@@ -1,0 +1,12 @@
+{
+  "name": "los4hermanos",
+  "version": "1.0.0",
+  "description": "Distribuidora Los 4 Hermanos - Sistema de pedidos",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
