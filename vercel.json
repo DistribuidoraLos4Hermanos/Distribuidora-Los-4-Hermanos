@@ -3,7 +3,7 @@
   "buildCommand": "",
   "outputDirectory": ".",
   "routes": [
-    { "src": "/admin", "dest": "/admin.html" },
+    { "src": "/admin", "dest": "/z-admin.html" },
     { "src": "/api/products/([^/]+)", "dest": "/[id].js" },
     { "src": "/api/products", "dest": "/products.js" },
     { "src": "^/$", "dest": "/index.html" },
