@@ -1,17 +1,11 @@
 {
   "version": 2,
-  "public": true,
-  "rewrites": [
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/api/products/:id", "destination": "/api/products/[id].js" },
-    { "source": "/api/products", "destination": "/api/products.js" }
-  ],
-  "headers": [
-    {
-      "source": "/admin.html",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex" }
-      ]
-    }
+  "routes": [
+    { "src": "/admin", "dest": "/public/admin.html" },
+    { "src": "/admin.html", "dest": "/public/admin.html" },
+    { "src": "/api/products/([^/]+)", "dest": "/api/products/[id].js" },
+    { "src": "/api/products", "dest": "/api/products.js" },
+    { "src": "/", "dest": "/public/index.html" },
+    { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
