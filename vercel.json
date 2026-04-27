@@ -1,9 +1,12 @@
 {
   "version": 2,
+  "buildCommand": "",
+  "outputDirectory": ".",
   "routes": [
     { "src": "/admin", "dest": "/admin.html" },
     { "src": "/api/products/([^/]+)", "dest": "/[id].js" },
     { "src": "/api/products", "dest": "/products.js" },
-    { "src": "/", "dest": "/index.html" }
+    { "src": "^/$", "dest": "/index.html" },
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
