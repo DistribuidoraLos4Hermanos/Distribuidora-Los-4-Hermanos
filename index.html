@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin – Los 4 Hermanos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Los 4 Hermanos – Distribuidora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -12,396 +13,319 @@
   --brownd:#3A2418;--black:#1A1008;--red:#C0392B;--gold:#D4A843;
   --white:#FDFAF5;--green:#1a7a3c;
 }
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--black);min-height:100vh}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--black);min-height:100vh;max-width:480px;margin:0 auto}
+header{background:var(--brownd);padding:14px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
+.logo h1{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.15rem;font-weight:900;line-height:1.1}
+.logo span{color:var(--beige);font-size:.62rem;font-weight:300;letter-spacing:2px;text-transform:uppercase;display:block;margin-top:1px}
+.cart-btn{background:var(--gold);border:none;border-radius:50px;padding:9px 14px;display:flex;align-items:center;gap:7px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.82rem;color:var(--brownd);transition:background .2s}
+.cart-btn:hover{background:#e8b84d}
+.cart-badge{background:var(--red);color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700}
+.hero{background:linear-gradient(135deg,var(--brown),var(--brownd));padding:18px 16px 16px;position:relative;overflow:hidden}
+.hero::after{content:'🍺';position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:4rem;opacity:.12;pointer-events:none}
+.hero h2{font-family:'Playfair Display',serif;color:var(--white);font-size:1.3rem;font-weight:900;line-height:1.3}
+.hero p{color:var(--beige);font-size:.76rem;margin-top:5px;opacity:.85}
+.repeat-btn{margin-top:11px;background:transparent;border:1.5px solid var(--gold);color:var(--gold);padding:8px 15px;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+.repeat-btn:hover{background:var(--gold);color:var(--brownd)}
+.horario{background:var(--gold);padding:8px 16px;font-size:.74rem;font-weight:600;color:var(--brownd)}
+.search-bar{padding:10px 16px;background:var(--white);border-bottom:1px solid rgba(92,61,46,.1)}
+.search-bar input{width:100%;padding:10px 14px;border:1.5px solid var(--beige);border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);color:var(--black);outline:none;transition:border .2s}
+.search-bar input:focus{border-color:var(--brown)}
+.cat-nav{display:flex;gap:7px;padding:10px 16px;overflow-x:auto;scrollbar-width:none;background:var(--white);border-bottom:1px solid rgba(92,61,46,.1)}
+.cat-nav::-webkit-scrollbar{display:none}
+.cat-pill{background:var(--beige);border:1.5px solid transparent;border-radius:50px;padding:7px 13px;font-size:.73rem;font-weight:600;color:var(--brown);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s}
+.cat-pill.active{background:var(--brown);color:var(--white)}
+.sec-title{padding:13px 16px 6px;font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd)}
+.products-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 14px}
+.product-card{background:var(--white);border-radius:14px;padding:13px 10px;box-shadow:0 2px 8px rgba(58,36,24,.09);display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;transition:transform .15s}
+.product-card:hover{transform:translateY(-2px)}
+.prod-emoji{font-size:2.4rem;margin-bottom:6px;line-height:1}
+.prod-img{width:60px;height:60px;object-fit:contain;margin-bottom:6px;border-radius:8px}
+.prod-name{font-size:.76rem;font-weight:600;color:var(--brownd);line-height:1.2;margin-bottom:2px}
+.prod-sub{font-size:.64rem;color:var(--brownl);margin-bottom:5px}
+.prod-price{font-size:.95rem;font-weight:700;color:var(--brown);margin-bottom:8px}
+.qty-control{display:flex;align-items:center;gap:6px;background:var(--beige);border-radius:50px;padding:3px 5px}
+.qty-btn{width:28px;height:28px;border-radius:50%;border:none;background:var(--brown);color:white;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:background .15s}
+.qty-btn:hover{background:var(--brownd)}
+.qty-num{font-size:.88rem;font-weight:700;color:var(--brownd);min-width:18px;text-align:center}
+.added-badge{position:absolute;top:8px;right:8px;background:var(--red);color:white;border-radius:50%;width:20px;height:20px;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.sin-precio{font-size:.68rem;color:#bbb;margin-bottom:8px;font-style:italic}
 
-/* LOGIN */
-#login-screen{position:fixed;inset:0;background:var(--brownd);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:0}
-.login-card{background:var(--white);border-radius:20px;padding:36px 28px;width:90%;max-width:360px;text-align:center}
-.login-card h1{font-family:'Playfair Display',serif;color:var(--brownd);font-size:1.6rem;font-weight:900;margin-bottom:4px}
-.login-card p{color:var(--brownl);font-size:.82rem;margin-bottom:24px}
-.login-card input{width:100%;padding:12px 14px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;background:var(--cream);color:var(--black);outline:none;margin-bottom:12px;transition:border .2s}
-.login-card input:focus{border-color:var(--brown)}
-.login-btn{width:100%;padding:13px;background:var(--brown);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:background .2s}
-.login-btn:hover{background:var(--brownd)}
-.login-error{color:var(--red);font-size:.78rem;margin-top:8px;display:none}
+/* CART SHEET */
+.overlay{position:fixed;inset:0;background:rgba(26,16,8,.55);z-index:200;display:none;align-items:flex-end}
+.overlay.open{display:flex}
+.cart-sheet{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:480px;margin:0 auto;max-height:92vh;overflow-y:auto;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:40px;height:4px;background:var(--beige);border-radius:2px;margin:12px auto 0}
+.sheet-header{padding:14px 16px;border-bottom:1px solid var(--beige);display:flex;align-items:center;justify-content:space-between}
+.sheet-header h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--brownd)}
+.close-btn{background:var(--beige);border:none;border-radius:50%;width:34px;height:34px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--brown)}
+.cart-items{padding:10px 16px}
+.cart-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--beige);gap:8px}
+.ci-info{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.ci-emoji{font-size:1.4rem;flex-shrink:0}
+.ci-name{font-size:.8rem;font-weight:600;color:var(--brownd);line-height:1.2}
+.ci-sub{font-size:.65rem;color:var(--brownl)}
+.ci-price{font-size:.72rem;color:var(--brown);font-weight:600;margin-top:1px}
+.ci-qty{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.cq-btn{width:25px;height:25px;border-radius:50%;border:1.5px solid var(--brown);background:transparent;color:var(--brown);font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.cq-num{font-size:.84rem;font-weight:700;min-width:14px;text-align:center}
+.ci-total{font-size:.82rem;font-weight:700;color:var(--brownd);min-width:54px;text-align:right;flex-shrink:0}
+.cart-empty{text-align:center;padding:36px 20px;color:var(--brownl)}
+.total-box{margin:10px 16px;background:var(--beige);border-radius:14px;padding:13px 16px}
+.total-row{display:flex;justify-content:space-between;font-size:.82rem;padding:3px 0;color:var(--brownd)}
+.total-row.main{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;border-top:1.5px solid rgba(92,61,46,.3);margin-top:6px;padding-top:8px}
+.turno-section{padding:14px 16px;border-top:1px solid var(--beige)}
+.turno-section h4{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--brownd);margin-bottom:10px}
+.turno-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.turno-opt{border:2px solid var(--beige);border-radius:12px;padding:11px 8px;text-align:center;cursor:pointer;transition:all .2s;background:var(--cream)}
+.turno-opt.selected{border-color:var(--brown);background:var(--brown);color:white}
+.t-icon{font-size:1.4rem;display:block;margin-bottom:3px}
+.t-label{font-size:.78rem;font-weight:600}
+.t-hours{font-size:.64rem;opacity:.75;margin-top:1px}
+.client-form{padding:14px 16px;border-top:1px solid var(--beige)}
+.client-form h4{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--brownd);margin-bottom:10px}
+.form-field{margin-bottom:10px}
+.form-field label{font-size:.68rem;font-weight:600;color:var(--brownl);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+.form-field input{width:100%;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);color:var(--black);outline:none;transition:border .2s}
+.form-field input:focus{border-color:var(--brown)}
+.send-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:calc(100% - 32px);margin:14px 16px 28px;background:#25D366;color:white;border:none;border-radius:14px;padding:15px;font-family:'DM Sans',sans-serif;font-size:.96rem;font-weight:700;cursor:pointer;transition:background .2s}
+.send-btn:hover{background:#1ebe5c}
+.send-btn:disabled{background:#aaa;cursor:not-allowed}
 
-/* ADMIN */
-#admin-screen{display:none}
-header{background:var(--brownd);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.logo h1{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;font-weight:900}
-.logo span{color:var(--beige);font-size:.6rem;font-weight:300;letter-spacing:2px;text-transform:uppercase;display:block}
-.header-btns{display:flex;gap:8px}
-.btn-outline{background:transparent;border:1.5px solid rgba(212,168,67,.5);border-radius:8px;padding:7px 12px;color:var(--gold);font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
-.btn-outline:hover{background:rgba(212,168,67,.1)}
-
-/* TABS */
-.tabs{display:flex;background:var(--white);border-bottom:1px solid var(--beige)}
-.tab{flex:1;padding:12px;text-align:center;font-size:.8rem;font-weight:600;color:var(--brownl);cursor:pointer;border-bottom:2.5px solid transparent;transition:all .2s}
-.tab.active{color:var(--brown);border-color:var(--brown)}
-
-/* PRODUCTS TAB */
-.toolbar{padding:12px 16px;background:var(--white);border-bottom:1px solid var(--beige);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.toolbar input[type=text]{flex:1;min-width:150px;padding:8px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.83rem;background:var(--cream);outline:none}
-.toolbar input[type=text]:focus{border-color:var(--brown)}
-.btn-primary{background:var(--brown);color:white;border:none;border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap}
-.btn-primary:hover{background:var(--brownd)}
-.btn-danger{background:var(--red);color:white;border:none;border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer}
-
-.products-table{width:100%;overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:640px}
-th{background:var(--beige);padding:10px 12px;text-align:left;font-weight:600;color:var(--brownd);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0}
-td{padding:9px 12px;border-bottom:1px solid var(--beige);vertical-align:middle}
-tr:hover td{background:rgba(237,230,214,.4)}
-.td-name input,.td-sub input,.td-price input,.td-cat select,.td-emoji input,.td-img input{border:1.5px solid transparent;border-radius:6px;padding:5px 8px;font-family:'DM Sans',sans-serif;font-size:.8rem;background:transparent;color:var(--black);width:100%;outline:none;transition:border .15s}
-.td-name input,.td-sub input{min-width:120px}
-.td-price input{width:90px;text-align:right}
-.td-emoji input{width:50px;text-align:center}
-.td-img input{min-width:160px}
-.td-name input:focus,.td-sub input:focus,.td-price input:focus,.td-cat select:focus,.td-emoji input:focus,.td-img input:focus{border-color:var(--brown);background:var(--white)}
-.td-cat select{background:transparent;border:1.5px solid transparent;border-radius:6px;padding:5px 8px;font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer}
-.td-cat select:focus{border-color:var(--brown);background:var(--white)}
-.toggle{width:38px;height:22px;background:var(--brown);border-radius:50px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
-.toggle.off{background:#ccc}
-.toggle::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:2px;left:2px;transition:left .2s}
-.toggle.off::after{left:18px}
-.row-actions{display:flex;gap:6px;align-items:center}
-.del-btn{background:transparent;border:1.5px solid rgba(192,57,43,.3);color:var(--red);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center}
-.save-row-btn{background:var(--green);color:white;border:none;border-radius:6px;padding:5px 10px;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer}
-
-/* NEW PRODUCT FORM */
-.add-form{background:var(--white);border-radius:14px;margin:14px 16px;padding:16px;border:1.5px solid var(--beige);display:none}
-.add-form.open{display:block}
-.add-form h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);margin-bottom:12px}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:480px){.form-grid{grid-template-columns:1fr}}
-.fld{display:flex;flex-direction:column;gap:3px}
-.fld label{font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px}
-.fld input,.fld select{padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);color:var(--black);outline:none;transition:border .2s}
-.fld input:focus,.fld select:focus{border-color:var(--brown)}
-.fld.full{grid-column:1/-1}
-.form-actions{display:flex;gap:8px;margin-top:14px}
-.btn-cancel{background:transparent;border:1.5px solid var(--beige);color:var(--brownl);border-radius:8px;padding:9px 16px;font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer}
-
-/* ORDERS / SETTINGS TABS */
-.tab-content{padding:16px}
-.info-card{background:var(--white);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--beige)}
-.info-card h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);margin-bottom:12px}
-.settings-field{margin-bottom:10px}
-.settings-field label{font-size:.7rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px}
-.settings-field input{width:100%;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);outline:none;transition:border .2s}
-.settings-field input:focus{border-color:var(--brown)}
-.save-settings-btn{background:var(--brown);color:white;border:none;border-radius:10px;padding:11px 20px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;margin-top:4px}
-
-/* SAVE BAR */
-.save-bar{position:fixed;bottom:0;left:0;right:0;background:var(--brownd);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;z-index:200;transform:translateY(100%);transition:transform .3s}
-.save-bar.visible{transform:translateY(0)}
-.save-bar span{color:var(--beige);font-size:.84rem}
-.save-bar-btn{background:var(--gold);color:var(--brownd);border:none;border-radius:8px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer}
-
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--brownd);color:var(--white);padding:10px 20px;border-radius:50px;font-size:.78rem;font-weight:600;opacity:0;transition:all .3s;z-index:500;white-space:nowrap;pointer-events:none}
+.loading{text-align:center;padding:40px;color:var(--brownl);font-size:.9rem}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--brownd);color:var(--white);padding:10px 20px;border-radius:50px;font-size:.78rem;font-weight:600;opacity:0;transition:all .3s;z-index:500;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.loading-msg{text-align:center;padding:40px;color:var(--brownl)}
-.badge-count{background:var(--brown);color:white;border-radius:50px;padding:2px 8px;font-size:.68rem;font-weight:700;margin-left:4px}
+footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opacity:.7}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-card">
+<header>
+  <div class="logo">
     <h1>Los 4 Hermanos</h1>
-    <p>Panel de administración</p>
-    <input type="password" id="pw-input" placeholder="Contraseña de admin" onkeydown="if(event.key==='Enter')tryLogin()">
-    <button class="login-btn" onclick="tryLogin()">Ingresar →</button>
-    <p class="login-error" id="login-error">Contraseña incorrecta</p>
+    <span>Distribuidora · Cba Sur</span>
   </div>
+  <button class="cart-btn" onclick="openCart()">
+    🛒 Carrito <span class="cart-badge" id="cart-count">0</span>
+  </button>
+</header>
+
+<div class="hero">
+  <h2>Hacé tu pedido<br>fácil y rápido 🚚</h2>
+  <p>Pedidos hasta las 14:30 · Reparto desde las 15:30</p>
+  <button class="repeat-btn" onclick="repeatLastOrder()">🔄 Repetir pedido anterior</button>
 </div>
+<div class="horario">📅 Lun, Mar, Jue, Vie y Sáb &nbsp;·&nbsp; 8:00 a 14:30</div>
 
-<!-- ADMIN -->
-<div id="admin-screen">
-  <header>
-    <div class="logo">
-      <h1>Los 4 Hermanos</h1>
-      <span>⚙️ Panel Admin</span>
-    </div>
-    <div class="header-btns">
-      <a href="/" class="btn-outline" target="_blank">🌐 Ver tienda</a>
-      <button class="btn-outline" onclick="logout()">Salir</button>
-    </div>
-  </header>
-
-  <div class="tabs">
-    <div class="tab active" onclick="showTab('products')">🛍️ Productos <span class="badge-count" id="prod-count">0</span></div>
-    <div class="tab" onclick="showTab('settings')">⚙️ Config</div>
-  </div>
-
-  <!-- PRODUCTS TAB -->
-  <div id="tab-products">
-    <div class="toolbar">
-      <input type="text" id="admin-search" placeholder="🔍 Buscar producto..." oninput="renderTable()">
-      <select id="cat-filter" onchange="renderTable()" style="padding:8px 10px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;background:var(--cream);outline:none">
-        <option value="all">Todas las categorías</option>
-        <option value="gaseosa">Gaseosas</option>
-        <option value="cerveza">Cervezas</option>
-        <option value="agua">Aguas</option>
-        <option value="jugo">Jugos</option>
-        <option value="vino">Vinos</option>
-        <option value="alcohol">Alcohol</option>
-        <option value="energizante">Energizantes</option>
-        <option value="otros">Otros</option>
-      </select>
-      <button class="btn-primary" onclick="toggleAddForm()">+ Nuevo producto</button>
-    </div>
-
-    <div class="add-form" id="add-form">
-      <h3>➕ Nuevo producto</h3>
-      <div class="form-grid">
-        <div class="fld"><label>Nombre *</label><input type="text" id="new-name" placeholder="Ej: COCA 2.5 RET"></div>
-        <div class="fld"><label>Precio ($)</label><input type="number" id="new-price" placeholder="26200"></div>
-        <div class="fld"><label>Categoría</label>
-          <select id="new-cat">
-            <option value="gaseosa">🥤 Gaseosas</option>
-            <option value="cerveza">🍺 Cervezas</option>
-            <option value="agua">💧 Aguas</option>
-            <option value="jugo">🧃 Jugos</option>
-            <option value="vino">🍷 Vinos</option>
-            <option value="alcohol">🥃 Alcohol</option>
-            <option value="energizante">⚡ Energizantes</option>
-            <option value="otros">📦 Otros</option>
-          </select>
-        </div>
-        <div class="fld"><label>Descripción</label><input type="text" id="new-desc" placeholder="Ej: Retornable 2.5L"></div>
-        <div class="fld"><label>Emoji</label><input type="text" id="new-emoji" placeholder="🥤" maxlength="4"></div>
-        <div class="fld full"><label>URL de imagen (opcional)</label><input type="text" id="new-img" placeholder="https://..."></div>
-      </div>
-      <div class="form-actions">
-        <button class="btn-primary" onclick="addProduct()">Guardar producto</button>
-        <button class="btn-cancel" onclick="toggleAddForm()">Cancelar</button>
-      </div>
-    </div>
-
-    <div class="products-table">
-      <table id="prod-table">
-        <thead>
-          <tr>
-            <th style="width:30px"></th>
-            <th>Emoji</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Categoría</th>
-            <th>Precio</th>
-            <th>Activo</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="table-body">
-          <tr><td colspan="8" class="loading-msg">⏳ Cargando...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- SETTINGS TAB -->
-  <div id="tab-settings" style="display:none">
-    <div class="tab-content">
-      <div class="info-card">
-        <h3>📱 Información de la tienda</h3>
-        <div class="settings-field"><label>Número de WhatsApp (con código de país)</label><input type="text" id="s-phone" value="5493516211515"></div>
-        <div class="settings-field"><label>Horario de pedidos</label><input type="text" id="s-hours" value="8:00 a 14:30"></div>
-        <div class="settings-field"><label>Días de reparto</label><input type="text" id="s-days" value="Lun, Mar, Jue, Vie y Sáb"></div>
-        <button class="save-settings-btn" onclick="saveSettings()">💾 Guardar configuración</button>
-      </div>
-      <div class="info-card">
-        <h3>🔐 Cambiar contraseña</h3>
-        <div class="settings-field"><label>Contraseña actual</label><input type="password" id="s-pw-old" placeholder="••••••••"></div>
-        <div class="settings-field"><label>Nueva contraseña</label><input type="password" id="s-pw-new" placeholder="••••••••"></div>
-        <button class="save-settings-btn" onclick="changePassword()">Cambiar contraseña</button>
-      </div>
-    </div>
-  </div>
+<div class="search-bar">
+  <input type="text" id="search-input" placeholder="🔍 Buscar producto..." oninput="renderProducts()">
 </div>
+<div class="cat-nav" id="cat-nav"></div>
+<div class="sec-title" id="sec-title">Cargando productos...</div>
+<div class="products-grid" id="products-grid"><div class="loading">⏳ Cargando...</div></div>
+<footer>Los 4 Hermanos · Zona Sur Córdoba · ☎️ 351 621-1515</footer>
 
-<!-- SAVE BAR -->
-<div class="save-bar" id="save-bar">
-  <span>⚠️ Hay cambios sin guardar</span>
-  <button class="save-bar-btn" onclick="saveAllChanges()">💾 Guardar todo</button>
+<!-- CART -->
+<div class="overlay" id="overlay" onclick="closeCartOutside(event)">
+  <div class="cart-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h3>🛒 Tu pedido</h3>
+      <button class="close-btn" onclick="closeCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items"></div>
+    <div id="total-box"></div>
+    <div class="turno-section">
+      <h4>⏰ Turno de entrega</h4>
+      <div class="turno-opts">
+        <div class="turno-opt" id="t-manana" onclick="selectTurno('manana')"><span class="t-icon">🌅</span><div class="t-label">Mañana</div><div class="t-hours">8:00 – 12:00</div></div>
+        <div class="turno-opt selected" id="t-tarde" onclick="selectTurno('tarde')"><span class="t-icon">🌇</span><div class="t-label">Tarde</div><div class="t-hours">15:30 – 19:00</div></div>
+      </div>
+    </div>
+    <div class="client-form">
+      <h4>📋 Tus datos</h4>
+      <div class="form-field"><label>Nombre del negocio</label><input type="text" id="negocio" placeholder="Kiosco / Almacén..."></div>
+      <div class="form-field"><label>Teléfono de contacto</label><input type="tel" id="telefono" placeholder="351 000-0000"></div>
+    </div>
+    <button class="send-btn" onclick="sendOrder()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+      Enviar pedido por WhatsApp
+    </button>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const ADMIN_PW_KEY='l4h_admin_pw';
-const DEFAULT_PW='hermanos2024';
+const CATS=[
+  {id:'all',label:'Todo',emoji:'🛒'},
+  {id:'gaseosa',label:'Gaseosas',emoji:'🥤'},
+  {id:'cerveza',label:'Cervezas',emoji:'🍺'},
+  {id:'agua',label:'Aguas',emoji:'💧'},
+  {id:'jugo',label:'Jugos',emoji:'🧃'},
+  {id:'vino',label:'Vinos',emoji:'🍷'},
+  {id:'alcohol',label:'Alcohol',emoji:'🥃'},
+  {id:'energizante',label:'Energizantes',emoji:'⚡'},
+  {id:'otros',label:'Otros',emoji:'📦'},
+];
+
 let products=[];
-let pendingChanges={};
-let activeTab='products';
+let cart={};
+let selectedTurno='tarde';
+let currentCat='all';
 
-// AUTH
-function tryLogin(){
-  const pw=document.getElementById('pw-input').value;
-  const stored=localStorage.getItem(ADMIN_PW_KEY)||DEFAULT_PW;
-  if(pw===stored){
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('admin-screen').style.display='block';
-    loadProducts();
-  }else{
-    document.getElementById('login-error').style.display='block';
-    document.getElementById('pw-input').value='';
-  }
-}
-function logout(){
-  document.getElementById('admin-screen').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('pw-input').value='';
-}
-
-// TABS
-function showTab(tab){
-  activeTab=tab;
-  document.querySelectorAll('.tab').forEach((t,i)=>{t.className='tab'+((['products','settings'][i]===tab)?' active':'')});
-  document.getElementById('tab-products').style.display=tab==='products'?'block':'none';
-  document.getElementById('tab-settings').style.display=tab==='settings'?'block':'none';
-}
-
-// PRODUCTS
 async function loadProducts(){
   try{
-    const r=await fetch('/api/products?admin=1');
-    products=await r.json();
-    document.getElementById('prod-count').textContent=products.length;
-    renderTable();
+    const r=await fetch('/api/products');
+    const data=await r.json();
+    products=data.filter(p=>p.active);
+    renderCatNav();
+    renderProducts();
   }catch(e){
-    document.getElementById('table-body').innerHTML=`<tr><td colspan="8" class="loading-msg">❌ Error al cargar. Verificá la conexión.</td></tr>`;
+    document.getElementById('products-grid').innerHTML='<div class="loading" style="grid-column:1/-1">❌ Error cargando productos. Recargá la página.</div>';
   }
 }
 
-const CATS_MAP={gaseosa:'🥤 Gaseosas',cerveza:'🍺 Cervezas',agua:'💧 Aguas',jugo:'🧃 Jugos',vino:'🍷 Vinos',alcohol:'🥃 Alcohol',energizante:'⚡ Energizantes',otros:'📦 Otros'};
+function fmt(n){return n>0?'$'+Number(n).toLocaleString('es-AR'):'Consultar'}
+function getQty(id){return cart[id]||0}
 
-function renderTable(){
-  const q=(document.getElementById('admin-search').value||'').toLowerCase();
-  const cf=document.getElementById('cat-filter').value;
+function renderCatNav(){
+  document.getElementById('cat-nav').innerHTML=CATS.map(c=>`<button class="cat-pill${currentCat===c.id?' active':''}" onclick="filterCat('${c.id}')">${c.emoji} ${c.label}</button>`).join('');
+}
+
+function renderProducts(){
+  const q=(document.getElementById('search-input').value||'').toLowerCase();
   const list=products.filter(p=>{
-    const mq=!q||p.name.toLowerCase().includes(q);
-    const mc=cf==='all'||p.category===cf;
-    return mq&&mc;
+    const matchCat=currentCat==='all'||p.category===currentCat;
+    const matchQ=!q||p.name.toLowerCase().includes(q);
+    return matchCat&&matchQ;
   });
-  const catOpts=Object.entries(CATS_MAP).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
-  document.getElementById('table-body').innerHTML=list.map(p=>`
-    <tr id="row-${p.id}">
-      <td style="color:var(--brownl);font-size:.72rem">${p.sort_order||''}</td>
-      <td class="td-emoji"><input value="${p.emoji||'🛍️'}" oninput="markChange('${p.id}','emoji',this.value)"></td>
-      <td class="td-name"><input value="${p.name}" oninput="markChange('${p.id}','name',this.value)"></td>
-      <td class="td-sub"><input value="${p.description||''}" oninput="markChange('${p.id}','description',this.value)"></td>
-      <td class="td-cat"><select onchange="markChange('${p.id}','category',this.value)">${Object.entries(CATS_MAP).map(([v,l])=>`<option value="${v}"${p.category===v?' selected':''}>${l}</option>`).join('')}</select></td>
-      <td class="td-price"><input type="number" value="${p.price||0}" oninput="markChange('${p.id}','price',this.value)"></td>
-      <td><button class="toggle${p.active?'':' off'}" id="tog-${p.id}" onclick="toggleActive('${p.id}')"></button></td>
-      <td><div class="row-actions">
-        <button class="save-row-btn" onclick="saveRow('${p.id}')">✓ Guardar</button>
-        <button class="del-btn" onclick="deleteProduct('${p.id}')" title="Eliminar">🗑</button>
-      </div></td>
-    </tr>`).join('');
+  document.getElementById('sec-title').textContent=list.length+' productos';
+  if(!list.length){
+    document.getElementById('products-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--brownl)">No se encontraron productos</div>';
+    return;
+  }
+  document.getElementById('products-grid').innerHTML=list.map(p=>{
+    const qty=getQty(p.id);
+    const imgHtml=p.image_url
+      ?`<img class="prod-img" src="${p.image_url}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`+`<div class="prod-emoji" style="display:none">${p.emoji||'🛍️'}</div>`
+      :`<div class="prod-emoji">${p.emoji||'🛍️'}</div>`;
+    return `<div class="product-card">
+      ${qty>0?`<div class="added-badge">${qty}</div>`:''}
+      ${imgHtml}
+      <div class="prod-name">${p.name}</div>
+      <div class="prod-sub">${p.description||''}</div>
+      ${p.price>0?`<div class="prod-price">${fmt(p.price)}</div>`:`<div class="sin-precio">Consultar precio</div>`}
+      <div class="qty-control">
+        <button class="qty-btn" onclick="changeQty('${p.id}',-1)">−</button>
+        <span class="qty-num">${qty}</span>
+        <button class="qty-btn" onclick="changeQty('${p.id}',+1)">+</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function markChange(id,field,value){
-  if(!pendingChanges[id])pendingChanges[id]={};
-  pendingChanges[id][field]=value;
-  document.getElementById('save-bar').className='save-bar visible';
+function filterCat(cat){currentCat=cat;renderCatNav();renderProducts()}
+
+function changeQty(id,delta){
+  const cur=getQty(id);
+  const nw=Math.max(0,cur+delta);
+  if(nw===0)delete cart[id];else cart[id]=nw;
+  updateCartCount();
+  renderProducts();
+  if(delta>0&&nw===1)showToast('✅ Agregado');
 }
 
-function toggleActive(id){
-  const p=products.find(x=>x.id==id);
-  if(!p)return;
-  p.active=!p.active;
-  markChange(id,'active',p.active);
-  const btn=document.getElementById('tog-'+id);
-  btn.className='toggle'+(p.active?'':' off');
+function updateCartCount(){
+  document.getElementById('cart-count').textContent=Object.values(cart).reduce((a,b)=>a+b,0);
 }
 
-async function saveRow(id){
-  const p=products.find(x=>x.id==id);
-  if(!p)return;
-  // Get current values from DOM
-  const row=document.getElementById('row-'+id);
-  const inputs=row.querySelectorAll('input,select');
-  const payload={
-    emoji:inputs[0].value,
-    name:inputs[1].value,
-    description:inputs[2].value,
-    category:inputs[3].value,
-    price:parseInt(inputs[4].value)||0,
-    active:p.active,
-  };
+function openCart(){
+  document.getElementById('overlay').classList.add('open');
+  renderCart();
+}
+function closeCart(){document.getElementById('overlay').classList.remove('open')}
+function closeCartOutside(e){if(e.target===document.getElementById('overlay'))closeCart()}
+
+function renderCart(){
+  const items=Object.entries(cart);
+  const container=document.getElementById('cart-items');
+  if(!items.length){
+    container.innerHTML='<div class="cart-empty"><div style="font-size:2.5rem">🛒</div><p style="margin-top:8px;font-size:.88rem">Tu carrito está vacío</p></div>';
+    document.getElementById('total-box').innerHTML='';
+    return;
+  }
+  let subtotal=0;
+  container.innerHTML=items.map(([id,qty])=>{
+    const p=products.find(x=>x.id==id);
+    if(!p)return'';
+    const rowTotal=p.price*qty;
+    subtotal+=rowTotal;
+    return `<div class="cart-item">
+      <div class="ci-info">
+        <span class="ci-emoji">${p.emoji||'🛍️'}</span>
+        <div>
+          <div class="ci-name">${p.name}</div>
+          <div class="ci-sub">${p.description||''}</div>
+          ${p.price>0?`<div class="ci-price">${fmt(p.price)} c/u</div>`:''}
+        </div>
+      </div>
+      <div class="ci-qty">
+        <button class="cq-btn" onclick="changeQty('${id}',-1);renderCart()">−</button>
+        <span class="cq-num">${qty}</span>
+        <button class="cq-btn" onclick="changeQty('${id}',+1);renderCart()">+</button>
+      </div>
+      <div class="ci-total">${p.price>0?fmt(rowTotal):'—'}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('total-box').innerHTML=`<div class="total-box">
+    <div class="total-row"><span>Artículos</span><span>${items.reduce((a,[,v])=>a+v,0)} unid.</span></div>
+    <div class="total-row main"><span>TOTAL</span><span>${fmt(subtotal)}</span></div>
+  </div>`;
+}
+
+function selectTurno(t){
+  selectedTurno=t;
+  document.getElementById('t-manana').className='turno-opt'+(t==='manana'?' selected':'');
+  document.getElementById('t-tarde').className='turno-opt'+(t==='tarde'?' selected':'');
+}
+
+function sendOrder(){
+  const negocio=document.getElementById('negocio').value.trim();
+  const telefono=document.getElementById('telefono').value.trim();
+  const items=Object.entries(cart);
+  if(!items.length){showToast('⚠️ Tu carrito está vacío');return}
+  if(!negocio){showToast('⚠️ Ingresá el nombre de tu negocio');return}
+  if(!telefono){showToast('⚠️ Ingresá tu teléfono');return}
+  localStorage.setItem('l4h_last',JSON.stringify({cart:{...cart},negocio,telefono,turno:selectedTurno}));
+  let subtotal=0;
+  const lines=items.map(([id,qty])=>{
+    const p=products.find(x=>x.id==id);
+    const rt=p&&p.price>0?p.price*qty:0;
+    subtotal+=rt;
+    return`  • ${p?p.name:id} x${qty}${p&&p.price>0?' → '+fmt(rt):''}`;
+  }).join('\n');
+  const turnoLabel=selectedTurno==='manana'?'🌅 Mañana (8:00-12:00)':'🌇 Tarde (15:30-19:00)';
+  const msg=`🍺 *PEDIDO - LOS 4 HERMANOS*\n\n📋 *Negocio:* ${negocio}\n📞 *Tel:* ${telefono}\n⏰ *Turno:* ${turnoLabel}\n\n*Detalle:*\n${lines}\n\n💰 *TOTAL ESTIMADO: ${fmt(subtotal)}*\n\n_Enviado desde la app_ ✅`;
+  window.open(`https://wa.me/5493516211515?text=${encodeURIComponent(msg)}`,'_blank');
+  cart={};
+  updateCartCount();
+  closeCart();
+  showToast('✅ ¡Pedido enviado!');
+}
+
+function repeatLastOrder(){
+  const saved=localStorage.getItem('l4h_last');
+  if(!saved){showToast('⚠️ No hay pedido anterior');return}
   try{
-    const r=await fetch('/api/products/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    if(r.ok){
-      Object.assign(p,payload);
-      delete pendingChanges[id];
-      if(!Object.keys(pendingChanges).length)document.getElementById('save-bar').className='save-bar';
-      showToast('✅ Guardado');
-    }else{showToast('❌ Error al guardar')}
-  }catch(e){showToast('❌ Error de conexión')}
-}
-
-async function saveAllChanges(){
-  const ids=Object.keys(pendingChanges);
-  for(const id of ids)await saveRow(id);
-}
-
-async function addProduct(){
-  const name=document.getElementById('new-name').value.trim();
-  if(!name){showToast('⚠️ El nombre es obligatorio');return}
-  const payload={
-    name,
-    price:parseInt(document.getElementById('new-price').value)||0,
-    category:document.getElementById('new-cat').value,
-    description:document.getElementById('new-desc').value,
-    emoji:document.getElementById('new-emoji').value||'🛍️',
-    image_url:document.getElementById('new-img').value,
-    active:true,
-  };
-  try{
-    const r=await fetch('/api/products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    if(r.ok){
-      const newProd=await r.json();
-      products.unshift(newProd);
-      document.getElementById('prod-count').textContent=products.length;
-      renderTable();
-      toggleAddForm();
-      ['new-name','new-price','new-desc','new-emoji','new-img'].forEach(id=>document.getElementById(id).value='');
-      showToast('✅ Producto agregado');
-    }else showToast('❌ Error al agregar');
-  }catch(e){showToast('❌ Error de conexión')}
-}
-
-async function deleteProduct(id){
-  if(!confirm('¿Eliminar este producto?'))return;
-  try{
-    const r=await fetch('/api/products/'+id,{method:'DELETE'});
-    if(r.ok){
-      products=products.filter(p=>p.id!=id);
-      document.getElementById('prod-count').textContent=products.length;
-      renderTable();
-      showToast('🗑 Producto eliminado');
-    }else showToast('❌ Error al eliminar');
-  }catch(e){showToast('❌ Error de conexión')}
-}
-
-function toggleAddForm(){
-  const f=document.getElementById('add-form');
-  f.className=f.classList.contains('open')?'add-form':'add-form open';
-}
-
-function saveSettings(){showToast('✅ Configuración guardada (próximamente en DB)')}
-function changePassword(){
-  const oldPw=document.getElementById('s-pw-old').value;
-  const newPw=document.getElementById('s-pw-new').value;
-  const stored=localStorage.getItem(ADMIN_PW_KEY)||DEFAULT_PW;
-  if(oldPw!==stored){showToast('❌ Contraseña actual incorrecta');return}
-  if(newPw.length<6){showToast('⚠️ Mínimo 6 caracteres');return}
-  localStorage.setItem(ADMIN_PW_KEY,newPw);
-  document.getElementById('s-pw-old').value='';
-  document.getElementById('s-pw-new').value='';
-  showToast('✅ Contraseña cambiada');
+    const d=JSON.parse(saved);
+    cart={...d.cart};
+    selectedTurno=d.turno||'tarde';
+    document.getElementById('negocio').value=d.negocio||'';
+    document.getElementById('telefono').value=d.telefono||'';
+    updateCartCount();renderProducts();openCart();renderCart();
+    showToast('🔄 Pedido anterior cargado');
+  }catch(e){showToast('Error al cargar pedido anterior')}
 }
 
 function showToast(msg){
@@ -409,6 +333,12 @@ function showToast(msg){
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
+
+loadProducts();
 </script>
 </body>
 </html>
+
+
+
+
