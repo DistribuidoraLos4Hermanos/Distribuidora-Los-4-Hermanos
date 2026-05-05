@@ -176,9 +176,11 @@ let currentCat='all';
 
 async function loadProducts(){
   try{
-    const r=await fetch('/api/products');
-    const data=await r.json();
-    products=data.filter(p=>p.active);
+  const SUPABASE_URL='https://zcktyocumratqojzxyzx.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpja3R5b2N1bXJhdHFvanp4eXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNTU5NzksImV4cCI6MjA5MjgzMTk3OX0.Jj8TCmJyn3j2QHS9KAIcRIv6njnp-8UZ24FNe_iHDNw';
+const r=await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&active=eq.true&order=sort_order.asc`,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+const data=await r.json();
+products=data;
     renderCatNav();
     renderProducts();
   }catch(e){
