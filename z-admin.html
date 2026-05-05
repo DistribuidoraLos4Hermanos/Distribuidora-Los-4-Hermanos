@@ -4,109 +4,76 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin – Los 4 Hermanos</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --cream:#F5F0E8;--beige:#EDE6D6;--brown:#5C3D2E;--brownl:#8B6248;
-  --brownd:#3A2418;--black:#1A1008;--red:#C0392B;--gold:#D4A843;
-  --white:#FDFAF5;--green:#1a7a3c;
-}
+:root{--cream:#F5F0E8;--beige:#EDE6D6;--brown:#5C3D2E;--brownl:#8B6248;--brownd:#3A2418;--black:#1A1008;--red:#C0392B;--gold:#D4A843;--white:#FDFAF5;--green:#1a7a3c}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--black);min-height:100vh}
-
-/* LOGIN */
-#login-screen{position:fixed;inset:0;background:var(--brownd);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:0}
+#login-screen{position:fixed;inset:0;background:var(--brownd);display:flex;align-items:center;justify-content:center;z-index:999}
 .login-card{background:var(--white);border-radius:20px;padding:36px 28px;width:90%;max-width:360px;text-align:center}
 .login-card h1{font-family:'Playfair Display',serif;color:var(--brownd);font-size:1.6rem;font-weight:900;margin-bottom:4px}
 .login-card p{color:var(--brownl);font-size:.82rem;margin-bottom:24px}
-.login-card input{width:100%;padding:12px 14px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;background:var(--cream);color:var(--black);outline:none;margin-bottom:12px;transition:border .2s}
+.login-card input{width:100%;padding:12px 14px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;background:var(--cream);color:var(--black);outline:none;margin-bottom:12px}
 .login-card input:focus{border-color:var(--brown)}
-.login-btn{width:100%;padding:13px;background:var(--brown);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:background .2s}
-.login-btn:hover{background:var(--brownd)}
+.login-btn{width:100%;padding:13px;background:var(--brown);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer}
 .login-error{color:var(--red);font-size:.78rem;margin-top:8px;display:none}
-
-/* ADMIN */
 #admin-screen{display:none}
 header{background:var(--brownd);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .logo h1{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;font-weight:900}
 .logo span{color:var(--beige);font-size:.6rem;font-weight:300;letter-spacing:2px;text-transform:uppercase;display:block}
 .header-btns{display:flex;gap:8px}
 .btn-outline{background:transparent;border:1.5px solid rgba(212,168,67,.5);border-radius:8px;padding:7px 12px;color:var(--gold);font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
-.btn-outline:hover{background:rgba(212,168,67,.1)}
-
-/* TABS */
 .tabs{display:flex;background:var(--white);border-bottom:1px solid var(--beige)}
-.tab{flex:1;padding:12px;text-align:center;font-size:.8rem;font-weight:600;color:var(--brownl);cursor:pointer;border-bottom:2.5px solid transparent;transition:all .2s}
+.tab{flex:1;padding:12px;text-align:center;font-size:.8rem;font-weight:600;color:var(--brownl);cursor:pointer;border-bottom:2.5px solid transparent}
 .tab.active{color:var(--brown);border-color:var(--brown)}
-
-/* PRODUCTS TAB */
 .toolbar{padding:12px 16px;background:var(--white);border-bottom:1px solid var(--beige);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .toolbar input[type=text]{flex:1;min-width:150px;padding:8px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.83rem;background:var(--cream);outline:none}
 .toolbar input[type=text]:focus{border-color:var(--brown)}
 .btn-primary{background:var(--brown);color:white;border:none;border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap}
 .btn-primary:hover{background:var(--brownd)}
-.btn-danger{background:var(--red);color:white;border:none;border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer}
-
-.products-table{width:100%;overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:640px}
-th{background:var(--beige);padding:10px 12px;text-align:left;font-weight:600;color:var(--brownd);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0}
-td{padding:9px 12px;border-bottom:1px solid var(--beige);vertical-align:middle}
-tr:hover td{background:rgba(237,230,214,.4)}
-.td-name input,.td-sub input,.td-price input,.td-cat select,.td-emoji input,.td-img input{border:1.5px solid transparent;border-radius:6px;padding:5px 8px;font-family:'DM Sans',sans-serif;font-size:.8rem;background:transparent;color:var(--black);width:100%;outline:none;transition:border .15s}
-.td-name input,.td-sub input{min-width:120px}
-.td-price input{width:90px;text-align:right}
-.td-emoji input{width:50px;text-align:center}
-.td-img input{min-width:160px}
-.td-name input:focus,.td-sub input:focus,.td-price input:focus,.td-cat select:focus,.td-emoji input:focus,.td-img input:focus{border-color:var(--brown);background:var(--white)}
-.td-cat select{background:transparent;border:1.5px solid transparent;border-radius:6px;padding:5px 8px;font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer}
-.td-cat select:focus{border-color:var(--brown);background:var(--white)}
-.toggle{width:38px;height:22px;background:var(--brown);border-radius:50px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
-.toggle.off{background:#ccc}
-.toggle::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:2px;left:2px;transition:left .2s}
-.toggle.off::after{left:18px}
-.row-actions{display:flex;gap:6px;align-items:center}
-.del-btn{background:transparent;border:1.5px solid rgba(192,57,43,.3);color:var(--red);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center}
-.save-row-btn{background:var(--green);color:white;border:none;border-radius:6px;padding:5px 10px;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer}
-
-/* NEW PRODUCT FORM */
 .add-form{background:var(--white);border-radius:14px;margin:14px 16px;padding:16px;border:1.5px solid var(--beige);display:none}
 .add-form.open{display:block}
 .add-form h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);margin-bottom:12px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:480px){.form-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
 .fld{display:flex;flex-direction:column;gap:3px}
 .fld label{font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px}
-.fld input,.fld select{padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);color:var(--black);outline:none;transition:border .2s}
+.fld input,.fld select{padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);color:var(--black);outline:none}
 .fld input:focus,.fld select:focus{border-color:var(--brown)}
 .fld.full{grid-column:1/-1}
 .form-actions{display:flex;gap:8px;margin-top:14px}
 .btn-cancel{background:transparent;border:1.5px solid var(--beige);color:var(--brownl);border-radius:8px;padding:9px 16px;font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer}
-
-/* ORDERS / SETTINGS TABS */
-.tab-content{padding:16px}
+.products-table{width:100%;overflow-x:auto;padding-bottom:80px}
+table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:700px}
+th{background:var(--beige);padding:10px 12px;text-align:left;font-weight:600;color:var(--brownd);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:9px 12px;border-bottom:1px solid var(--beige);vertical-align:middle}
+tr:hover td{background:rgba(237,230,214,.4)}
+.td-input{border:1.5px solid transparent;border-radius:6px;padding:5px 8px;font-family:'DM Sans',sans-serif;font-size:.8rem;background:transparent;color:var(--black);width:100%;outline:none}
+.td-input:focus{border-color:var(--brown);background:var(--white)}
+.td-select{background:transparent;border:1.5px solid transparent;border-radius:6px;padding:5px 8px;font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer;width:100%}
+.td-select:focus{border-color:var(--brown);background:var(--white)}
+.toggle{width:38px;height:22px;background:var(--brown);border-radius:50px;position:relative;cursor:pointer;transition:background .2s;border:none}
+.toggle.off{background:#ccc}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:2px;left:2px;transition:left .2s}
+.toggle.off::after{left:18px}
+.save-btn{background:var(--green);color:white;border:none;border-radius:6px;padding:5px 10px;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer}
+.del-btn{background:transparent;border:1.5px solid rgba(192,57,43,.3);color:var(--red);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:.9rem;display:inline-flex;align-items:center;justify-content:center}
+.loading-msg{text-align:center;padding:40px;color:var(--brownl);font-size:.9rem}
+.badge{background:var(--brown);color:white;border-radius:50px;padding:2px 8px;font-size:.68rem;font-weight:700;margin-left:4px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--brownd);color:var(--white);padding:10px 20px;border-radius:50px;font-size:.78rem;font-weight:600;opacity:0;transition:all .3s;z-index:500;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#tab-settings{display:none;padding:16px}
 .info-card{background:var(--white);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--beige)}
 .info-card h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);margin-bottom:12px}
 .settings-field{margin-bottom:10px}
 .settings-field label{font-size:.7rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px}
-.settings-field input{width:100%;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);outline:none;transition:border .2s}
-.settings-field input:focus{border-color:var(--brown)}
+.settings-field input{width:100%;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);outline:none}
 .save-settings-btn{background:var(--brown);color:white;border:none;border-radius:10px;padding:11px 20px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;margin-top:4px}
-
-/* SAVE BAR */
-.save-bar{position:fixed;bottom:0;left:0;right:0;background:var(--brownd);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;z-index:200;transform:translateY(100%);transition:transform .3s}
-.save-bar.visible{transform:translateY(0)}
-.save-bar span{color:var(--beige);font-size:.84rem}
-.save-bar-btn{background:var(--gold);color:var(--brownd);border:none;border-radius:8px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer}
-
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--brownd);color:var(--white);padding:10px 20px;border-radius:50px;font-size:.78rem;font-weight:600;opacity:0;transition:all .3s;z-index:500;white-space:nowrap;pointer-events:none}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.loading-msg{text-align:center;padding:40px;color:var(--brownl)}
-.badge-count{background:var(--brown);color:white;border-radius:50px;padding:2px 8px;font-size:.68rem;font-weight:700;margin-left:4px}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <h1>Los 4 Hermanos</h1>
@@ -117,7 +84,6 @@ tr:hover td{background:rgba(237,230,214,.4)}
   </div>
 </div>
 
-<!-- ADMIN -->
 <div id="admin-screen">
   <header>
     <div class="logo">
@@ -131,24 +97,23 @@ tr:hover td{background:rgba(237,230,214,.4)}
   </header>
 
   <div class="tabs">
-    <div class="tab active" onclick="showTab('products')">🛍️ Productos <span class="badge-count" id="prod-count">0</span></div>
+    <div class="tab active" onclick="showTab('products')">🛍️ Productos <span class="badge" id="prod-count">0</span></div>
     <div class="tab" onclick="showTab('settings')">⚙️ Config</div>
   </div>
 
-  <!-- PRODUCTS TAB -->
   <div id="tab-products">
     <div class="toolbar">
       <input type="text" id="admin-search" placeholder="🔍 Buscar producto..." oninput="renderTable()">
       <select id="cat-filter" onchange="renderTable()" style="padding:8px 10px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;background:var(--cream);outline:none">
         <option value="all">Todas las categorías</option>
-        <option value="gaseosa">Gaseosas</option>
-        <option value="cerveza">Cervezas</option>
-        <option value="agua">Aguas</option>
-        <option value="jugo">Jugos</option>
-        <option value="vino">Vinos</option>
-        <option value="alcohol">Alcohol</option>
-        <option value="energizante">Energizantes</option>
-        <option value="otros">Otros</option>
+        <option value="gaseosa">🥤 Gaseosas</option>
+        <option value="cerveza">🍺 Cervezas</option>
+        <option value="agua">💧 Aguas</option>
+        <option value="jugo">🧃 Jugos</option>
+        <option value="vino">🍷 Vinos</option>
+        <option value="alcohol">🥃 Alcohol</option>
+        <option value="energizante">⚡ Energizantes</option>
+        <option value="otros">📦 Otros</option>
       </select>
       <button class="btn-primary" onclick="toggleAddForm()">+ Nuevo producto</button>
     </div>
@@ -181,234 +146,180 @@ tr:hover td{background:rgba(237,230,214,.4)}
     </div>
 
     <div class="products-table">
-      <table id="prod-table">
+      <table>
         <thead>
           <tr>
-            <th style="width:30px"></th>
-            <th>Emoji</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Categoría</th>
-            <th>Precio</th>
-            <th>Activo</th>
-            <th>Acciones</th>
+            <th>Emoji</th><th>Nombre</th><th>Descripción</th><th>Categoría</th><th>Precio</th><th>Activo</th><th>Acciones</th>
           </tr>
         </thead>
         <tbody id="table-body">
-          <tr><td colspan="8" class="loading-msg">⏳ Cargando...</td></tr>
+          <tr><td colspan="7" class="loading-msg">⏳ Conectando...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- SETTINGS TAB -->
-  <div id="tab-settings" style="display:none">
-    <div class="tab-content">
-      <div class="info-card">
-        <h3>📱 Información de la tienda</h3>
-        <div class="settings-field"><label>Número de WhatsApp (con código de país)</label><input type="text" id="s-phone" value="5493516211515"></div>
-        <div class="settings-field"><label>Horario de pedidos</label><input type="text" id="s-hours" value="8:00 a 14:30"></div>
-        <div class="settings-field"><label>Días de reparto</label><input type="text" id="s-days" value="Lun, Mar, Jue, Vie y Sáb"></div>
-        <button class="save-settings-btn" onclick="saveSettings()">💾 Guardar configuración</button>
-      </div>
-      <div class="info-card">
-        <h3>🔐 Cambiar contraseña</h3>
-        <div class="settings-field"><label>Contraseña actual</label><input type="password" id="s-pw-old" placeholder="••••••••"></div>
-        <div class="settings-field"><label>Nueva contraseña</label><input type="password" id="s-pw-new" placeholder="••••••••"></div>
-        <button class="save-settings-btn" onclick="changePassword()">Cambiar contraseña</button>
-      </div>
+  <div id="tab-settings">
+    <div class="info-card">
+      <h3>🔐 Cambiar contraseña</h3>
+      <div class="settings-field"><label>Contraseña actual</label><input type="password" id="s-pw-old" placeholder="••••••••"></div>
+      <div class="settings-field"><label>Nueva contraseña</label><input type="password" id="s-pw-new" placeholder="••••••••"></div>
+      <button class="save-settings-btn" onclick="changePassword()">Cambiar contraseña</button>
     </div>
   </div>
-</div>
-
-<!-- SAVE BAR -->
-<div class="save-bar" id="save-bar">
-  <span>⚠️ Hay cambios sin guardar</span>
-  <button class="save-bar-btn" onclick="saveAllChanges()">💾 Guardar todo</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const ADMIN_PW_KEY='l4h_admin_pw';
-const DEFAULT_PW='hermanos2024';
-let products=[];
-let pendingChanges={};
-let activeTab='products';
+const SUPABASE_URL = 'https://zcktyocumratqojzxyzx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpja3R5b2N1bXJhdHFvanp4eXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNTU5NzksImV4cCI6MjA5MjgzMTk3OX0.Jj8TCmJyn3j2QHS9KAIcRIv6njnp-8UZ24FNe_iHDNw';
 
-// AUTH
-function tryLogin(){
-  const pw=document.getElementById('pw-input').value;
-  const stored=localStorage.getItem(ADMIN_PW_KEY)||DEFAULT_PW;
-  if(pw===stored){
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('admin-screen').style.display='block';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const ADMIN_PW_KEY = 'l4h_admin_pw';
+const DEFAULT_PW = 'hermanos2024';
+let products = [];
+
+function tryLogin() {
+  const pw = document.getElementById('pw-input').value;
+  const stored = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
+  if (pw === stored) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'block';
     loadProducts();
-  }else{
-    document.getElementById('login-error').style.display='block';
-    document.getElementById('pw-input').value='';
-  }
-}
-function logout(){
-  document.getElementById('admin-screen').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('pw-input').value='';
-}
-
-// TABS
-function showTab(tab){
-  activeTab=tab;
-  document.querySelectorAll('.tab').forEach((t,i)=>{t.className='tab'+((['products','settings'][i]===tab)?' active':'')});
-  document.getElementById('tab-products').style.display=tab==='products'?'block':'none';
-  document.getElementById('tab-settings').style.display=tab==='settings'?'block':'none';
-}
-
-// PRODUCTS
-async function loadProducts(){
-  try{
-    const r=await fetch('/api/products?admin=1');
-    products=await r.json();
-    document.getElementById('prod-count').textContent=products.length;
-    renderTable();
-  }catch(e){
-    document.getElementById('table-body').innerHTML=`<tr><td colspan="8" class="loading-msg">❌ Error al cargar. Verificá la conexión.</td></tr>`;
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
   }
 }
 
-const CATS_MAP={gaseosa:'🥤 Gaseosas',cerveza:'🍺 Cervezas',agua:'💧 Aguas',jugo:'🧃 Jugos',vino:'🍷 Vinos',alcohol:'🥃 Alcohol',energizante:'⚡ Energizantes',otros:'📦 Otros'};
+function logout() {
+  document.getElementById('admin-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
 
-function renderTable(){
-  const q=(document.getElementById('admin-search').value||'').toLowerCase();
-  const cf=document.getElementById('cat-filter').value;
-  const list=products.filter(p=>{
-    const mq=!q||p.name.toLowerCase().includes(q);
-    const mc=cf==='all'||p.category===cf;
-    return mq&&mc;
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.className = 'tab' + ((['products','settings'][i] === tab) ? ' active' : '');
   });
-  const catOpts=Object.entries(CATS_MAP).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
-  document.getElementById('table-body').innerHTML=list.map(p=>`
+  document.getElementById('tab-products').style.display = tab === 'products' ? 'block' : 'none';
+  document.getElementById('tab-settings').style.display = tab === 'settings' ? 'block' : 'none';
+}
+
+async function loadProducts() {
+  const { data, error } = await db.from('products').select('*').order('sort_order', { ascending: true });
+  if (error) {
+    document.getElementById('table-body').innerHTML = `<tr><td colspan="7" class="loading-msg">❌ Error: ${error.message}</td></tr>`;
+    return;
+  }
+  products = data;
+  document.getElementById('prod-count').textContent = products.length;
+  renderTable();
+}
+
+const CATS = { gaseosa:'🥤 Gaseosas', cerveza:'🍺 Cervezas', agua:'💧 Aguas', jugo:'🧃 Jugos', vino:'🍷 Vinos', alcohol:'🥃 Alcohol', energizante:'⚡ Energizantes', otros:'📦 Otros' };
+
+function renderTable() {
+  const q = (document.getElementById('admin-search').value || '').toLowerCase();
+  const cf = document.getElementById('cat-filter').value;
+  const list = products.filter(p => (!q || p.name.toLowerCase().includes(q)) && (cf === 'all' || p.category === cf));
+  document.getElementById('table-body').innerHTML = list.map(p => `
     <tr id="row-${p.id}">
-      <td style="color:var(--brownl);font-size:.72rem">${p.sort_order||''}</td>
-      <td class="td-emoji"><input value="${p.emoji||'🛍️'}" oninput="markChange('${p.id}','emoji',this.value)"></td>
-      <td class="td-name"><input value="${p.name}" oninput="markChange('${p.id}','name',this.value)"></td>
-      <td class="td-sub"><input value="${p.description||''}" oninput="markChange('${p.id}','description',this.value)"></td>
-      <td class="td-cat"><select onchange="markChange('${p.id}','category',this.value)">${Object.entries(CATS_MAP).map(([v,l])=>`<option value="${v}"${p.category===v?' selected':''}>${l}</option>`).join('')}</select></td>
-      <td class="td-price"><input type="number" value="${p.price||0}" oninput="markChange('${p.id}','price',this.value)"></td>
+      <td><input class="td-input" style="width:50px;text-align:center" value="${p.emoji||'🛍️'}" id="emoji-${p.id}"></td>
+      <td><input class="td-input" style="min-width:140px" value="${p.name}" id="name-${p.id}"></td>
+      <td><input class="td-input" style="min-width:120px" value="${p.description||''}" id="desc-${p.id}"></td>
+      <td><select class="td-select" id="cat-${p.id}">${Object.entries(CATS).map(([v,l])=>`<option value="${v}"${p.category===v?' selected':''}>${l}</option>`).join('')}</select></td>
+      <td><input class="td-input" type="number" style="width:90px;text-align:right" value="${p.price||0}" id="price-${p.id}"></td>
       <td><button class="toggle${p.active?'':' off'}" id="tog-${p.id}" onclick="toggleActive('${p.id}')"></button></td>
-      <td><div class="row-actions">
-        <button class="save-row-btn" onclick="saveRow('${p.id}')">✓ Guardar</button>
-        <button class="del-btn" onclick="deleteProduct('${p.id}')" title="Eliminar">🗑</button>
-      </div></td>
+      <td style="display:flex;gap:6px;align-items:center">
+        <button class="save-btn" onclick="saveRow('${p.id}')">✓ Guardar</button>
+        <button class="del-btn" onclick="deleteProduct('${p.id}')">🗑</button>
+      </td>
     </tr>`).join('');
 }
 
-function markChange(id,field,value){
-  if(!pendingChanges[id])pendingChanges[id]={};
-  pendingChanges[id][field]=value;
-  document.getElementById('save-bar').className='save-bar visible';
-}
-
-function toggleActive(id){
-  const p=products.find(x=>x.id==id);
-  if(!p)return;
-  p.active=!p.active;
-  markChange(id,'active',p.active);
-  const btn=document.getElementById('tog-'+id);
-  btn.className='toggle'+(p.active?'':' off');
-}
-
-async function saveRow(id){
-  const p=products.find(x=>x.id==id);
-  if(!p)return;
-  // Get current values from DOM
-  const row=document.getElementById('row-'+id);
-  const inputs=row.querySelectorAll('input,select');
-  const payload={
-    emoji:inputs[0].value,
-    name:inputs[1].value,
-    description:inputs[2].value,
-    category:inputs[3].value,
-    price:parseInt(inputs[4].value)||0,
-    active:p.active,
+async function saveRow(id) {
+  const payload = {
+    emoji: document.getElementById('emoji-'+id).value,
+    name: document.getElementById('name-'+id).value,
+    description: document.getElementById('desc-'+id).value,
+    category: document.getElementById('cat-'+id).value,
+    price: parseInt(document.getElementById('price-'+id).value)||0,
+    active: !document.getElementById('tog-'+id).classList.contains('off'),
   };
-  try{
-    const r=await fetch('/api/products/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    if(r.ok){
-      Object.assign(p,payload);
-      delete pendingChanges[id];
-      if(!Object.keys(pendingChanges).length)document.getElementById('save-bar').className='save-bar';
-      showToast('✅ Guardado');
-    }else{showToast('❌ Error al guardar')}
-  }catch(e){showToast('❌ Error de conexión')}
+  const { error } = await db.from('products').update(payload).eq('id', id);
+  if (error) { showToast('❌ Error: '+error.message); return; }
+  const p = products.find(x => x.id === id);
+  if (p) Object.assign(p, payload);
+  showToast('✅ Guardado');
 }
 
-async function saveAllChanges(){
-  const ids=Object.keys(pendingChanges);
-  for(const id of ids)await saveRow(id);
+async function toggleActive(id) {
+  const btn = document.getElementById('tog-'+id);
+  const isOff = btn.classList.contains('off');
+  btn.className = 'toggle'+(isOff?'':' off');
+  const { error } = await db.from('products').update({ active: isOff }).eq('id', id);
+  if (error) { showToast('❌ Error'); btn.className = 'toggle'+(isOff?' off':''); return; }
+  showToast(isOff ? '✅ Activado' : '❌ Desactivado');
 }
 
-async function addProduct(){
-  const name=document.getElementById('new-name').value.trim();
-  if(!name){showToast('⚠️ El nombre es obligatorio');return}
-  const payload={
+async function deleteProduct(id) {
+  if (!confirm('¿Eliminar este producto?')) return;
+  const { error } = await db.from('products').delete().eq('id', id);
+  if (error) { showToast('❌ Error al eliminar'); return; }
+  products = products.filter(p => p.id !== id);
+  document.getElementById('prod-count').textContent = products.length;
+  renderTable();
+  showToast('🗑 Eliminado');
+}
+
+async function addProduct() {
+  const name = document.getElementById('new-name').value.trim();
+  if (!name) { showToast('⚠️ El nombre es obligatorio'); return; }
+  const payload = {
     name,
-    price:parseInt(document.getElementById('new-price').value)||0,
-    category:document.getElementById('new-cat').value,
-    description:document.getElementById('new-desc').value,
-    emoji:document.getElementById('new-emoji').value||'🛍️',
-    image_url:document.getElementById('new-img').value,
-    active:true,
+    price: parseInt(document.getElementById('new-price').value)||0,
+    category: document.getElementById('new-cat').value,
+    description: document.getElementById('new-desc').value,
+    emoji: document.getElementById('new-emoji').value||'🛍️',
+    image_url: document.getElementById('new-img').value||null,
+    active: true,
+    sort_order: 9999,
   };
-  try{
-    const r=await fetch('/api/products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    if(r.ok){
-      const newProd=await r.json();
-      products.unshift(newProd);
-      document.getElementById('prod-count').textContent=products.length;
-      renderTable();
-      toggleAddForm();
-      ['new-name','new-price','new-desc','new-emoji','new-img'].forEach(id=>document.getElementById(id).value='');
-      showToast('✅ Producto agregado');
-    }else showToast('❌ Error al agregar');
-  }catch(e){showToast('❌ Error de conexión')}
+  const { data, error } = await db.from('products').insert([payload]).select().single();
+  if (error) { showToast('❌ Error: '+error.message); return; }
+  products.unshift(data);
+  document.getElementById('prod-count').textContent = products.length;
+  toggleAddForm();
+  ['new-name','new-price','new-desc','new-emoji','new-img'].forEach(id => document.getElementById(id).value='');
+  renderTable();
+  showToast('✅ Producto agregado');
 }
 
-async function deleteProduct(id){
-  if(!confirm('¿Eliminar este producto?'))return;
-  try{
-    const r=await fetch('/api/products/'+id,{method:'DELETE'});
-    if(r.ok){
-      products=products.filter(p=>p.id!=id);
-      document.getElementById('prod-count').textContent=products.length;
-      renderTable();
-      showToast('🗑 Producto eliminado');
-    }else showToast('❌ Error al eliminar');
-  }catch(e){showToast('❌ Error de conexión')}
+function toggleAddForm() {
+  const f = document.getElementById('add-form');
+  f.className = f.classList.contains('open') ? 'add-form' : 'add-form open';
 }
 
-function toggleAddForm(){
-  const f=document.getElementById('add-form');
-  f.className=f.classList.contains('open')?'add-form':'add-form open';
-}
-
-function saveSettings(){showToast('✅ Configuración guardada (próximamente en DB)')}
-function changePassword(){
-  const oldPw=document.getElementById('s-pw-old').value;
-  const newPw=document.getElementById('s-pw-new').value;
-  const stored=localStorage.getItem(ADMIN_PW_KEY)||DEFAULT_PW;
-  if(oldPw!==stored){showToast('❌ Contraseña actual incorrecta');return}
-  if(newPw.length<6){showToast('⚠️ Mínimo 6 caracteres');return}
-  localStorage.setItem(ADMIN_PW_KEY,newPw);
+function changePassword() {
+  const oldPw = document.getElementById('s-pw-old').value;
+  const newPw = document.getElementById('s-pw-new').value;
+  const stored = localStorage.getItem(ADMIN_PW_KEY)||DEFAULT_PW;
+  if (oldPw !== stored) { showToast('❌ Contraseña actual incorrecta'); return; }
+  if (newPw.length < 6) { showToast('⚠️ Mínimo 6 caracteres'); return; }
+  localStorage.setItem(ADMIN_PW_KEY, newPw);
   document.getElementById('s-pw-old').value='';
   document.getElementById('s-pw-new').value='';
   showToast('✅ Contraseña cambiada');
 }
 
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 </script>
 </body>
-</html> 
+</html>
+
