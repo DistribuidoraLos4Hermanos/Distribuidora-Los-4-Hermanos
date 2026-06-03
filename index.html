@@ -3,54 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Los 4 Hermanos – Distribuidora</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>Los 4 Hermanos - Distribuidora</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --cream:#F5F0E8;--beige:#EDE6D6;--brown:#5C3D2E;--brownl:#8B6248;
-  --brownd:#3A2418;--black:#1A1008;--red:#C0392B;--gold:#D4A843;
-  --white:#FDFAF5;--green:#1a7a3c;
-}
+:root{--cream:#F5F0E8;--beige:#EDE6D6;--brown:#5C3D2E;--brownl:#8B6248;--brownd:#3A2418;--black:#1A1008;--red:#C0392B;--gold:#D4A843;--white:#FDFAF5}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--black);min-height:100vh;max-width:480px;margin:0 auto}
 header{background:var(--brownd);padding:14px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
 .logo h1{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.15rem;font-weight:900;line-height:1.1}
 .logo span{color:var(--beige);font-size:.62rem;font-weight:300;letter-spacing:2px;text-transform:uppercase;display:block;margin-top:1px}
-.cart-btn{background:var(--gold);border:none;border-radius:50px;padding:9px 14px;display:flex;align-items:center;gap:7px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.82rem;color:var(--brownd);transition:background .2s}
-.cart-btn:hover{background:#e8b84d}
+.cart-btn{background:var(--gold);border:none;border-radius:50px;padding:9px 14px;display:flex;align-items:center;gap:7px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.82rem;color:var(--brownd)}
 .cart-badge{background:var(--red);color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700}
 .hero{background:linear-gradient(135deg,var(--brown),var(--brownd));padding:18px 16px 16px;position:relative;overflow:hidden}
 .hero::after{content:'🍺';position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:4rem;opacity:.12;pointer-events:none}
 .hero h2{font-family:'Playfair Display',serif;color:var(--white);font-size:1.3rem;font-weight:900;line-height:1.3}
 .hero p{color:var(--beige);font-size:.76rem;margin-top:5px;opacity:.85}
-.repeat-btn{margin-top:11px;background:transparent;border:1.5px solid var(--gold);color:var(--gold);padding:8px 15px;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
-.repeat-btn:hover{background:var(--gold);color:var(--brownd)}
+.repeat-btn{margin-top:11px;background:transparent;border:1.5px solid var(--gold);color:var(--gold);padding:8px 15px;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .horario{background:var(--gold);padding:8px 16px;font-size:.74rem;font-weight:600;color:var(--brownd)}
 .search-bar{padding:10px 16px;background:var(--white);border-bottom:1px solid rgba(92,61,46,.1)}
-.search-bar input{width:100%;padding:10px 14px;border:1.5px solid var(--beige);border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);color:var(--black);outline:none;transition:border .2s}
+.search-bar input{width:100%;padding:10px 14px;border:1.5px solid var(--beige);border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);color:var(--black);outline:none}
 .search-bar input:focus{border-color:var(--brown)}
 .cat-nav{display:flex;gap:7px;padding:10px 16px;overflow-x:auto;scrollbar-width:none;background:var(--white);border-bottom:1px solid rgba(92,61,46,.1)}
 .cat-nav::-webkit-scrollbar{display:none}
-.cat-pill{background:var(--beige);border:1.5px solid transparent;border-radius:50px;padding:7px 13px;font-size:.73rem;font-weight:600;color:var(--brown);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s}
+.cat-pill{background:var(--beige);border:1.5px solid transparent;border-radius:50px;padding:7px 13px;font-size:.73rem;font-weight:600;color:var(--brown);cursor:pointer;white-space:nowrap;flex-shrink:0}
 .cat-pill.active{background:var(--brown);color:var(--white)}
 .sec-title{padding:13px 16px 6px;font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd)}
 .products-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 14px}
 .product-card{background:var(--white);border-radius:14px;padding:13px 10px;box-shadow:0 2px 8px rgba(58,36,24,.09);display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;transition:transform .15s}
 .product-card:hover{transform:translateY(-2px)}
 .prod-emoji{font-size:2.4rem;margin-bottom:6px;line-height:1}
-.prod-img{width:60px;height:60px;object-fit:contain;margin-bottom:6px;border-radius:8px}
 .prod-name{font-size:.76rem;font-weight:600;color:var(--brownd);line-height:1.2;margin-bottom:2px}
 .prod-sub{font-size:.64rem;color:var(--brownl);margin-bottom:5px}
 .prod-price{font-size:.95rem;font-weight:700;color:var(--brown);margin-bottom:8px}
 .qty-control{display:flex;align-items:center;gap:6px;background:var(--beige);border-radius:50px;padding:3px 5px}
-.qty-btn{width:28px;height:28px;border-radius:50%;border:none;background:var(--brown);color:white;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:background .15s}
-.qty-btn:hover{background:var(--brownd)}
+.qty-btn{width:28px;height:28px;border-radius:50%;border:none;background:var(--brown);color:white;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
 .qty-num{font-size:.88rem;font-weight:700;color:var(--brownd);min-width:18px;text-align:center}
 .added-badge{position:absolute;top:8px;right:8px;background:var(--red);color:white;border-radius:50%;width:20px;height:20px;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center}
 .sin-precio{font-size:.68rem;color:#bbb;margin-bottom:8px;font-style:italic}
-
-/* CART SHEET */
 .overlay{position:fixed;inset:0;background:rgba(26,16,8,.55);z-index:200;display:none;align-items:flex-end}
 .overlay.open{display:flex}
 .cart-sheet{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:480px;margin:0 auto;max-height:92vh;overflow-y:auto;animation:slideUp .3s ease}
@@ -86,12 +76,9 @@ header{background:var(--brownd);padding:14px 16px;position:sticky;top:0;z-index:
 .client-form h4{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--brownd);margin-bottom:10px}
 .form-field{margin-bottom:10px}
 .form-field label{font-size:.68rem;font-weight:600;color:var(--brownl);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
-.form-field input{width:100%;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);color:var(--black);outline:none;transition:border .2s}
+.form-field input{width:100%;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);color:var(--black);outline:none}
 .form-field input:focus{border-color:var(--brown)}
-.send-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:calc(100% - 32px);margin:14px 16px 28px;background:#25D366;color:white;border:none;border-radius:14px;padding:15px;font-family:'DM Sans',sans-serif;font-size:.96rem;font-weight:700;cursor:pointer;transition:background .2s}
-.send-btn:hover{background:#1ebe5c}
-.send-btn:disabled{background:#aaa;cursor:not-allowed}
-
+.send-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:calc(100% - 32px);margin:14px 16px 28px;background:#25D366;color:white;border:none;border-radius:14px;padding:15px;font-family:'DM Sans',sans-serif;font-size:.96rem;font-weight:700;cursor:pointer}
 .loading{text-align:center;padding:40px;color:var(--brownl);font-size:.9rem}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--brownd);color:var(--white);padding:10px 20px;border-radius:50px;font-size:.78rem;font-weight:600;opacity:0;transition:all .3s;z-index:500;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -99,65 +86,53 @@ footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opaci
 </style>
 </head>
 <body>
-
 <header>
-  <div class="logo">
-    <h1>Los 4 Hermanos</h1>
-    <span>Distribuidora · Cba Sur</span>
-  </div>
-  <button class="cart-btn" onclick="openCart()">
-    🛒 Carrito <span class="cart-badge" id="cart-count">0</span>
-  </button>
+  <div class="logo"><h1>Los 4 Hermanos</h1><span>Distribuidora · Cba Sur</span></div>
+  <button class="cart-btn" onclick="openCart()">🛒 Carrito <span class="cart-badge" id="cart-count">0</span></button>
 </header>
-
 <div class="hero">
-  <h2>Hacé tu pedido<br>fácil y rápido 🚚</h2>
+  <h2>Hace tu pedido<br>facil y rapido 🚚</h2>
   <p>Pedidos hasta las 14:30 · Reparto desde las 15:30</p>
   <button class="repeat-btn" onclick="repeatLastOrder()">🔄 Repetir pedido anterior</button>
 </div>
-<div class="horario">📅 Lun, Mar, Jue, Vie y Sáb &nbsp;·&nbsp; 8:00 a 14:30</div>
-
-<div class="search-bar">
-  <input type="text" id="search-input" placeholder="🔍 Buscar producto..." oninput="renderProducts()">
-</div>
+<div class="horario">📅 Lun, Mar, Jue, Vie y Sab &nbsp;·&nbsp; 8:00 a 14:30</div>
+<div class="search-bar"><input type="text" id="search-input" placeholder="🔍 Buscar producto..." oninput="renderProducts()"></div>
 <div class="cat-nav" id="cat-nav"></div>
 <div class="sec-title" id="sec-title">Cargando productos...</div>
-<div class="products-grid" id="products-grid"><div class="loading">⏳ Cargando...</div></div>
-<footer>Los 4 Hermanos · Zona Sur Córdoba · ☎️ 351 621-1515</footer>
+<div class="products-grid" id="products-grid"><div class="loading">Cargando...</div></div>
+<footer>Los 4 Hermanos · Zona Sur Cordoba · Tel: 351 621-1515</footer>
 
-<!-- CART -->
 <div class="overlay" id="overlay" onclick="closeCartOutside(event)">
   <div class="cart-sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-header">
-      <h3>🛒 Tu pedido</h3>
-      <button class="close-btn" onclick="closeCart()">✕</button>
-    </div>
+    <div class="sheet-header"><h3>🛒 Tu pedido</h3><button class="close-btn" onclick="closeCart()">X</button></div>
     <div class="cart-items" id="cart-items"></div>
     <div id="total-box"></div>
     <div class="turno-section">
-      <h4>⏰ Turno de entrega</h4>
+      <h4>Turno de entrega</h4>
       <div class="turno-opts">
-        <div class="turno-opt" id="t-manana" onclick="selectTurno('manana')"><span class="t-icon">🌅</span><div class="t-label">Mañana</div><div class="t-hours">8:00 – 12:00</div></div>
-        <div class="turno-opt selected" id="t-tarde" onclick="selectTurno('tarde')"><span class="t-icon">🌇</span><div class="t-label">Tarde</div><div class="t-hours">15:30 – 19:00</div></div>
+        <div class="turno-opt" id="t-manana" onclick="selectTurno('manana')"><span class="t-icon">🌅</span><div class="t-label">Manana</div><div class="t-hours">8:00 - 12:00</div></div>
+        <div class="turno-opt selected" id="t-tarde" onclick="selectTurno('tarde')"><span class="t-icon">🌇</span><div class="t-label">Tarde</div><div class="t-hours">15:30 - 19:00</div></div>
       </div>
     </div>
     <div class="client-form">
-      <h4>📋 Tus datos</h4>
-      <div class="form-field"><label>Nombre del negocio</label><input type="text" id="negocio" placeholder="Kiosco / Almacén..."></div>
-      <div class="form-field"><label>Teléfono de contacto</label><input type="tel" id="telefono" placeholder="351 000-0000"></div>
+      <h4>Tus datos</h4>
+      <div class="form-field"><label>Nombre del negocio</label><input type="text" id="negocio" placeholder="Kiosco / Almacen..."></div>
+      <div class="form-field"><label>Telefono de contacto</label><input type="tel" id="telefono" placeholder="351 000-0000"></div>
     </div>
     <button class="send-btn" onclick="sendOrder()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
       Enviar pedido por WhatsApp
     </button>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-const CATS=[
+const SURL = 'https://zcktyocumratqojzxyzx.supabase.co';
+const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpja3R5b2N1bXJhdHFvanp4eXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNTU5NzksImV4cCI6MjA5MjgzMTk3OX0.Jj8TCmJyn3j2QHS9KAIcRIv6njnp-8UZ24FNe_iHDNw';
+const db = supabase.createClient(SURL, SKEY);
+
+const CATS = [
   {id:'all',label:'Todo',emoji:'🛒'},
   {id:'gaseosa',label:'Gaseosas',emoji:'🥤'},
   {id:'cerveza',label:'Cervezas',emoji:'🍺'},
@@ -166,60 +141,51 @@ const CATS=[
   {id:'vino',label:'Vinos',emoji:'🍷'},
   {id:'alcohol',label:'Alcohol',emoji:'🥃'},
   {id:'energizante',label:'Energizantes',emoji:'⚡'},
-  {id:'otros',label:'Otros',emoji:'📦'},
+  {id:'otros',label:'Otros',emoji:'📦'}
 ];
 
-let products=[];
-let cart={};
-let selectedTurno='tarde';
-let currentCat='all';
+let products = [], cart = {}, turno = 'tarde', cat = 'all';
+
+function fmt(n){ return n > 0 ? '$' + Number(n).toLocaleString('es-AR') : 'Consultar'; }
+function getQty(id){ return cart[id] || 0; }
 
 async function loadProducts(){
-  try{
-  const SUPABASE_URL='https://zcktyocumratqojzxyzx.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpja3R5b2N1bXJhdHFvanp4eXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNTU5NzksImV4cCI6MjA5MjgzMTk3OX0.Jj8TCmJyn3j2QHS9KAIcRIv6njnp-8UZ24FNe_iHDNw';
-const r=await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&active=eq.true&order=sort_order.asc`,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
-const data=await r.json();
-products=data;
+  try {
+    const { data, error } = await db.from('products').select('*').eq('active', true).order('sort_order', {ascending: true});
+    if(error) throw error;
+    products = data;
     renderCatNav();
     renderProducts();
-  }catch(e){
-    document.getElementById('products-grid').innerHTML='<div class="loading" style="grid-column:1/-1">❌ Error cargando productos. Recargá la página.</div>';
+  } catch(e) {
+    console.error('Error:', e);
+    document.getElementById('products-grid').innerHTML = '<div class="loading" style="grid-column:1/-1">Error cargando productos. Recarga la pagina.</div>';
   }
 }
 
-function fmt(n){return n>0?'$'+Number(n).toLocaleString('es-AR'):'Consultar'}
-function getQty(id){return cart[id]||0}
-
 function renderCatNav(){
-  document.getElementById('cat-nav').innerHTML=CATS.map(c=>`<button class="cat-pill${currentCat===c.id?' active':''}" onclick="filterCat('${c.id}')">${c.emoji} ${c.label}</button>`).join('');
+  document.getElementById('cat-nav').innerHTML = CATS.map(c =>
+    `<button class="cat-pill${cat===c.id?' active':''}" onclick="filterCat('${c.id}')">${c.emoji} ${c.label}</button>`
+  ).join('');
 }
 
 function renderProducts(){
-  const q=(document.getElementById('search-input').value||'').toLowerCase();
-  const list=products.filter(p=>{
-    const matchCat=currentCat==='all'||p.category===currentCat;
-    const matchQ=!q||p.name.toLowerCase().includes(q);
-    return matchCat&&matchQ;
-  });
-  document.getElementById('sec-title').textContent=list.length+' productos';
+  const q = (document.getElementById('search-input').value || '').toLowerCase();
+  const list = products.filter(p => (cat==='all'||p.category===cat) && (!q||p.name.toLowerCase().includes(q)));
+  document.getElementById('sec-title').textContent = list.length + ' productos';
   if(!list.length){
-    document.getElementById('products-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--brownl)">No se encontraron productos</div>';
+    document.getElementById('products-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--brownl)">No se encontraron productos</div>';
     return;
   }
-  document.getElementById('products-grid').innerHTML=list.map(p=>{
-    const qty=getQty(p.id);
-    const imgHtml=p.image_url
-      ?`<img class="prod-img" src="${p.image_url}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`+`<div class="prod-emoji" style="display:none">${p.emoji||'🛍️'}</div>`
-      :`<div class="prod-emoji">${p.emoji||'🛍️'}</div>`;
+  document.getElementById('products-grid').innerHTML = list.map(p => {
+    const qty = getQty(p.id);
     return `<div class="product-card">
-      ${qty>0?`<div class="added-badge">${qty}</div>`:''}
-      ${imgHtml}
+      ${qty > 0 ? `<div class="added-badge">${qty}</div>` : ''}
+      <div class="prod-emoji">${p.emoji || '🛍️'}</div>
       <div class="prod-name">${p.name}</div>
-      <div class="prod-sub">${p.description||''}</div>
-      ${p.price>0?`<div class="prod-price">${fmt(p.price)}</div>`:`<div class="sin-precio">Consultar precio</div>`}
+      <div class="prod-sub">${p.description || ''}</div>
+      ${p.price > 0 ? `<div class="prod-price">${fmt(p.price)}</div>` : '<div class="sin-precio">Consultar</div>'}
       <div class="qty-control">
-        <button class="qty-btn" onclick="changeQty('${p.id}',-1)">−</button>
+        <button class="qty-btn" onclick="changeQty('${p.id}',-1)">-</button>
         <span class="qty-num">${qty}</span>
         <button class="qty-btn" onclick="changeQty('${p.id}',+1)">+</button>
       </div>
@@ -227,120 +193,124 @@ function renderProducts(){
   }).join('');
 }
 
-function filterCat(cat){currentCat=cat;renderCatNav();renderProducts()}
+function filterCat(c){ cat = c; renderCatNav(); renderProducts(); }
 
-function changeQty(id,delta){
-  const cur=getQty(id);
-  const nw=Math.max(0,cur+delta);
-  if(nw===0)delete cart[id];else cart[id]=nw;
+function changeQty(id, delta){
+  const nw = Math.max(0, getQty(id) + delta);
+  if(nw === 0) delete cart[id]; else cart[id] = nw;
   updateCartCount();
   renderProducts();
-  if(delta>0&&nw===1)showToast('✅ Agregado');
+  if(delta > 0 && nw === 1) showToast('Agregado al carrito');
 }
 
 function updateCartCount(){
-  document.getElementById('cart-count').textContent=Object.values(cart).reduce((a,b)=>a+b,0);
+  document.getElementById('cart-count').textContent = Object.values(cart).reduce((a,b)=>a+b,0);
 }
 
-function openCart(){
-  document.getElementById('overlay').classList.add('open');
-  renderCart();
-}
-function closeCart(){document.getElementById('overlay').classList.remove('open')}
-function closeCartOutside(e){if(e.target===document.getElementById('overlay'))closeCart()}
+function openCart(){ document.getElementById('overlay').classList.add('open'); renderCart(); }
+function closeCart(){ document.getElementById('overlay').classList.remove('open'); }
+function closeCartOutside(e){ if(e.target===document.getElementById('overlay')) closeCart(); }
 
 function renderCart(){
-  const items=Object.entries(cart);
-  const container=document.getElementById('cart-items');
+  const items = Object.entries(cart);
+  const container = document.getElementById('cart-items');
   if(!items.length){
-    container.innerHTML='<div class="cart-empty"><div style="font-size:2.5rem">🛒</div><p style="margin-top:8px;font-size:.88rem">Tu carrito está vacío</p></div>';
-    document.getElementById('total-box').innerHTML='';
+    container.innerHTML = '<div class="cart-empty"><div style="font-size:2.5rem">🛒</div><p style="margin-top:8px;font-size:.88rem">Tu carrito esta vacio</p></div>';
+    document.getElementById('total-box').innerHTML = '';
     return;
   }
-  let subtotal=0;
-  container.innerHTML=items.map(([id,qty])=>{
-    const p=products.find(x=>x.id==id);
-    if(!p)return'';
-    const rowTotal=p.price*qty;
-    subtotal+=rowTotal;
+  let subtotal = 0;
+  container.innerHTML = items.map(([id,qty]) => {
+    const p = products.find(x => x.id == id);
+    if(!p) return '';
+    const rowTotal = p.price * qty;
+    subtotal += rowTotal;
     return `<div class="cart-item">
       <div class="ci-info">
-        <span class="ci-emoji">${p.emoji||'🛍️'}</span>
+        <span class="ci-emoji">${p.emoji || '🛍️'}</span>
         <div>
           <div class="ci-name">${p.name}</div>
-          <div class="ci-sub">${p.description||''}</div>
-          ${p.price>0?`<div class="ci-price">${fmt(p.price)} c/u</div>`:''}
+          <div class="ci-sub">${p.description || ''}</div>
+          ${p.price > 0 ? `<div class="ci-price">${fmt(p.price)} c/u</div>` : ''}
         </div>
       </div>
       <div class="ci-qty">
-        <button class="cq-btn" onclick="changeQty('${id}',-1);renderCart()">−</button>
+        <button class="cq-btn" onclick="changeQty('${id}',-1);renderCart()">-</button>
         <span class="cq-num">${qty}</span>
         <button class="cq-btn" onclick="changeQty('${id}',+1);renderCart()">+</button>
       </div>
-      <div class="ci-total">${p.price>0?fmt(rowTotal):'—'}</div>
+      <div class="ci-total">${p.price > 0 ? fmt(rowTotal) : '-'}</div>
     </div>`;
   }).join('');
-  document.getElementById('total-box').innerHTML=`<div class="total-box">
-    <div class="total-row"><span>Artículos</span><span>${items.reduce((a,[,v])=>a+v,0)} unid.</span></div>
+  document.getElementById('total-box').innerHTML = `<div class="total-box">
+    <div class="total-row"><span>Articulos</span><span>${items.reduce((a,[,v])=>a+v,0)} unid.</span></div>
     <div class="total-row main"><span>TOTAL</span><span>${fmt(subtotal)}</span></div>
   </div>`;
 }
 
 function selectTurno(t){
-  selectedTurno=t;
-  document.getElementById('t-manana').className='turno-opt'+(t==='manana'?' selected':'');
-  document.getElementById('t-tarde').className='turno-opt'+(t==='tarde'?' selected':'');
+  turno = t;
+  document.getElementById('t-manana').className = 'turno-opt' + (t==='manana'?' selected':'');
+  document.getElementById('t-tarde').className = 'turno-opt' + (t==='tarde'?' selected':'');
 }
 
-function sendOrder(){
-  const negocio=document.getElementById('negocio').value.trim();
-  const telefono=document.getElementById('telefono').value.trim();
-  const items=Object.entries(cart);
-  if(!items.length){showToast('⚠️ Tu carrito está vacío');return}
-  if(!negocio){showToast('⚠️ Ingresá el nombre de tu negocio');return}
-  if(!telefono){showToast('⚠️ Ingresá tu teléfono');return}
-  localStorage.setItem('l4h_last',JSON.stringify({cart:{...cart},negocio,telefono,turno:selectedTurno}));
-  let subtotal=0;
-  const lines=items.map(([id,qty])=>{
-    const p=products.find(x=>x.id==id);
-    const rt=p&&p.price>0?p.price*qty:0;
-    subtotal+=rt;
-    return`  • ${p?p.name:id} x${qty}${p&&p.price>0?' → '+fmt(rt):''}`;
-  }).join('\n');
-  const turnoLabel=selectedTurno==='manana'?'🌅 Mañana (8:00-12:00)':'🌇 Tarde (15:30-19:00)';
-  const msg=`🍺 *PEDIDO - LOS 4 HERMANOS*\n\n📋 *Negocio:* ${negocio}\n📞 *Tel:* ${telefono}\n⏰ *Turno:* ${turnoLabel}\n\n*Detalle:*\n${lines}\n\n💰 *TOTAL ESTIMADO: ${fmt(subtotal)}*\n\n_Enviado desde la app_ ✅`;
-  window.open(`https://wa.me/5493516211515?text=${encodeURIComponent(msg)}`,'_blank');
-  cart={};
+async function sendOrder(){
+  const negocio = document.getElementById('negocio').value.trim();
+  const telefono = document.getElementById('telefono').value.trim();
+  const items = Object.entries(cart);
+  if(!items.length){ showToast('Tu carrito esta vacio'); return; }
+  if(!negocio){ showToast('Ingresa el nombre de tu negocio'); return; }
+  if(!telefono){ showToast('Ingresa tu telefono'); return; }
+
+  let subtotal = 0;
+  const itemsDetail = items.map(([id,qty]) => {
+    const p = products.find(x => x.id == id);
+    const rowTotal = p && p.price > 0 ? p.price * qty : 0;
+    subtotal += rowTotal;
+    return { id, name: p ? p.name : id, qty, price: p ? p.price : 0, total: rowTotal };
+  });
+
+  // Guardar pedido en Supabase
+  try {
+    await db.from('orders').insert([{ negocio, telefono, turno, items: itemsDetail, total: subtotal }]);
+  } catch(e) {
+    console.log('Error guardando pedido:', e);
+  }
+
+  localStorage.setItem('l4h_last', JSON.stringify({ cart: {...cart}, negocio, telefono, turno }));
+
+  const lines = itemsDetail.map(i => `  - ${i.name} x${i.qty}${i.price > 0 ? ' -> ' + fmt(i.total) : ''}`).join('\n');
+  const turnoLabel = turno === 'manana' ? 'Manana (8:00-12:00)' : 'Tarde (15:30-19:00)';
+  const msg = `PEDIDO - LOS 4 HERMANOS\n\nNegocio: ${negocio}\nTel: ${telefono}\nTurno: ${turnoLabel}\n\nDetalle:\n${lines}\n\nTOTAL: ${fmt(subtotal)}\n\nEnviado desde la app`;
+
+  window.open('https://wa.me/5493516211515?text=' + encodeURIComponent(msg), '_blank');
+  cart = {};
   updateCartCount();
   closeCart();
-  showToast('✅ ¡Pedido enviado!');
+  showToast('Pedido enviado!');
 }
 
 function repeatLastOrder(){
-  const saved=localStorage.getItem('l4h_last');
-  if(!saved){showToast('⚠️ No hay pedido anterior');return}
-  try{
-    const d=JSON.parse(saved);
-    cart={...d.cart};
-    selectedTurno=d.turno||'tarde';
-    document.getElementById('negocio').value=d.negocio||'';
-    document.getElementById('telefono').value=d.telefono||'';
-    updateCartCount();renderProducts();openCart();renderCart();
-    showToast('🔄 Pedido anterior cargado');
-  }catch(e){showToast('Error al cargar pedido anterior')}
+  const saved = localStorage.getItem('l4h_last');
+  if(!saved){ showToast('No hay pedido anterior'); return; }
+  try {
+    const d = JSON.parse(saved);
+    cart = {...d.cart};
+    turno = d.turno || 'tarde';
+    document.getElementById('negocio').value = d.negocio || '';
+    document.getElementById('telefono').value = d.telefono || '';
+    updateCartCount(); renderProducts(); openCart(); renderCart();
+    showToast('Pedido anterior cargado');
+  } catch(e) { showToast('Error al cargar pedido anterior'); }
 }
 
 function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
 loadProducts();
 </script>
 </body>
 </html>
-
-
-
-
