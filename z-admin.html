@@ -91,7 +91,7 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .rank-bar{background:var(--brown);border-radius:50px;height:5px;transition:width .5s}
 .rank-val{font-size:.82rem;font-weight:700;color:var(--brown);text-align:right;white-space:nowrap}
 .day-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
-.day-label{font-size:.72rem;color:var(--brownl);min-width:36px;text-align:right}
+.day-label{font-size:.72rem;color:var(--brownl);min-width:50px;text-align:right}
 .day-bar-wrap{flex:1;background:var(--beige);border-radius:50px;height:8px}
 .day-bar{background:var(--gold);border-radius:50px;height:8px;transition:width .5s}
 .day-count{font-size:.72rem;font-weight:600;color:var(--brownd);min-width:20px}
@@ -107,15 +107,31 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .order-total{font-size:.88rem;font-weight:700;color:var(--brown)}
 .order-info{font-size:.72rem;color:var(--brownl);margin-bottom:5px}
 .order-items{font-size:.72rem;color:var(--brownl);border-top:1px solid var(--beige);padding-top:5px;margin-top:5px}
+.order-discount{font-size:.72rem;color:var(--green);font-weight:600}
 
 /* CONFIG */
 #tab-settings{display:none;padding:16px 16px 80px}
 .info-card{background:var(--white);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--beige)}
-.info-card h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);margin-bottom:12px}
+.info-card h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);margin-bottom:4px}
+.info-card p{font-size:.75rem;color:var(--brownl);margin-bottom:14px}
 .settings-field{margin-bottom:10px}
 .settings-field label{font-size:.7rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px}
 .settings-field input{width:100%;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);outline:none}
 .save-settings-btn{background:var(--brown);color:white;border:none;border-radius:10px;padding:11px 20px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;margin-top:4px}
+
+/* LOYALTY SWITCH */
+.loyalty-switch-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--beige);margin-bottom:12px}
+.loyalty-switch-label{font-size:.88rem;font-weight:600;color:var(--brownd)}
+.loyalty-switch-sub{font-size:.72rem;color:var(--brownl);margin-top:2px}
+.big-toggle{width:52px;height:30px;background:var(--brown);border-radius:50px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.big-toggle.off{background:#ccc}
+.big-toggle::after{content:'';position:absolute;width:24px;height:24px;background:white;border-radius:50%;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.big-toggle.off::after{left:25px}
+.loyalty-clients-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:8px}
+.loyalty-clients-table th{background:var(--beige);padding:8px 10px;text-align:left;font-weight:600;color:var(--brownd);font-size:.68rem;text-transform:uppercase}
+.loyalty-clients-table td{padding:8px 10px;border-bottom:1px solid var(--beige)}
+.loyalty-badge{background:var(--green);color:white;border-radius:50px;padding:2px 8px;font-size:.65rem;font-weight:700}
+.loyalty-badge.pending{background:var(--gold);color:var(--brownd)}
 
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--brownd);color:var(--white);padding:10px 20px;border-radius:50px;font-size:.78rem;font-weight:600;opacity:0;transition:all .3s;z-index:500;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -218,8 +234,42 @@ tr:hover td{background:rgba(237,230,214,.4)}
 
   <!-- CONFIG -->
   <div id="tab-settings">
+
+    <!-- FIDELIDAD -->
     <div class="info-card">
-      <h3>Cambiar contrasena</h3>
+      <h3>🎁 Programa de fidelidad</h3>
+      <p>Los clientes ganan un descuento despues de cierta cantidad de pedidos. El contador se reinicia al usar el descuento.</p>
+
+      <div class="loyalty-switch-row">
+        <div>
+          <div class="loyalty-switch-label">Activar programa de fidelidad</div>
+          <div class="loyalty-switch-sub" id="loyalty-status-label">Desactivado</div>
+        </div>
+        <button class="big-toggle off" id="loyalty-toggle" onclick="toggleLoyalty()"></button>
+      </div>
+
+      <div class="settings-field">
+        <label>Pedidos necesarios para ganar descuento</label>
+        <input type="number" id="loyalty-pedidos" value="5" min="1" max="50">
+      </div>
+      <div class="settings-field">
+        <label>Porcentaje de descuento (%)</label>
+        <input type="number" id="loyalty-pct" value="5" min="1" max="50">
+      </div>
+      <button class="save-settings-btn" onclick="saveLoyaltyConfig()">Guardar configuracion</button>
+    </div>
+
+    <!-- CLIENTES FIDELIZADOS -->
+    <div class="info-card">
+      <h3>👥 Clientes en el programa</h3>
+      <p>Progreso de cada cliente hacia su descuento.</p>
+      <div id="loyalty-clients-content"><div class="loading-msg">Cargando...</div></div>
+    </div>
+
+    <!-- CONTRASENA -->
+    <div class="info-card">
+      <h3>🔐 Cambiar contrasena</h3>
+      <p></p>
       <div class="settings-field"><label>Contrasena actual</label><input type="password" id="s-pw-old" placeholder="........"></div>
       <div class="settings-field"><label>Nueva contrasena</label><input type="password" id="s-pw-new" placeholder="........"></div>
       <button class="save-settings-btn" onclick="changePassword()">Cambiar contrasena</button>
@@ -237,6 +287,7 @@ const db = supabase.createClient(SURL, SKEY);
 const ADMIN_PW_KEY = 'l4h_admin_pw';
 const DEFAULT_PW = 'hermanos2024';
 let products = [], allOrders = [], currentPeriod = 'week';
+let loyaltyConfig = { enabled: false, pedidos_necesarios: 5, descuento_pct: 5 };
 
 function fmt(n){ return n > 0 ? '$' + Number(n).toLocaleString('es-AR') : '-'; }
 
@@ -248,6 +299,7 @@ function tryLogin(){
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-screen').style.display = 'block';
     loadProducts();
+    loadLoyaltyConfig();
   } else {
     document.getElementById('login-error').style.display = 'block';
     document.getElementById('pw-input').value = '';
@@ -268,6 +320,7 @@ function showTab(tab){
   });
   if(tab === 'stats') loadStats();
   if(tab === 'orders') loadOrders();
+  if(tab === 'settings') loadLoyaltyClients();
 }
 
 // PRODUCTOS
@@ -404,7 +457,6 @@ function renderStats(orders){
   const clientesRecurrentes = Object.values(clientesMap).filter(c => c.pedidos > 1).length;
   const pctRecurrentes = clientesUnicos > 0 ? Math.round(clientesRecurrentes / clientesUnicos * 100) : 0;
 
-  // Pedidos por dia (7 dias)
   const diasMap = {};
   const hoy = new Date();
   for(let i = 6; i >= 0; i--){
@@ -422,11 +474,9 @@ function renderStats(orders){
   });
   const maxDia = Math.max(...Object.values(diasMap), 1);
 
-  // Top clientes por gasto
   const topClientes = Object.entries(clientesMap).sort((a,b) => b[1].gasto - a[1].gasto).slice(0,7);
   const maxGasto = topClientes[0] ? topClientes[0][1].gasto : 1;
 
-  // Productos mas vendidos
   const prodMap = {};
   orders.forEach(o => {
     if(o.items && Array.isArray(o.items)){
@@ -438,12 +488,14 @@ function renderStats(orders){
   const topProds = Object.entries(prodMap).sort((a,b) => b[1]-a[1]).slice(0,7);
   const maxProd = topProds[0] ? topProds[0][1] : 1;
 
+  const totalDescuentos = orders.reduce((s,o) => s + (o.descuento_aplicado||0), 0);
+
   document.getElementById('stats-content').innerHTML = `
     <div class="kpi-grid">
       <div class="kpi-card"><span class="kpi-icon">📦</span><div class="kpi-label">Pedidos</div><div class="kpi-value">${totalPedidos}</div><div class="kpi-sub">en el periodo</div></div>
       <div class="kpi-card"><span class="kpi-icon">💰</span><div class="kpi-label">Ventas</div><div class="kpi-value" style="font-size:1.05rem">${fmt(totalVentas)}</div><div class="kpi-sub">total estimado</div></div>
       <div class="kpi-card"><span class="kpi-icon">🧾</span><div class="kpi-label">Ticket promedio</div><div class="kpi-value" style="font-size:1.05rem">${fmt(ticketProm)}</div><div class="kpi-sub">por pedido</div></div>
-      <div class="kpi-card"><span class="kpi-icon">👥</span><div class="kpi-label">Clientes unicos</div><div class="kpi-value">${clientesUnicos}</div><div class="kpi-sub">${pctRecurrentes}% recurrentes</div></div>
+      <div class="kpi-card"><span class="kpi-icon">🎁</span><div class="kpi-label">Descuentos dados</div><div class="kpi-value" style="font-size:1.05rem">${fmt(totalDescuentos)}</div><div class="kpi-sub">en fidelidad</div></div>
     </div>
 
     <div class="stat-card">
@@ -517,15 +569,85 @@ function renderOrders(orders){
     const fecha = new Date(o.created_at).toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
     const turnoLabel = o.turno === 'manana' ? 'Manana' : 'Tarde';
     const preview = o.items && o.items.length ? o.items.slice(0,4).map(i => `${i.name} x${i.qty}`).join(', ') + (o.items.length > 4 ? ` +${o.items.length-4} mas` : '') : 'Sin detalle';
+    const discountLine = o.descuento_aplicado > 0 ? `<div class="order-discount">Descuento fidelidad aplicado: -${fmt(o.descuento_aplicado)}</div>` : '';
     return `<div class="order-card">
       <div class="order-top">
         <div class="order-negocio">${o.negocio||'Sin nombre'}</div>
         <div class="order-total">${fmt(o.total)}</div>
       </div>
       <div class="order-info">Tel: ${o.telefono||'-'} · Turno: ${turnoLabel} · ${fecha}</div>
+      ${discountLine}
       <div class="order-items">${preview}</div>
     </div>`;
   }).join('');
+}
+
+// LOYALTY CONFIG
+async function loadLoyaltyConfig(){
+  try {
+    const { data } = await db.from('loyalty_config').select('*').eq('id', 1).single();
+    if(data){
+      loyaltyConfig = data;
+      const btn = document.getElementById('loyalty-toggle');
+      if(btn){
+        btn.className = 'big-toggle' + (data.enabled ? '' : ' off');
+        document.getElementById('loyalty-status-label').textContent = data.enabled ? 'Activado' : 'Desactivado';
+        document.getElementById('loyalty-pedidos').value = data.pedidos_necesarios || 5;
+        document.getElementById('loyalty-pct').value = data.descuento_pct || 5;
+      }
+    }
+  } catch(e) {}
+}
+
+async function toggleLoyalty(){
+  loyaltyConfig.enabled = !loyaltyConfig.enabled;
+  const btn = document.getElementById('loyalty-toggle');
+  btn.className = 'big-toggle' + (loyaltyConfig.enabled ? '' : ' off');
+  document.getElementById('loyalty-status-label').textContent = loyaltyConfig.enabled ? 'Activado' : 'Desactivado';
+  await db.from('loyalty_config').update({enabled: loyaltyConfig.enabled}).eq('id', 1);
+  showToast(loyaltyConfig.enabled ? 'Programa de fidelidad activado' : 'Programa de fidelidad desactivado');
+}
+
+async function saveLoyaltyConfig(){
+  const pedidos = parseInt(document.getElementById('loyalty-pedidos').value) || 5;
+  const pct = parseInt(document.getElementById('loyalty-pct').value) || 5;
+  const { error } = await db.from('loyalty_config').update({
+    pedidos_necesarios: pedidos,
+    descuento_pct: pct
+  }).eq('id', 1);
+  if(error){ showToast('Error al guardar'); return; }
+  loyaltyConfig.pedidos_necesarios = pedidos;
+  loyaltyConfig.descuento_pct = pct;
+  showToast('Configuracion guardada');
+}
+
+async function loadLoyaltyClients(){
+  const container = document.getElementById('loyalty-clients-content');
+  if(!container) return;
+  try {
+    const { data, error } = await db.from('loyalty').select('*').order('pedidos', {ascending: false});
+    if(error || !data || !data.length){
+      container.innerHTML = '<div class="no-data">Aun no hay clientes registrados en el programa.</div>';
+      return;
+    }
+    const necesarios = loyaltyConfig.pedidos_necesarios || 5;
+    container.innerHTML = `<table class="loyalty-clients-table">
+      <thead><tr><th>Negocio</th><th>Tel</th><th>Pedidos</th><th>Estado</th></tr></thead>
+      <tbody>${data.map(c => `
+        <tr>
+          <td>${c.negocio||'-'}</td>
+          <td>${c.telefono}</td>
+          <td>${c.pedidos} / ${necesarios}</td>
+          <td>${c.pedidos >= necesarios
+            ? '<span class="loyalty-badge">Descuento listo!</span>'
+            : `<span class="loyalty-badge pending">Faltan ${necesarios - c.pedidos}</span>`
+          }</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  } catch(e) {
+    container.innerHTML = '<div class="no-data">Error al cargar clientes.</div>';
+  }
 }
 
 // CONFIG
@@ -547,7 +669,6 @@ function showToast(msg){
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// Init - ocultar tabs
 document.getElementById('tab-stats').style.display = 'none';
 document.getElementById('tab-orders').style.display = 'none';
 document.getElementById('tab-settings').style.display = 'none';
