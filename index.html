@@ -41,8 +41,6 @@ header{background:var(--brownd);padding:14px 16px;position:sticky;top:0;z-index:
 .qty-num{font-size:.88rem;font-weight:700;color:var(--brownd);min-width:18px;text-align:center}
 .added-badge{position:absolute;top:8px;right:8px;background:var(--red);color:white;border-radius:50%;width:20px;height:20px;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center}
 .sin-precio{font-size:.68rem;color:#bbb;margin-bottom:8px;font-style:italic}
-
-/* LOYALTY BANNER */
 .loyalty-banner{background:linear-gradient(135deg,#1a7a3c,#145c2d);margin:10px 16px;border-radius:14px;padding:14px 16px;display:none}
 .loyalty-banner.show{display:block}
 .loyalty-banner h3{font-family:'Playfair Display',serif;color:white;font-size:1rem;font-weight:700;margin-bottom:4px}
@@ -50,13 +48,10 @@ header{background:var(--brownd);padding:14px 16px;position:sticky;top:0;z-index:
 .loyalty-progress{background:rgba(255,255,255,.2);border-radius:50px;height:6px;margin-top:10px}
 .loyalty-progress-bar{background:var(--gold);border-radius:50px;height:6px;transition:width .5s}
 .loyalty-progress-label{color:rgba(255,255,255,.75);font-size:.66rem;margin-top:4px}
-
-/* DESCUENTO BANNER */
 .discount-banner{background:linear-gradient(135deg,var(--gold),#e8a500);margin:10px 16px;border-radius:14px;padding:14px 16px;display:none;text-align:center}
 .discount-banner.show{display:block}
 .discount-banner h3{font-family:'Playfair Display',serif;color:var(--brownd);font-size:1.1rem;font-weight:900;margin-bottom:4px}
 .discount-banner p{color:var(--brownd);font-size:.78rem;opacity:.85}
-
 .overlay{position:fixed;inset:0;background:rgba(26,16,8,.55);z-index:200;display:none;align-items:flex-end}
 .overlay.open{display:flex}
 .cart-sheet{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:480px;margin:0 auto;max-height:92vh;overflow-y:auto;animation:slideUp .3s ease}
@@ -81,6 +76,19 @@ header{background:var(--brownd);padding:14px 16px;position:sticky;top:0;z-index:
 .total-row{display:flex;justify-content:space-between;font-size:.82rem;padding:3px 0;color:var(--brownd)}
 .total-row.main{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;border-top:1.5px solid rgba(92,61,46,.3);margin-top:6px;padding-top:8px}
 .total-row.discount{color:var(--green);font-weight:600}
+
+/* CUPON */
+.cupon-section{padding:12px 16px;border-top:1px solid var(--beige)}
+.cupon-section h4{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--brownd);margin-bottom:8px}
+.cupon-row{display:flex;gap:8px}
+.cupon-input{flex:1;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);color:var(--black);outline:none;text-transform:uppercase}
+.cupon-input:focus{border-color:var(--brown)}
+.cupon-btn{background:var(--brown);color:white;border:none;border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.82rem;cursor:pointer;white-space:nowrap}
+.cupon-ok{background:#e8f5e9;border:1.5px solid var(--green);border-radius:10px;padding:9px 13px;color:var(--green);font-size:.78rem;font-weight:600;margin-top:6px;display:none}
+.cupon-ok.show{display:block}
+.cupon-err{background:#fdecea;border:1.5px solid var(--red);border-radius:10px;padding:9px 13px;color:var(--red);font-size:.78rem;font-weight:600;margin-top:6px;display:none}
+.cupon-err.show{display:block}
+
 .turno-section{padding:14px 16px;border-top:1px solid var(--beige)}
 .turno-section h4{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--brownd);margin-bottom:10px}
 .turno-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -114,13 +122,10 @@ footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opaci
 </div>
 <div class="horario">📅 Lun, Mar, Jue, Vie y Sab &nbsp;·&nbsp; 8:00 a 14:30</div>
 
-<!-- BANNER DESCUENTO (cuando corresponde) -->
 <div class="discount-banner" id="discount-banner">
   <h3>🎉 Tenes un descuento especial!</h3>
   <p id="discount-text">Por tu fidelidad, tenes 5% de descuento en este pedido.</p>
 </div>
-
-<!-- BANNER PROGRESO (cuando no corresponde descuento) -->
 <div class="loyalty-banner" id="loyalty-banner">
   <h3>🏆 Programa de fidelidad</h3>
   <p id="loyalty-text">Segui pidiendo para ganar tu descuento</p>
@@ -140,6 +145,18 @@ footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opaci
     <div class="sheet-header"><h3>🛒 Tu pedido</h3><button class="close-btn" onclick="closeCart()">✕</button></div>
     <div class="cart-items" id="cart-items"></div>
     <div id="total-box"></div>
+
+    <!-- CUPON -->
+    <div class="cupon-section">
+      <h4>🎟️ Cupon de descuento</h4>
+      <div class="cupon-row">
+        <input type="text" class="cupon-input" id="cupon-input" placeholder="Ingresa tu codigo..." oninput="this.value=this.value.toUpperCase()">
+        <button class="cupon-btn" onclick="aplicarCupon()">Aplicar</button>
+      </div>
+      <div class="cupon-ok" id="cupon-ok"></div>
+      <div class="cupon-err" id="cupon-err"></div>
+    </div>
+
     <div class="turno-section">
       <h4>Turno de entrega</h4>
       <div class="turno-opts">
@@ -174,253 +191,228 @@ const CATS = [
   {id:'otros',label:'Otros',emoji:'📦'}
 ];
 
-let products = [], cart = {}, turno = 'tarde', cat = 'all';
-let loyaltyConfig = { enabled: false, pedidos_necesarios: 5, descuento_pct: 5 };
-let clientLoyalty = null;
-let hasDiscount = false;
-let loyaltyCheckTimeout = null;
+let products=[], cart={}, turno='tarde', cat='all';
+let loyaltyConfig={enabled:false,pedidos_necesarios:5,descuento_pct:5};
+let clientLoyalty=null, hasDiscount=false, loyaltyCheckTimeout=null;
+let cuponAplicado=null;
 
-function fmt(n){ return n > 0 ? '$' + Number(n).toLocaleString('es-AR') : 'Consultar'; }
-function getQty(id){ return cart[id] || 0; }
+function fmt(n){return n>0?'$'+Number(n).toLocaleString('es-AR'):'Consultar';}
+function getQty(id){return cart[id]||0;}
 
 async function loadProducts(){
-  try {
-    const { data, error } = await db.from('products').select('*').eq('active', true).order('sort_order', {ascending: true});
-    if(error) throw error;
-    products = data;
-    renderCatNav();
-    renderProducts();
-  } catch(e) {
-    document.getElementById('products-grid').innerHTML = '<div class="loading" style="grid-column:1/-1">Error cargando productos. Recarga la pagina.</div>';
+  try{
+    const{data,error}=await db.from('products').select('*').eq('active',true).order('sort_order',{ascending:true});
+    if(error)throw error;
+    products=data;
+    renderCatNav();renderProducts();
+  }catch(e){
+    document.getElementById('products-grid').innerHTML='<div class="loading" style="grid-column:1/-1">Error cargando productos. Recarga la pagina.</div>';
   }
 }
 
 async function loadLoyaltyConfig(){
-  try {
-    const { data } = await db.from('loyalty_config').select('*').eq('id', 1).single();
-    if(data) loyaltyConfig = data;
-  } catch(e) {}
+  try{const{data}=await db.from('loyalty_config').select('*').eq('id',1).single();if(data)loyaltyConfig=data;}catch(e){}
 }
 
 async function checkLoyalty(){
-  const tel = document.getElementById('telefono').value.trim();
-  if(tel.length < 8) {
-    hideLoyaltyBanners();
-    return;
-  }
+  const tel=document.getElementById('telefono').value.trim();
+  if(tel.length<8){hideLoyaltyBanners();return;}
   clearTimeout(loyaltyCheckTimeout);
-  loyaltyCheckTimeout = setTimeout(async () => {
-    if(!loyaltyConfig.enabled) { hideLoyaltyBanners(); return; }
-    try {
-      const { data } = await db.from('loyalty').select('*').eq('telefono', tel).single();
-      clientLoyalty = data;
-      const pedidos = data ? data.pedidos : 0;
-      const necesarios = loyaltyConfig.pedidos_necesarios || 5;
-      if(pedidos >= necesarios) {
-        hasDiscount = true;
-        document.getElementById('discount-text').textContent = `Por tu fidelidad con ${pedidos} pedidos, tenes ${loyaltyConfig.descuento_pct}% de descuento en este pedido!`;
-        document.getElementById('discount-banner').className = 'discount-banner show';
-        document.getElementById('loyalty-banner').className = 'loyalty-banner';
-      } else {
-        hasDiscount = false;
-        const pct = Math.round(pedidos / necesarios * 100);
-        document.getElementById('loyalty-text').textContent = `Te faltan ${necesarios - pedidos} pedido${necesarios-pedidos!==1?'s':''} para ganar tu descuento de ${loyaltyConfig.descuento_pct}%`;
-        document.getElementById('loyalty-bar').style.width = pct + '%';
-        document.getElementById('loyalty-label').textContent = `${pedidos} de ${necesarios} pedidos`;
-        document.getElementById('loyalty-banner').className = 'loyalty-banner show';
-        document.getElementById('discount-banner').className = 'discount-banner';
+  loyaltyCheckTimeout=setTimeout(async()=>{
+    if(!loyaltyConfig.enabled){hideLoyaltyBanners();return;}
+    try{
+      const{data}=await db.from('loyalty').select('*').eq('telefono',tel).single();
+      clientLoyalty=data;
+      const pedidos=data?data.pedidos:0;
+      const necesarios=loyaltyConfig.pedidos_necesarios||5;
+      if(pedidos>=necesarios){
+        hasDiscount=true;
+        document.getElementById('discount-text').textContent=`Por tu fidelidad con ${pedidos} pedidos, tenes ${loyaltyConfig.descuento_pct}% de descuento!`;
+        document.getElementById('discount-banner').className='discount-banner show';
+        document.getElementById('loyalty-banner').className='loyalty-banner';
+      }else{
+        hasDiscount=false;
+        const pct=Math.round(pedidos/necesarios*100);
+        document.getElementById('loyalty-text').textContent=`Te faltan ${necesarios-pedidos} pedido${necesarios-pedidos!==1?'s':''} para ganar ${loyaltyConfig.descuento_pct}% de descuento`;
+        document.getElementById('loyalty-bar').style.width=pct+'%';
+        document.getElementById('loyalty-label').textContent=`${pedidos} de ${necesarios} pedidos`;
+        document.getElementById('loyalty-banner').className='loyalty-banner show';
+        document.getElementById('discount-banner').className='discount-banner';
       }
       renderCart();
-    } catch(e) {
-      hideLoyaltyBanners();
-      hasDiscount = false;
-    }
-  }, 600);
+    }catch(e){hideLoyaltyBanners();hasDiscount=false;}
+  },600);
 }
 
 function hideLoyaltyBanners(){
-  document.getElementById('loyalty-banner').className = 'loyalty-banner';
-  document.getElementById('discount-banner').className = 'discount-banner';
-  hasDiscount = false;
+  document.getElementById('loyalty-banner').className='loyalty-banner';
+  document.getElementById('discount-banner').className='discount-banner';
+  hasDiscount=false;
+}
+
+// CUPON
+async function aplicarCupon(){
+  const codigo=document.getElementById('cupon-input').value.trim().toUpperCase();
+  const okEl=document.getElementById('cupon-ok');
+  const errEl=document.getElementById('cupon-err');
+  okEl.className='cupon-ok';errEl.className='cupon-err';
+  if(!codigo){errEl.textContent='Ingresa un codigo de cupon.';errEl.className='cupon-err show';return;}
+  try{
+    const{data,error}=await db.from('cupones').select('*').eq('codigo',codigo).eq('activo',true).single();
+    if(error||!data){errEl.textContent='Cupon invalido o no disponible.';errEl.className='cupon-err show';cuponAplicado=null;renderCart();return;}
+    cuponAplicado=data;
+    okEl.textContent=`Cupon "${codigo}" aplicado: ${data.descuento_pct}% de descuento!`;
+    okEl.className='cupon-ok show';
+    renderCart();
+  }catch(e){errEl.textContent='Cupon invalido o no disponible.';errEl.className='cupon-err show';cuponAplicado=null;renderCart();}
+}
+
+function quitarCupon(){
+  cuponAplicado=null;
+  document.getElementById('cupon-input').value='';
+  document.getElementById('cupon-ok').className='cupon-ok';
+  document.getElementById('cupon-err').className='cupon-err';
+  renderCart();
 }
 
 function renderCatNav(){
-  document.getElementById('cat-nav').innerHTML = CATS.map(c =>
-    `<button class="cat-pill${cat===c.id?' active':''}" onclick="filterCat('${c.id}')">${c.emoji} ${c.label}</button>`
-  ).join('');
+  document.getElementById('cat-nav').innerHTML=CATS.map(c=>`<button class="cat-pill${cat===c.id?' active':''}" onclick="filterCat('${c.id}')">${c.emoji} ${c.label}</button>`).join('');
 }
 
 function renderProducts(){
-  const q = (document.getElementById('search-input').value || '').toLowerCase();
-  const list = products.filter(p => (cat==='all'||p.category===cat) && (!q||p.name.toLowerCase().includes(q)));
-  document.getElementById('sec-title').textContent = list.length + ' productos';
-  if(!list.length){
-    document.getElementById('products-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--brownl)">No se encontraron productos</div>';
-    return;
-  }
-  document.getElementById('products-grid').innerHTML = list.map(p => {
-    const qty = getQty(p.id);
-    return `<div class="product-card">
-      ${qty > 0 ? `<div class="added-badge">${qty}</div>` : ''}
-      <div class="prod-emoji">${p.emoji || '🛍️'}</div>
-      <div class="prod-name">${p.name}</div>
-      <div class="prod-sub">${p.description || ''}</div>
-      ${p.price > 0 ? `<div class="prod-price">${fmt(p.price)}</div>` : '<div class="sin-precio">Consultar</div>'}
-      <div class="qty-control">
-        <button class="qty-btn" onclick="changeQty('${p.id}',-1)">-</button>
-        <span class="qty-num">${qty}</span>
-        <button class="qty-btn" onclick="changeQty('${p.id}',+1)">+</button>
-      </div>
-    </div>`;
+  const q=(document.getElementById('search-input').value||'').toLowerCase();
+  const list=products.filter(p=>(cat==='all'||p.category===cat)&&(!q||p.name.toLowerCase().includes(q)));
+  document.getElementById('sec-title').textContent=list.length+' productos';
+  if(!list.length){document.getElementById('products-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--brownl)">No se encontraron productos</div>';return;}
+  document.getElementById('products-grid').innerHTML=list.map(p=>{
+    const qty=getQty(p.id);
+    return`<div class="product-card">${qty>0?`<div class="added-badge">${qty}</div>`:''}<div class="prod-emoji">${p.emoji||'🛍️'}</div><div class="prod-name">${p.name}</div><div class="prod-sub">${p.description||''}</div>${p.price>0?`<div class="prod-price">${fmt(p.price)}</div>`:'<div class="sin-precio">Consultar</div>'}<div class="qty-control"><button class="qty-btn" onclick="changeQty('${p.id}',-1)">-</button><span class="qty-num">${qty}</span><button class="qty-btn" onclick="changeQty('${p.id}',+1)">+</button></div></div>`;
   }).join('');
 }
 
-function filterCat(c){ cat = c; renderCatNav(); renderProducts(); }
+function filterCat(c){cat=c;renderCatNav();renderProducts();}
 
-function changeQty(id, delta){
-  const nw = Math.max(0, getQty(id) + delta);
-  if(nw === 0) delete cart[id]; else cart[id] = nw;
-  updateCartCount();
-  renderProducts();
-  if(delta > 0 && nw === 1) showToast('Agregado al carrito');
+function changeQty(id,delta){
+  const nw=Math.max(0,getQty(id)+delta);
+  if(nw===0)delete cart[id];else cart[id]=nw;
+  updateCartCount();renderProducts();
+  if(delta>0&&nw===1)showToast('Agregado al carrito');
 }
 
-function updateCartCount(){
-  document.getElementById('cart-count').textContent = Object.values(cart).reduce((a,b)=>a+b,0);
-}
+function updateCartCount(){document.getElementById('cart-count').textContent=Object.values(cart).reduce((a,b)=>a+b,0);}
 
-function openCart(){ document.getElementById('overlay').classList.add('open'); renderCart(); }
-function closeCart(){ document.getElementById('overlay').classList.remove('open'); }
-function closeCartOutside(e){ if(e.target===document.getElementById('overlay')) closeCart(); }
+function openCart(){document.getElementById('overlay').classList.add('open');renderCart();}
+function closeCart(){document.getElementById('overlay').classList.remove('open');}
+function closeCartOutside(e){if(e.target===document.getElementById('overlay'))closeCart();}
 
 function renderCart(){
-  const items = Object.entries(cart);
-  const container = document.getElementById('cart-items');
+  const items=Object.entries(cart);
+  const container=document.getElementById('cart-items');
   if(!items.length){
-    container.innerHTML = '<div class="cart-empty"><div style="font-size:2.5rem">🛒</div><p style="margin-top:8px;font-size:.88rem">Tu carrito esta vacio</p></div>';
-    document.getElementById('total-box').innerHTML = '';
-    return;
+    container.innerHTML='<div class="cart-empty"><div style="font-size:2.5rem">🛒</div><p style="margin-top:8px;font-size:.88rem">Tu carrito esta vacio</p></div>';
+    document.getElementById('total-box').innerHTML='';return;
   }
-  let subtotal = 0;
-  container.innerHTML = items.map(([id,qty]) => {
-    const p = products.find(x => x.id == id);
-    if(!p) return '';
-    const rowTotal = p.price * qty;
-    subtotal += rowTotal;
-    return `<div class="cart-item">
-      <div class="ci-info">
-        <span class="ci-emoji">${p.emoji || '🛍️'}</span>
-        <div>
-          <div class="ci-name">${p.name}</div>
-          <div class="ci-sub">${p.description || ''}</div>
-          ${p.price > 0 ? `<div class="ci-price">${fmt(p.price)} c/u</div>` : ''}
-        </div>
-      </div>
-      <div class="ci-qty">
-        <button class="cq-btn" onclick="changeQty('${id}',-1);renderCart()">-</button>
-        <span class="cq-num">${qty}</span>
-        <button class="cq-btn" onclick="changeQty('${id}',+1);renderCart()">+</button>
-      </div>
-      <div class="ci-total">${p.price > 0 ? fmt(rowTotal) : '-'}</div>
-    </div>`;
+  let subtotal=0;
+  container.innerHTML=items.map(([id,qty])=>{
+    const p=products.find(x=>x.id==id);if(!p)return'';
+    const rowTotal=p.price*qty;subtotal+=rowTotal;
+    return`<div class="cart-item"><div class="ci-info"><span class="ci-emoji">${p.emoji||'🛍️'}</span><div><div class="ci-name">${p.name}</div><div class="ci-sub">${p.description||''}</div>${p.price>0?`<div class="ci-price">${fmt(p.price)} c/u</div>`:''}</div></div><div class="ci-qty"><button class="cq-btn" onclick="changeQty('${id}',-1);renderCart()">-</button><span class="cq-num">${qty}</span><button class="cq-btn" onclick="changeQty('${id}',+1);renderCart()">+</button></div><div class="ci-total">${p.price>0?fmt(rowTotal):'-'}</div></div>`;
   }).join('');
 
-  const descuento = hasDiscount ? Math.round(subtotal * (loyaltyConfig.descuento_pct || 5) / 100) : 0;
-  const total = subtotal - descuento;
+  // Calcular descuentos
+  const descLoyalty=hasDiscount?Math.round(subtotal*(loyaltyConfig.descuento_pct||5)/100):0;
+  const subtotalPostLoyalty=subtotal-descLoyalty;
+  const descCupon=cuponAplicado?Math.round(subtotalPostLoyalty*cuponAplicado.descuento_pct/100):0;
+  const total=subtotalPostLoyalty-descCupon;
 
-  document.getElementById('total-box').innerHTML = `<div class="total-box">
+  document.getElementById('total-box').innerHTML=`<div class="total-box">
     <div class="total-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
-    ${hasDiscount ? `<div class="total-row discount"><span>Descuento ${loyaltyConfig.descuento_pct}% fidelidad</span><span>-${fmt(descuento)}</span></div>` : ''}
+    ${hasDiscount?`<div class="total-row discount"><span>Descuento fidelidad (${loyaltyConfig.descuento_pct}%)</span><span>-${fmt(descLoyalty)}</span></div>`:''}
+    ${cuponAplicado?`<div class="total-row discount"><span>Cupon "${cuponAplicado.codigo}" (${cuponAplicado.descuento_pct}%)</span><span>-${fmt(descCupon)}</span></div>`:''}
     <div class="total-row main"><span>TOTAL</span><span>${fmt(total)}</span></div>
   </div>`;
 }
 
 function selectTurno(t){
-  turno = t;
-  document.getElementById('t-manana').className = 'turno-opt' + (t==='manana'?' selected':'');
-  document.getElementById('t-tarde').className = 'turno-opt' + (t==='tarde'?' selected':'');
+  turno=t;
+  document.getElementById('t-manana').className='turno-opt'+(t==='manana'?' selected':'');
+  document.getElementById('t-tarde').className='turno-opt'+(t==='tarde'?' selected':'');
 }
 
 async function sendOrder(){
-  const negocio = document.getElementById('negocio').value.trim();
-  const telefono = document.getElementById('telefono').value.trim();
-  const items = Object.entries(cart);
-  if(!items.length){ showToast('Tu carrito esta vacio'); return; }
-  if(!negocio){ showToast('Ingresa el nombre de tu negocio'); return; }
-  if(!telefono){ showToast('Ingresa tu telefono'); return; }
+  const negocio=document.getElementById('negocio').value.trim();
+  const telefono=document.getElementById('telefono').value.trim();
+  const items=Object.entries(cart);
+  if(!items.length){showToast('Tu carrito esta vacio');return;}
+  if(!negocio){showToast('Ingresa el nombre de tu negocio');return;}
+  if(!telefono){showToast('Ingresa tu telefono');return;}
 
-  let subtotal = 0;
-  const itemsDetail = items.map(([id,qty]) => {
-    const p = products.find(x => x.id == id);
-    const rowTotal = p && p.price > 0 ? p.price * qty : 0;
-    subtotal += rowTotal;
-    return { id, name: p ? p.name : id, qty, price: p ? p.price : 0, total: rowTotal };
+  let subtotal=0;
+  const itemsDetail=items.map(([id,qty])=>{
+    const p=products.find(x=>x.id==id);
+    const rowTotal=p&&p.price>0?p.price*qty:0;
+    subtotal+=rowTotal;
+    return{id,name:p?p.name:id,qty,price:p?p.price:0,total:rowTotal};
   });
 
-  const descuento = hasDiscount ? Math.round(subtotal * (loyaltyConfig.descuento_pct || 5) / 100) : 0;
-  const totalFinal = subtotal - descuento;
+  const descLoyalty=hasDiscount?Math.round(subtotal*(loyaltyConfig.descuento_pct||5)/100):0;
+  const subtotalPostLoyalty=subtotal-descLoyalty;
+  const descCupon=cuponAplicado?Math.round(subtotalPostLoyalty*cuponAplicado.descuento_pct/100):0;
+  const totalFinal=subtotalPostLoyalty-descCupon;
 
   // Guardar pedido
-  try {
-    await db.from('orders').insert([{ negocio, telefono, turno, items: itemsDetail, total: totalFinal, descuento_aplicado: descuento }]);
-  } catch(e) {}
+  try{await db.from('orders').insert([{negocio,telefono,turno,items:itemsDetail,total:totalFinal,descuento_aplicado:descLoyalty+descCupon,cupon_usado:cuponAplicado?cuponAplicado.codigo:null}]);}catch(e){}
 
   // Actualizar loyalty
-  try {
-    const pedidosActuales = clientLoyalty ? clientLoyalty.pedidos : 0;
-    const necesarios = loyaltyConfig.pedidos_necesarios || 5;
-    let nuevosPedidos = hasDiscount ? 0 : pedidosActuales + 1; // reinicia si usó descuento
-    const { data: existing } = await db.from('loyalty').select('*').eq('telefono', telefono).single().catch(()=>({data:null}));
-    if(existing) {
-      await db.from('loyalty').update({
-        negocio,
-        pedidos: nuevosPedidos,
-        total_gastado: (existing.total_gastado || 0) + totalFinal,
-        updated_at: new Date().toISOString()
-      }).eq('telefono', telefono);
-    } else {
-      await db.from('loyalty').insert([{
-        telefono, negocio, pedidos: 1, total_gastado: totalFinal
-      }]);
+  try{
+    const pedidosActuales=clientLoyalty?clientLoyalty.pedidos:0;
+    const nuevosPedidos=hasDiscount?0:pedidosActuales+1;
+    const existing=await db.from('loyalty').select('*').eq('telefono',telefono).single().catch(()=>({data:null}));
+    if(existing.data){
+      await db.from('loyalty').update({negocio,pedidos:nuevosPedidos,total_gastado:(existing.data.total_gastado||0)+totalFinal,updated_at:new Date().toISOString()}).eq('telefono',telefono);
+    }else{
+      await db.from('loyalty').insert([{telefono,negocio,pedidos:1,total_gastado:totalFinal}]);
     }
-  } catch(e) {}
+  }catch(e){}
 
-  localStorage.setItem('l4h_last', JSON.stringify({ cart: {...cart}, negocio, telefono, turno }));
+  // Actualizar usos del cupon
+  if(cuponAplicado){
+    try{await db.from('cupones').update({usos:(cuponAplicado.usos||0)+1}).eq('id',cuponAplicado.id);}catch(e){}
+  }
 
-  const lines = itemsDetail.map(i => `  - ${i.name} x${i.qty}${i.price > 0 ? ' -> ' + fmt(i.total) : ''}`).join('\n');
-  const turnoLabel = turno === 'manana' ? 'Manana (8:00-12:00)' : 'Tarde (15:30-19:00)';
-  const discountLine = hasDiscount ? `\n🎉 DESCUENTO FIDELIDAD (${loyaltyConfig.descuento_pct}%): -${fmt(descuento)}` : '';
-  const msg = `PEDIDO - LOS 4 HERMANOS\n\nNegocio: ${negocio}\nTel: ${telefono}\nTurno: ${turnoLabel}\n\nDetalle:\n${lines}\n\nSubtotal: ${fmt(subtotal)}${discountLine}\nTOTAL: ${fmt(totalFinal)}\n\nEnviado desde la app`;
+  localStorage.setItem('l4h_last',JSON.stringify({cart:{...cart},negocio,telefono,turno}));
 
-  window.open('https://wa.me/5493516211515?text=' + encodeURIComponent(msg), '_blank');
-  cart = {};
-  hasDiscount = false;
-  clientLoyalty = null;
-  hideLoyaltyBanners();
-  updateCartCount();
-  closeCart();
+  const lines=itemsDetail.map(i=>`  - ${i.name} x${i.qty}${i.price>0?' -> '+fmt(i.total):''}`).join('\n');
+  const turnoLabel=turno==='manana'?'Manana (8:00-12:00)':'Tarde (15:30-19:00)';
+  let descLines='';
+  if(hasDiscount)descLines+=`\n🏆 Descuento fidelidad (${loyaltyConfig.descuento_pct}%): -${fmt(descLoyalty)}`;
+  if(cuponAplicado)descLines+=`\n🎟️ Cupon "${cuponAplicado.codigo}" (${cuponAplicado.descuento_pct}%): -${fmt(descCupon)}`;
+  const msg=`PEDIDO - LOS 4 HERMANOS\n\nNegocio: ${negocio}\nTel: ${telefono}\nTurno: ${turnoLabel}\n\nDetalle:\n${lines}\n\nSubtotal: ${fmt(subtotal)}${descLines}\nTOTAL: ${fmt(totalFinal)}\n\nEnviado desde la app`;
+
+  window.open('https://wa.me/5493516211515?text='+encodeURIComponent(msg),'_blank');
+  cart={};hasDiscount=false;clientLoyalty=null;cuponAplicado=null;
+  hideLoyaltyBanners();quitarCupon();updateCartCount();closeCart();
   showToast('Pedido enviado!');
 }
 
 function repeatLastOrder(){
-  const saved = localStorage.getItem('l4h_last');
-  if(!saved){ showToast('No hay pedido anterior'); return; }
-  try {
-    const d = JSON.parse(saved);
-    cart = {...d.cart};
-    turno = d.turno || 'tarde';
-    document.getElementById('negocio').value = d.negocio || '';
-    document.getElementById('telefono').value = d.telefono || '';
-    updateCartCount(); renderProducts(); openCart(); renderCart();
-    if(d.telefono) checkLoyalty();
+  const saved=localStorage.getItem('l4h_last');
+  if(!saved){showToast('No hay pedido anterior');return;}
+  try{
+    const d=JSON.parse(saved);
+    cart={...d.cart};turno=d.turno||'tarde';
+    document.getElementById('negocio').value=d.negocio||'';
+    document.getElementById('telefono').value=d.telefono||'';
+    updateCartCount();renderProducts();openCart();renderCart();
+    if(d.telefono)checkLoyalty();
     showToast('Pedido anterior cargado');
-  } catch(e) { showToast('Error al cargar pedido anterior'); }
+  }catch(e){showToast('Error al cargar pedido anterior');}
 }
 
 function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
 }
 
 loadProducts();
