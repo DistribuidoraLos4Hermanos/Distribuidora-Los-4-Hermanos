@@ -10,7 +10,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--cream:#F5F0E8;--beige:#EDE6D6;--brown:#5C3D2E;--brownl:#8B6248;--brownd:#3A2418;--black:#1A1008;--red:#C0392B;--gold:#D4A843;--white:#FDFAF5;--green:#1a7a3c}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--black);min-height:100vh}
-
 #login-screen{position:fixed;inset:0;background:var(--brownd);display:flex;align-items:center;justify-content:center;z-index:999}
 .login-card{background:var(--white);border-radius:20px;padding:36px 28px;width:90%;max-width:360px;text-align:center}
 .login-card h1{font-family:'Playfair Display',serif;color:var(--brownd);font-size:1.6rem;font-weight:900;margin-bottom:4px}
@@ -19,21 +18,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--black)
 .login-card input:focus{border-color:var(--brown)}
 .login-btn{width:100%;padding:13px;background:var(--brown);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer}
 .login-error{color:var(--red);font-size:.78rem;margin-top:8px;display:none}
-
 #admin-screen{display:none}
 header{background:var(--brownd);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .logo h1{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;font-weight:900}
 .logo span{color:var(--beige);font-size:.6rem;font-weight:300;letter-spacing:2px;text-transform:uppercase;display:block}
 .header-btns{display:flex;gap:8px}
 .btn-outline{background:transparent;border:1.5px solid rgba(212,168,67,.5);border-radius:8px;padding:7px 12px;color:var(--gold);font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
-
 .tabs{display:flex;background:var(--white);border-bottom:1px solid var(--beige);overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex-shrink:0;padding:12px 14px;text-align:center;font-size:.78rem;font-weight:600;color:var(--brownl);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap}
 .tab.active{color:var(--brown);border-color:var(--brown)}
 .badge{background:var(--brown);color:white;border-radius:50px;padding:2px 8px;font-size:.68rem;font-weight:700;margin-left:4px}
-
-/* PRODUCTOS */
 .toolbar{padding:12px 16px;background:var(--white);border-bottom:1px solid var(--beige);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .toolbar input[type=text]{flex:1;min-width:150px;padding:8px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.83rem;background:var(--cream);outline:none}
 .toolbar input[type=text]:focus{border-color:var(--brown)}
@@ -67,8 +62,6 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .save-btn{background:var(--green);color:white;border:none;border-radius:6px;padding:5px 10px;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer}
 .del-btn{background:transparent;border:1.5px solid rgba(192,57,43,.3);color:var(--red);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:.9rem;display:inline-flex;align-items:center;justify-content:center}
 .loading-msg{text-align:center;padding:40px;color:var(--brownl);font-size:.9rem}
-
-/* ESTADISTICAS */
 #tab-stats{display:none;padding:14px 16px 80px}
 .period-btns{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .period-btn{padding:7px 14px;border:1.5px solid var(--beige);border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;color:var(--brownl);cursor:pointer;background:var(--white)}
@@ -96,8 +89,6 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .day-bar{background:var(--gold);border-radius:50px;height:8px;transition:width .5s}
 .day-count{font-size:.72rem;font-weight:600;color:var(--brownd);min-width:20px}
 .no-data{text-align:center;padding:20px;color:var(--brownl);font-size:.82rem}
-
-/* PEDIDOS */
 #tab-orders{display:none;padding:14px 16px 80px}
 .orders-search{width:100%;padding:9px 13px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--white);outline:none;margin-bottom:12px}
 .orders-search:focus{border-color:var(--brown)}
@@ -108,8 +99,6 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .order-info{font-size:.72rem;color:var(--brownl);margin-bottom:5px}
 .order-items{font-size:.72rem;color:var(--brownl);border-top:1px solid var(--beige);padding-top:5px;margin-top:5px}
 .order-discount{font-size:.72rem;color:var(--green);font-weight:600}
-
-/* CONFIG */
 #tab-settings{display:none;padding:16px 16px 80px}
 .info-card{background:var(--white);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--beige)}
 .info-card h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);margin-bottom:4px}
@@ -118,8 +107,6 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .settings-field label{font-size:.7rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px}
 .settings-field input{width:100%;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);outline:none}
 .save-settings-btn{background:var(--brown);color:white;border:none;border-radius:10px;padding:11px 20px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;margin-top:4px}
-
-/* LOYALTY SWITCH */
 .loyalty-switch-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--beige);margin-bottom:12px}
 .loyalty-switch-label{font-size:.88rem;font-weight:600;color:var(--brownd)}
 .loyalty-switch-sub{font-size:.72rem;color:var(--brownl);margin-top:2px}
@@ -132,6 +119,18 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .loyalty-clients-table td{padding:8px 10px;border-bottom:1px solid var(--beige)}
 .loyalty-badge{background:var(--green);color:white;border-radius:50px;padding:2px 8px;font-size:.65rem;font-weight:700}
 .loyalty-badge.pending{background:var(--gold);color:var(--brownd)}
+
+/* CUPONES */
+.cupon-list{margin-top:8px}
+.cupon-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--beige)}
+.cupon-item:last-child{border-bottom:none}
+.cupon-codigo{font-size:.9rem;font-weight:700;color:var(--brownd);font-family:monospace;background:var(--beige);padding:3px 10px;border-radius:6px;letter-spacing:1px}
+.cupon-pct{font-size:.82rem;font-weight:600;color:var(--brown)}
+.cupon-usos{font-size:.72rem;color:var(--brownl)}
+.cupon-actions{display:flex;gap:6px;margin-left:auto}
+.cupon-active-badge{font-size:.65rem;font-weight:700;border-radius:50px;padding:2px 8px}
+.cupon-active-badge.on{background:#e8f5e9;color:var(--green)}
+.cupon-active-badge.off{background:#fdecea;color:var(--red)}
 
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--brownd);color:var(--white);padding:10px 20px;border-radius:50px;font-size:.78rem;font-weight:600;opacity:0;transition:all .3s;z-index:500;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -189,14 +188,10 @@ tr:hover td{background:rgba(237,230,214,.4)}
         <div class="fld"><label>Precio ($)</label><input type="number" id="new-price" placeholder="26200"></div>
         <div class="fld"><label>Categoria</label>
           <select id="new-cat">
-            <option value="gaseosa">Gaseosas</option>
-            <option value="cerveza">Cervezas</option>
-            <option value="agua">Aguas</option>
-            <option value="jugo">Jugos</option>
-            <option value="vino">Vinos</option>
-            <option value="alcohol">Alcohol</option>
-            <option value="energizante">Energizantes</option>
-            <option value="otros">Otros</option>
+            <option value="gaseosa">Gaseosas</option><option value="cerveza">Cervezas</option>
+            <option value="agua">Aguas</option><option value="jugo">Jugos</option>
+            <option value="vino">Vinos</option><option value="alcohol">Alcohol</option>
+            <option value="energizante">Energizantes</option><option value="otros">Otros</option>
           </select>
         </div>
         <div class="fld"><label>Descripcion</label><input type="text" id="new-desc" placeholder="Ej: Retornable 2.5L"></div>
@@ -235,11 +230,22 @@ tr:hover td{background:rgba(237,230,214,.4)}
   <!-- CONFIG -->
   <div id="tab-settings">
 
+    <!-- CUPONES -->
+    <div class="info-card">
+      <h3>🎟️ Cupones de descuento</h3>
+      <p>Crea codigos que tus clientes pueden ingresar al hacer un pedido.</p>
+      <div class="form-grid" style="margin-bottom:10px">
+        <div class="fld"><label>Codigo del cupon *</label><input type="text" id="new-cupon-codigo" placeholder="Ej: 10%OFF" style="text-transform:uppercase"></div>
+        <div class="fld"><label>Descuento (%)</label><input type="number" id="new-cupon-pct" placeholder="10" min="1" max="100"></div>
+      </div>
+      <button class="save-settings-btn" onclick="crearCupon()">Crear cupon</button>
+      <div class="cupon-list" id="cupon-list"><div class="loading-msg">Cargando cupones...</div></div>
+    </div>
+
     <!-- FIDELIDAD -->
     <div class="info-card">
       <h3>🎁 Programa de fidelidad</h3>
-      <p>Los clientes ganan un descuento despues de cierta cantidad de pedidos. El contador se reinicia al usar el descuento.</p>
-
+      <p>Los clientes ganan un descuento despues de cierta cantidad de pedidos.</p>
       <div class="loyalty-switch-row">
         <div>
           <div class="loyalty-switch-label">Activar programa de fidelidad</div>
@@ -247,7 +253,6 @@ tr:hover td{background:rgba(237,230,214,.4)}
         </div>
         <button class="big-toggle off" id="loyalty-toggle" onclick="toggleLoyalty()"></button>
       </div>
-
       <div class="settings-field">
         <label>Pedidos necesarios para ganar descuento</label>
         <input type="number" id="loyalty-pedidos" value="5" min="1" max="50">
@@ -280,65 +285,47 @@ tr:hover td{background:rgba(237,230,214,.4)}
 <div class="toast" id="toast"></div>
 
 <script>
-const SURL = 'https://zcktyocumratqojzxyzx.supabase.co';
-const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpja3R5b2N1bXJhdHFvanp4eXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNTU5NzksImV4cCI6MjA5MjgzMTk3OX0.Jj8TCmJyn3j2QHS9KAIcRIv6njnp-8UZ24FNe_iHDNw';
-const db = supabase.createClient(SURL, SKEY);
+const SURL='https://zcktyocumratqojzxyzx.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpja3R5b2N1bXJhdHFvanp4eXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNTU5NzksImV4cCI6MjA5MjgzMTk3OX0.Jj8TCmJyn3j2QHS9KAIcRIv6njnp-8UZ24FNe_iHDNw';
+const db=supabase.createClient(SURL,SKEY);
+const ADMIN_PW_KEY='l4h_admin_pw';
+const DEFAULT_PW='hermanos2024';
+let products=[],allOrders=[],currentPeriod='week';
+let loyaltyConfig={enabled:false,pedidos_necesarios:5,descuento_pct:5};
+function fmt(n){return n>0?'$'+Number(n).toLocaleString('es-AR'):'-';}
 
-const ADMIN_PW_KEY = 'l4h_admin_pw';
-const DEFAULT_PW = 'hermanos2024';
-let products = [], allOrders = [], currentPeriod = 'week';
-let loyaltyConfig = { enabled: false, pedidos_necesarios: 5, descuento_pct: 5 };
-
-function fmt(n){ return n > 0 ? '$' + Number(n).toLocaleString('es-AR') : '-'; }
-
-// AUTH
 function tryLogin(){
-  const pw = document.getElementById('pw-input').value;
-  const stored = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
-  if(pw === stored){
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('admin-screen').style.display = 'block';
-    loadProducts();
-    loadLoyaltyConfig();
-  } else {
-    document.getElementById('login-error').style.display = 'block';
-    document.getElementById('pw-input').value = '';
-  }
+  const pw=document.getElementById('pw-input').value;
+  const stored=localStorage.getItem(ADMIN_PW_KEY)||DEFAULT_PW;
+  if(pw===stored){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('admin-screen').style.display='block';
+    loadProducts();loadLoyaltyConfig();
+  }else{document.getElementById('login-error').style.display='block';document.getElementById('pw-input').value='';}
 }
-function logout(){
-  document.getElementById('admin-screen').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-}
+function logout(){document.getElementById('admin-screen').style.display='none';document.getElementById('login-screen').style.display='flex';}
 
-// TABS
 function showTab(tab){
-  ['products','stats','orders','settings'].forEach(t => {
-    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
-  });
-  document.querySelectorAll('.tab').forEach((el, i) => {
-    el.className = 'tab' + (['products','stats','orders','settings'][i] === tab ? ' active' : '');
-  });
-  if(tab === 'stats') loadStats();
-  if(tab === 'orders') loadOrders();
-  if(tab === 'settings') loadLoyaltyClients();
+  ['products','stats','orders','settings'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===tab?'block':'none';});
+  document.querySelectorAll('.tab').forEach((el,i)=>{el.className='tab'+(['products','stats','orders','settings'][i]===tab?' active':'');});
+  if(tab==='stats')loadStats();
+  if(tab==='orders')loadOrders();
+  if(tab==='settings'){loadLoyaltyClients();loadCupones();}
 }
 
-// PRODUCTOS
-const CATS = {gaseosa:'Gaseosas',cerveza:'Cervezas',agua:'Aguas',jugo:'Jugos',vino:'Vinos',alcohol:'Alcohol',energizante:'Energizantes',otros:'Otros'};
+const CATS={gaseosa:'Gaseosas',cerveza:'Cervezas',agua:'Aguas',jugo:'Jugos',vino:'Vinos',alcohol:'Alcohol',energizante:'Energizantes',otros:'Otros'};
 
 async function loadProducts(){
-  const { data, error } = await db.from('products').select('*').order('sort_order', {ascending: true});
-  if(error){ document.getElementById('table-body').innerHTML = `<tr><td colspan="7" class="loading-msg">Error: ${error.message}</td></tr>`; return; }
-  products = data;
-  document.getElementById('prod-count').textContent = products.length;
-  renderTable();
+  const{data,error}=await db.from('products').select('*').order('sort_order',{ascending:true});
+  if(error){document.getElementById('table-body').innerHTML=`<tr><td colspan="7" class="loading-msg">Error: ${error.message}</td></tr>`;return;}
+  products=data;document.getElementById('prod-count').textContent=products.length;renderTable();
 }
 
 function renderTable(){
-  const q = (document.getElementById('admin-search').value || '').toLowerCase();
-  const cf = document.getElementById('cat-filter').value;
-  const list = products.filter(p => (!q || p.name.toLowerCase().includes(q)) && (cf === 'all' || p.category === cf));
-  document.getElementById('table-body').innerHTML = list.map(p => `
+  const q=(document.getElementById('admin-search').value||'').toLowerCase();
+  const cf=document.getElementById('cat-filter').value;
+  const list=products.filter(p=>(!q||p.name.toLowerCase().includes(q))&&(cf==='all'||p.category===cf));
+  document.getElementById('table-body').innerHTML=list.map(p=>`
     <tr>
       <td><input class="td-input" style="width:48px;text-align:center" value="${p.emoji||'🛍️'}" id="emoji-${p.id}"></td>
       <td><input class="td-input" style="min-width:130px" value="${p.name}" id="name-${p.id}"></td>
@@ -354,324 +341,238 @@ function renderTable(){
 }
 
 async function saveRow(id){
-  const payload = {
-    emoji: document.getElementById('emoji-'+id).value,
-    name: document.getElementById('name-'+id).value,
-    description: document.getElementById('desc-'+id).value,
-    category: document.getElementById('cat-'+id).value,
-    price: parseInt(document.getElementById('price-'+id).value) || 0,
-    active: !document.getElementById('tog-'+id).classList.contains('off'),
-  };
-  const { error } = await db.from('products').update(payload).eq('id', id);
-  if(error){ showToast('Error: ' + error.message); return; }
-  const p = products.find(x => x.id === id);
-  if(p) Object.assign(p, payload);
+  const payload={emoji:document.getElementById('emoji-'+id).value,name:document.getElementById('name-'+id).value,description:document.getElementById('desc-'+id).value,category:document.getElementById('cat-'+id).value,price:parseInt(document.getElementById('price-'+id).value)||0,active:!document.getElementById('tog-'+id).classList.contains('off')};
+  const{error}=await db.from('products').update(payload).eq('id',id);
+  if(error){showToast('Error: '+error.message);return;}
+  const p=products.find(x=>x.id===id);if(p)Object.assign(p,payload);
   showToast('Guardado');
 }
 
 async function toggleActive(id){
-  const btn = document.getElementById('tog-'+id);
-  const isOff = btn.classList.contains('off');
-  btn.className = 'toggle' + (isOff ? '' : ' off');
-  const { error } = await db.from('products').update({active: isOff}).eq('id', id);
-  if(error){ showToast('Error'); btn.className = 'toggle' + (isOff ? ' off' : ''); return; }
-  showToast(isOff ? 'Activado' : 'Desactivado');
+  const btn=document.getElementById('tog-'+id);
+  const isOff=btn.classList.contains('off');
+  btn.className='toggle'+(isOff?'':' off');
+  const{error}=await db.from('products').update({active:isOff}).eq('id',id);
+  if(error){showToast('Error');btn.className='toggle'+(isOff?' off':'');return;}
+  showToast(isOff?'Activado':'Desactivado');
 }
 
 async function deleteProduct(id){
-  if(!confirm('Eliminar este producto?')) return;
-  const { error } = await db.from('products').delete().eq('id', id);
-  if(error){ showToast('Error al eliminar'); return; }
-  products = products.filter(p => p.id !== id);
-  document.getElementById('prod-count').textContent = products.length;
-  renderTable();
-  showToast('Eliminado');
+  if(!confirm('Eliminar este producto?'))return;
+  const{error}=await db.from('products').delete().eq('id',id);
+  if(error){showToast('Error al eliminar');return;}
+  products=products.filter(p=>p.id!==id);
+  document.getElementById('prod-count').textContent=products.length;
+  renderTable();showToast('Eliminado');
 }
 
 async function addProduct(){
-  const name = document.getElementById('new-name').value.trim();
-  if(!name){ showToast('El nombre es obligatorio'); return; }
-  const payload = {
-    name,
-    price: parseInt(document.getElementById('new-price').value) || 0,
-    category: document.getElementById('new-cat').value,
-    description: document.getElementById('new-desc').value,
-    emoji: document.getElementById('new-emoji').value || '🛍️',
-    image_url: document.getElementById('new-img').value || null,
-    active: true, sort_order: 9999,
-  };
-  const { data, error } = await db.from('products').insert([payload]).select().single();
-  if(error){ showToast('Error: ' + error.message); return; }
-  products.unshift(data);
-  document.getElementById('prod-count').textContent = products.length;
-  toggleAddForm();
-  ['new-name','new-price','new-desc','new-emoji','new-img'].forEach(id => document.getElementById(id).value = '');
-  renderTable();
-  showToast('Producto agregado');
+  const name=document.getElementById('new-name').value.trim();
+  if(!name){showToast('El nombre es obligatorio');return;}
+  const payload={name,price:parseInt(document.getElementById('new-price').value)||0,category:document.getElementById('new-cat').value,description:document.getElementById('new-desc').value,emoji:document.getElementById('new-emoji').value||'🛍️',image_url:document.getElementById('new-img').value||null,active:true,sort_order:9999};
+  const{data,error}=await db.from('products').insert([payload]).select().single();
+  if(error){showToast('Error: '+error.message);return;}
+  products.unshift(data);document.getElementById('prod-count').textContent=products.length;
+  toggleAddForm();['new-name','new-price','new-desc','new-emoji','new-img'].forEach(id=>document.getElementById(id).value='');
+  renderTable();showToast('Producto agregado');
 }
 
-function toggleAddForm(){
-  const f = document.getElementById('add-form');
-  f.className = f.classList.contains('open') ? 'add-form' : 'add-form open';
+function toggleAddForm(){const f=document.getElementById('add-form');f.className=f.classList.contains('open')?'add-form':'add-form open';}
+
+// CUPONES
+async function loadCupones(){
+  const container=document.getElementById('cupon-list');
+  try{
+    const{data,error}=await db.from('cupones').select('*').order('created_at',{ascending:false});
+    if(error||!data||!data.length){container.innerHTML='<div class="no-data" style="padding:16px 0">No hay cupones creados todavia.</div>';return;}
+    container.innerHTML=data.map(c=>`
+      <div class="cupon-item">
+        <div>
+          <div class="cupon-codigo">${c.codigo}</div>
+          <div class="cupon-usos" style="margin-top:3px">Usado ${c.usos||0} veces</div>
+        </div>
+        <div class="cupon-pct">${c.descuento_pct}% off</div>
+        <span class="cupon-active-badge ${c.activo?'on':'off'}">${c.activo?'Activo':'Inactivo'}</span>
+        <div class="cupon-actions">
+          <button class="save-btn" onclick="toggleCupon('${c.id}',${c.activo})">${c.activo?'Desactivar':'Activar'}</button>
+          <button class="del-btn" onclick="deleteCupon('${c.id}')">X</button>
+        </div>
+      </div>`).join('');
+  }catch(e){container.innerHTML='<div class="no-data">Error al cargar cupones.</div>';}
+}
+
+async function crearCupon(){
+  const codigo=document.getElementById('new-cupon-codigo').value.trim().toUpperCase();
+  const pct=parseInt(document.getElementById('new-cupon-pct').value)||0;
+  if(!codigo){showToast('Ingresa un codigo');return;}
+  if(pct<1||pct>100){showToast('El descuento debe ser entre 1 y 100%');return;}
+  const{error}=await db.from('cupones').insert([{codigo,descuento_pct:pct,activo:true,usos:0}]);
+  if(error){
+    if(error.message.includes('unique'))showToast('Ese codigo ya existe');
+    else showToast('Error: '+error.message);
+    return;
+  }
+  document.getElementById('new-cupon-codigo').value='';
+  document.getElementById('new-cupon-pct').value='';
+  loadCupones();showToast('Cupon creado!');
+}
+
+async function toggleCupon(id,activo){
+  const{error}=await db.from('cupones').update({activo:!activo}).eq('id',id);
+  if(error){showToast('Error');return;}
+  loadCupones();showToast(activo?'Cupon desactivado':'Cupon activado');
+}
+
+async function deleteCupon(id){
+  if(!confirm('Eliminar este cupon?'))return;
+  const{error}=await db.from('cupones').delete().eq('id',id);
+  if(error){showToast('Error al eliminar');return;}
+  loadCupones();showToast('Cupon eliminado');
 }
 
 // ESTADISTICAS
-function setPeriod(p, btn){
-  currentPeriod = p;
-  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  loadStats();
-}
+function setPeriod(p,btn){currentPeriod=p;document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');loadStats();}
 
 async function loadStats(){
-  document.getElementById('stats-content').innerHTML = '<div class="loading-msg">Cargando estadisticas...</div>';
-  let query = db.from('orders').select('*').order('created_at', {ascending: false});
-  if(currentPeriod === 'week'){
-    const d = new Date(); d.setDate(d.getDate() - 7);
-    query = query.gte('created_at', d.toISOString());
-  } else if(currentPeriod === 'month'){
-    const d = new Date(); d.setDate(1); d.setHours(0,0,0,0);
-    query = query.gte('created_at', d.toISOString());
-  }
-  const { data, error } = await query;
-  if(error){ document.getElementById('stats-content').innerHTML = `<div class="no-data">Error: ${error.message}</div>`; return; }
-  if(!data || !data.length){
-    document.getElementById('stats-content').innerHTML = '<div class="no-data">No hay pedidos en este periodo todavia.<br>Los pedidos apareceran cuando los clientes usen la app.</div>';
-    return;
-  }
+  document.getElementById('stats-content').innerHTML='<div class="loading-msg">Cargando estadisticas...</div>';
+  let query=db.from('orders').select('*').order('created_at',{ascending:false});
+  if(currentPeriod==='week'){const d=new Date();d.setDate(d.getDate()-7);query=query.gte('created_at',d.toISOString());}
+  else if(currentPeriod==='month'){const d=new Date();d.setDate(1);d.setHours(0,0,0,0);query=query.gte('created_at',d.toISOString());}
+  const{data,error}=await query;
+  if(error){document.getElementById('stats-content').innerHTML=`<div class="no-data">Error: ${error.message}</div>`;return;}
+  if(!data||!data.length){document.getElementById('stats-content').innerHTML='<div class="no-data">No hay pedidos en este periodo todavia.</div>';return;}
   renderStats(data);
 }
 
 function renderStats(orders){
-  const totalPedidos = orders.length;
-  const totalVentas = orders.reduce((s,o) => s + (o.total||0), 0);
-  const ticketProm = totalPedidos > 0 ? Math.round(totalVentas / totalPedidos) : 0;
-  const clientesMap = {};
-  orders.forEach(o => {
-    const tel = o.telefono || 'Sin tel';
-    if(!clientesMap[tel]) clientesMap[tel] = {nombre: o.negocio||'Sin nombre', gasto: 0, pedidos: 0};
-    clientesMap[tel].gasto += o.total || 0;
-    clientesMap[tel].pedidos++;
-  });
-  const clientesUnicos = Object.keys(clientesMap).length;
-  const clientesRecurrentes = Object.values(clientesMap).filter(c => c.pedidos > 1).length;
-  const pctRecurrentes = clientesUnicos > 0 ? Math.round(clientesRecurrentes / clientesUnicos * 100) : 0;
+  const totalPedidos=orders.length;
+  const totalVentas=orders.reduce((s,o)=>s+(o.total||0),0);
+  const ticketProm=totalPedidos>0?Math.round(totalVentas/totalPedidos):0;
+  const totalDescuentos=orders.reduce((s,o)=>s+(o.descuento_aplicado||0),0);
+  const cuponesUsados=orders.filter(o=>o.cupon_usado).length;
+  const clientesMap={};
+  orders.forEach(o=>{const tel=o.telefono||'Sin tel';if(!clientesMap[tel])clientesMap[tel]={nombre:o.negocio||'Sin nombre',gasto:0,pedidos:0};clientesMap[tel].gasto+=o.total||0;clientesMap[tel].pedidos++;});
+  const clientesUnicos=Object.keys(clientesMap).length;
+  const clientesRecurrentes=Object.values(clientesMap).filter(c=>c.pedidos>1).length;
+  const pctRecurrentes=clientesUnicos>0?Math.round(clientesRecurrentes/clientesUnicos*100):0;
+  const diasMap={};const hoy=new Date();
+  for(let i=6;i>=0;i--){const d=new Date(hoy);d.setDate(d.getDate()-i);diasMap[d.toLocaleDateString('es-AR',{weekday:'short',day:'numeric'})]=0;}
+  orders.forEach(o=>{const d=new Date(o.created_at);const diff=Math.floor((hoy-d)/(1000*60*60*24));if(diff<=6){const key=d.toLocaleDateString('es-AR',{weekday:'short',day:'numeric'});if(diasMap[key]!==undefined)diasMap[key]++;}});
+  const maxDia=Math.max(...Object.values(diasMap),1);
+  const topClientes=Object.entries(clientesMap).sort((a,b)=>b[1].gasto-a[1].gasto).slice(0,7);
+  const maxGasto=topClientes[0]?topClientes[0][1].gasto:1;
+  const prodMap={};
+  orders.forEach(o=>{if(o.items&&Array.isArray(o.items))o.items.forEach(item=>{prodMap[item.name]=(prodMap[item.name]||0)+(item.qty||1);});});
+  const topProds=Object.entries(prodMap).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  const maxProd=topProds[0]?topProds[0][1]:1;
 
-  const diasMap = {};
-  const hoy = new Date();
-  for(let i = 6; i >= 0; i--){
-    const d = new Date(hoy); d.setDate(d.getDate() - i);
-    const key = d.toLocaleDateString('es-AR', {weekday:'short', day:'numeric'});
-    diasMap[key] = 0;
-  }
-  orders.forEach(o => {
-    const d = new Date(o.created_at);
-    const diff = Math.floor((hoy - d) / (1000*60*60*24));
-    if(diff <= 6){
-      const key = d.toLocaleDateString('es-AR', {weekday:'short', day:'numeric'});
-      if(diasMap[key] !== undefined) diasMap[key]++;
-    }
-  });
-  const maxDia = Math.max(...Object.values(diasMap), 1);
-
-  const topClientes = Object.entries(clientesMap).sort((a,b) => b[1].gasto - a[1].gasto).slice(0,7);
-  const maxGasto = topClientes[0] ? topClientes[0][1].gasto : 1;
-
-  const prodMap = {};
-  orders.forEach(o => {
-    if(o.items && Array.isArray(o.items)){
-      o.items.forEach(item => {
-        prodMap[item.name] = (prodMap[item.name]||0) + (item.qty||1);
-      });
-    }
-  });
-  const topProds = Object.entries(prodMap).sort((a,b) => b[1]-a[1]).slice(0,7);
-  const maxProd = topProds[0] ? topProds[0][1] : 1;
-
-  const totalDescuentos = orders.reduce((s,o) => s + (o.descuento_aplicado||0), 0);
-
-  document.getElementById('stats-content').innerHTML = `
+  document.getElementById('stats-content').innerHTML=`
     <div class="kpi-grid">
       <div class="kpi-card"><span class="kpi-icon">📦</span><div class="kpi-label">Pedidos</div><div class="kpi-value">${totalPedidos}</div><div class="kpi-sub">en el periodo</div></div>
       <div class="kpi-card"><span class="kpi-icon">💰</span><div class="kpi-label">Ventas</div><div class="kpi-value" style="font-size:1.05rem">${fmt(totalVentas)}</div><div class="kpi-sub">total estimado</div></div>
       <div class="kpi-card"><span class="kpi-icon">🧾</span><div class="kpi-label">Ticket promedio</div><div class="kpi-value" style="font-size:1.05rem">${fmt(ticketProm)}</div><div class="kpi-sub">por pedido</div></div>
-      <div class="kpi-card"><span class="kpi-icon">🎁</span><div class="kpi-label">Descuentos dados</div><div class="kpi-value" style="font-size:1.05rem">${fmt(totalDescuentos)}</div><div class="kpi-sub">en fidelidad</div></div>
+      <div class="kpi-card"><span class="kpi-icon">🎟️</span><div class="kpi-label">Cupones usados</div><div class="kpi-value">${cuponesUsados}</div><div class="kpi-sub">desc. dados: ${fmt(totalDescuentos)}</div></div>
     </div>
-
     <div class="stat-card">
       <h3>Pedidos por dia (ultimos 7 dias)</h3>
-      ${Object.entries(diasMap).map(([dia,cant]) => `
-        <div class="day-row">
-          <div class="day-label">${dia}</div>
-          <div class="day-bar-wrap"><div class="day-bar" style="width:${Math.round(cant/maxDia*100)}%"></div></div>
-          <div class="day-count">${cant}</div>
-        </div>`).join('')}
+      ${Object.entries(diasMap).map(([dia,cant])=>`<div class="day-row"><div class="day-label">${dia}</div><div class="day-bar-wrap"><div class="day-bar" style="width:${Math.round(cant/maxDia*100)}%"></div></div><div class="day-count">${cant}</div></div>`).join('')}
     </div>
-
     <div class="stat-card">
       <h3>Clientes que mas gastan</h3>
-      ${topClientes.length ? topClientes.map(([tel, c], i) => `
-        <div class="rank-item">
-          <div class="rank-num">#${i+1}</div>
-          <div class="rank-info">
-            <div class="rank-name">${c.nombre}</div>
-            <div class="rank-sub">${tel} · ${c.pedidos} pedido${c.pedidos>1?'s':''}</div>
-            <div class="rank-bar-wrap"><div class="rank-bar" style="width:${Math.round(c.gasto/maxGasto*100)}%"></div></div>
-          </div>
-          <div class="rank-val">${fmt(c.gasto)}</div>
-        </div>`).join('') : '<div class="no-data">Sin datos</div>'}
+      ${topClientes.length?topClientes.map(([tel,c],i)=>`<div class="rank-item"><div class="rank-num">#${i+1}</div><div class="rank-info"><div class="rank-name">${c.nombre}</div><div class="rank-sub">${tel} · ${c.pedidos} pedido${c.pedidos>1?'s':''}</div><div class="rank-bar-wrap"><div class="rank-bar" style="width:${Math.round(c.gasto/maxGasto*100)}%"></div></div></div><div class="rank-val">${fmt(c.gasto)}</div></div>`).join(''):'<div class="no-data">Sin datos</div>'}
     </div>
-
     <div class="stat-card">
       <h3>Productos mas pedidos</h3>
-      ${topProds.length ? topProds.map(([nombre, qty], i) => `
-        <div class="rank-item">
-          <div class="rank-num">#${i+1}</div>
-          <div class="rank-info">
-            <div class="rank-name">${nombre}</div>
-            <div class="rank-bar-wrap"><div class="rank-bar" style="width:${Math.round(qty/maxProd*100)}%"></div></div>
-          </div>
-          <div class="rank-val">${qty} unid.</div>
-        </div>`).join('') : '<div class="no-data">Sin datos</div>'}
+      ${topProds.length?topProds.map(([nombre,qty],i)=>`<div class="rank-item"><div class="rank-num">#${i+1}</div><div class="rank-info"><div class="rank-name">${nombre}</div><div class="rank-bar-wrap"><div class="rank-bar" style="width:${Math.round(qty/maxProd*100)}%"></div></div></div><div class="rank-val">${qty} unid.</div></div>`).join(''):'<div class="no-data">Sin datos</div>'}
     </div>
-
     <div class="stat-card">
       <h3>Reincidencia de clientes</h3>
-      <div class="rank-item">
-        <div class="rank-info"><div class="rank-name">Clientes recurrentes</div><div class="rank-sub">Pidieron mas de una vez</div></div>
-        <div class="rank-val">${clientesRecurrentes} (${pctRecurrentes}%)</div>
-      </div>
-      <div class="rank-item">
-        <div class="rank-info"><div class="rank-name">Clientes nuevos</div><div class="rank-sub">Solo un pedido</div></div>
-        <div class="rank-val">${clientesUnicos - clientesRecurrentes}</div>
-      </div>
+      <div class="rank-item"><div class="rank-info"><div class="rank-name">Clientes recurrentes</div><div class="rank-sub">Pidieron mas de una vez</div></div><div class="rank-val">${clientesRecurrentes} (${pctRecurrentes}%)</div></div>
+      <div class="rank-item"><div class="rank-info"><div class="rank-name">Clientes nuevos</div><div class="rank-sub">Solo un pedido</div></div><div class="rank-val">${clientesUnicos-clientesRecurrentes}</div></div>
     </div>`;
 }
 
 // PEDIDOS
 async function loadOrders(){
-  document.getElementById('orders-content').innerHTML = '<div class="loading-msg">Cargando...</div>';
-  const { data, error } = await db.from('orders').select('*').order('created_at', {ascending: false}).limit(200);
-  if(error){ document.getElementById('orders-content').innerHTML = `<div class="loading-msg">Error: ${error.message}</div>`; return; }
-  allOrders = data || [];
-  renderOrders(allOrders);
+  document.getElementById('orders-content').innerHTML='<div class="loading-msg">Cargando...</div>';
+  const{data,error}=await db.from('orders').select('*').order('created_at',{ascending:false}).limit(200);
+  if(error){document.getElementById('orders-content').innerHTML=`<div class="loading-msg">Error: ${error.message}</div>`;return;}
+  allOrders=data||[];renderOrders(allOrders);
 }
 
 function filterOrders(){
-  const q = (document.getElementById('orders-search').value || '').toLowerCase();
-  const filtered = allOrders.filter(o => (o.negocio||'').toLowerCase().includes(q) || (o.telefono||'').includes(q));
-  renderOrders(filtered);
+  const q=(document.getElementById('orders-search').value||'').toLowerCase();
+  renderOrders(allOrders.filter(o=>(o.negocio||'').toLowerCase().includes(q)||(o.telefono||'').includes(q)));
 }
 
 function renderOrders(orders){
-  if(!orders.length){ document.getElementById('orders-content').innerHTML = '<div class="loading-msg">No hay pedidos.</div>'; return; }
-  document.getElementById('orders-content').innerHTML = orders.map(o => {
-    const fecha = new Date(o.created_at).toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
-    const turnoLabel = o.turno === 'manana' ? 'Manana' : 'Tarde';
-    const preview = o.items && o.items.length ? o.items.slice(0,4).map(i => `${i.name} x${i.qty}`).join(', ') + (o.items.length > 4 ? ` +${o.items.length-4} mas` : '') : 'Sin detalle';
-    const discountLine = o.descuento_aplicado > 0 ? `<div class="order-discount">Descuento fidelidad aplicado: -${fmt(o.descuento_aplicado)}</div>` : '';
-    return `<div class="order-card">
-      <div class="order-top">
-        <div class="order-negocio">${o.negocio||'Sin nombre'}</div>
-        <div class="order-total">${fmt(o.total)}</div>
-      </div>
-      <div class="order-info">Tel: ${o.telefono||'-'} · Turno: ${turnoLabel} · ${fecha}</div>
-      ${discountLine}
-      <div class="order-items">${preview}</div>
-    </div>`;
+  if(!orders.length){document.getElementById('orders-content').innerHTML='<div class="loading-msg">No hay pedidos.</div>';return;}
+  document.getElementById('orders-content').innerHTML=orders.map(o=>{
+    const fecha=new Date(o.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const turnoLabel=o.turno==='manana'?'Manana':'Tarde';
+    const preview=o.items&&o.items.length?o.items.slice(0,4).map(i=>`${i.name} x${i.qty}`).join(', ')+(o.items.length>4?` +${o.items.length-4} mas`:''):'Sin detalle';
+    const discountLine=o.descuento_aplicado>0?`<div class="order-discount">Descuento aplicado: -${fmt(o.descuento_aplicado)}${o.cupon_usado?' (cupon: '+o.cupon_usado+')':''}</div>`:'';
+    return`<div class="order-card"><div class="order-top"><div class="order-negocio">${o.negocio||'Sin nombre'}</div><div class="order-total">${fmt(o.total)}</div></div><div class="order-info">Tel: ${o.telefono||'-'} · Turno: ${turnoLabel} · ${fecha}</div>${discountLine}<div class="order-items">${preview}</div></div>`;
   }).join('');
 }
 
-// LOYALTY CONFIG
+// LOYALTY
 async function loadLoyaltyConfig(){
-  try {
-    const { data } = await db.from('loyalty_config').select('*').eq('id', 1).single();
+  try{
+    const{data}=await db.from('loyalty_config').select('*').eq('id',1).single();
     if(data){
-      loyaltyConfig = data;
-      const btn = document.getElementById('loyalty-toggle');
-      if(btn){
-        btn.className = 'big-toggle' + (data.enabled ? '' : ' off');
-        document.getElementById('loyalty-status-label').textContent = data.enabled ? 'Activado' : 'Desactivado';
-        document.getElementById('loyalty-pedidos').value = data.pedidos_necesarios || 5;
-        document.getElementById('loyalty-pct').value = data.descuento_pct || 5;
-      }
+      loyaltyConfig=data;
+      const btn=document.getElementById('loyalty-toggle');
+      if(btn){btn.className='big-toggle'+(data.enabled?'':' off');document.getElementById('loyalty-status-label').textContent=data.enabled?'Activado':'Desactivado';document.getElementById('loyalty-pedidos').value=data.pedidos_necesarios||5;document.getElementById('loyalty-pct').value=data.descuento_pct||5;}
     }
-  } catch(e) {}
+  }catch(e){}
 }
 
 async function toggleLoyalty(){
-  loyaltyConfig.enabled = !loyaltyConfig.enabled;
-  const btn = document.getElementById('loyalty-toggle');
-  btn.className = 'big-toggle' + (loyaltyConfig.enabled ? '' : ' off');
-  document.getElementById('loyalty-status-label').textContent = loyaltyConfig.enabled ? 'Activado' : 'Desactivado';
-  await db.from('loyalty_config').update({enabled: loyaltyConfig.enabled}).eq('id', 1);
-  showToast(loyaltyConfig.enabled ? 'Programa de fidelidad activado' : 'Programa de fidelidad desactivado');
+  loyaltyConfig.enabled=!loyaltyConfig.enabled;
+  const btn=document.getElementById('loyalty-toggle');
+  btn.className='big-toggle'+(loyaltyConfig.enabled?'':' off');
+  document.getElementById('loyalty-status-label').textContent=loyaltyConfig.enabled?'Activado':'Desactivado';
+  await db.from('loyalty_config').update({enabled:loyaltyConfig.enabled}).eq('id',1);
+  showToast(loyaltyConfig.enabled?'Fidelidad activada':'Fidelidad desactivada');
 }
 
 async function saveLoyaltyConfig(){
-  const pedidos = parseInt(document.getElementById('loyalty-pedidos').value) || 5;
-  const pct = parseInt(document.getElementById('loyalty-pct').value) || 5;
-  const { error } = await db.from('loyalty_config').update({
-    pedidos_necesarios: pedidos,
-    descuento_pct: pct
-  }).eq('id', 1);
-  if(error){ showToast('Error al guardar'); return; }
-  loyaltyConfig.pedidos_necesarios = pedidos;
-  loyaltyConfig.descuento_pct = pct;
+  const pedidos=parseInt(document.getElementById('loyalty-pedidos').value)||5;
+  const pct=parseInt(document.getElementById('loyalty-pct').value)||5;
+  const{error}=await db.from('loyalty_config').update({pedidos_necesarios:pedidos,descuento_pct:pct}).eq('id',1);
+  if(error){showToast('Error al guardar');return;}
+  loyaltyConfig.pedidos_necesarios=pedidos;loyaltyConfig.descuento_pct=pct;
   showToast('Configuracion guardada');
 }
 
 async function loadLoyaltyClients(){
-  const container = document.getElementById('loyalty-clients-content');
-  if(!container) return;
-  try {
-    const { data, error } = await db.from('loyalty').select('*').order('pedidos', {ascending: false});
-    if(error || !data || !data.length){
-      container.innerHTML = '<div class="no-data">Aun no hay clientes registrados en el programa.</div>';
-      return;
-    }
-    const necesarios = loyaltyConfig.pedidos_necesarios || 5;
-    container.innerHTML = `<table class="loyalty-clients-table">
-      <thead><tr><th>Negocio</th><th>Tel</th><th>Pedidos</th><th>Estado</th></tr></thead>
-      <tbody>${data.map(c => `
-        <tr>
-          <td>${c.negocio||'-'}</td>
-          <td>${c.telefono}</td>
-          <td>${c.pedidos} / ${necesarios}</td>
-          <td>${c.pedidos >= necesarios
-            ? '<span class="loyalty-badge">Descuento listo!</span>'
-            : `<span class="loyalty-badge pending">Faltan ${necesarios - c.pedidos}</span>`
-          }</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
-  } catch(e) {
-    container.innerHTML = '<div class="no-data">Error al cargar clientes.</div>';
-  }
+  const container=document.getElementById('loyalty-clients-content');
+  if(!container)return;
+  try{
+    const{data,error}=await db.from('loyalty').select('*').order('pedidos',{ascending:false});
+    if(error||!data||!data.length){container.innerHTML='<div class="no-data">Aun no hay clientes registrados.</div>';return;}
+    const necesarios=loyaltyConfig.pedidos_necesarios||5;
+    container.innerHTML=`<table class="loyalty-clients-table"><thead><tr><th>Negocio</th><th>Tel</th><th>Pedidos</th><th>Estado</th></tr></thead><tbody>${data.map(c=>`<tr><td>${c.negocio||'-'}</td><td>${c.telefono}</td><td>${c.pedidos}/${necesarios}</td><td>${c.pedidos>=necesarios?'<span class="loyalty-badge">Descuento listo!</span>':`<span class="loyalty-badge pending">Faltan ${necesarios-c.pedidos}</span>`}</td></tr>`).join('')}</tbody></table>`;
+  }catch(e){container.innerHTML='<div class="no-data">Error al cargar clientes.</div>';}
 }
 
-// CONFIG
 function changePassword(){
-  const oldPw = document.getElementById('s-pw-old').value;
-  const newPw = document.getElementById('s-pw-new').value;
-  const stored = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
-  if(oldPw !== stored){ showToast('Contrasena actual incorrecta'); return; }
-  if(newPw.length < 6){ showToast('Minimo 6 caracteres'); return; }
-  localStorage.setItem(ADMIN_PW_KEY, newPw);
-  document.getElementById('s-pw-old').value = '';
-  document.getElementById('s-pw-new').value = '';
+  const oldPw=document.getElementById('s-pw-old').value;
+  const newPw=document.getElementById('s-pw-new').value;
+  const stored=localStorage.getItem(ADMIN_PW_KEY)||DEFAULT_PW;
+  if(oldPw!==stored){showToast('Contrasena actual incorrecta');return;}
+  if(newPw.length<6){showToast('Minimo 6 caracteres');return;}
+  localStorage.setItem(ADMIN_PW_KEY,newPw);
+  document.getElementById('s-pw-old').value='';document.getElementById('s-pw-new').value='';
   showToast('Contrasena cambiada');
 }
 
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
-document.getElementById('tab-stats').style.display = 'none';
-document.getElementById('tab-orders').style.display = 'none';
-document.getElementById('tab-settings').style.display = 'none';
+document.getElementById('tab-stats').style.display='none';
+document.getElementById('tab-orders').style.display='none';
+document.getElementById('tab-settings').style.display='none';
 </script>
 </body>
 </html>
