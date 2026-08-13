@@ -32,15 +32,24 @@ header{background:var(--brownd);padding:14px 16px;position:sticky;top:0;z-index:
 .products-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 14px}
 .product-card{background:var(--white);border-radius:14px;padding:13px 10px;box-shadow:0 2px 8px rgba(58,36,24,.09);display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;transition:transform .15s}
 .product-card:hover{transform:translateY(-2px)}
-.prod-emoji{font-size:2.4rem;margin-bottom:6px;line-height:1}
-.prod-name{font-size:.76rem;font-weight:600;color:var(--brownd);line-height:1.2;margin-bottom:2px}
-.prod-sub{font-size:.64rem;color:var(--brownl);margin-bottom:5px}
-.prod-price{font-size:.95rem;font-weight:700;color:var(--brown);margin-bottom:8px}
-.qty-control{display:flex;align-items:center;gap:6px;background:var(--beige);border-radius:50px;padding:3px 5px}
-.qty-btn{width:28px;height:28px;border-radius:50%;border:none;background:var(--brown);color:white;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
-.qty-num{font-size:.88rem;font-weight:700;color:var(--brownd);min-width:18px;text-align:center}
+.prod-emoji{font-size:2.2rem;margin-bottom:5px;line-height:1}
+.prod-name{font-size:.75rem;font-weight:600;color:var(--brownd);line-height:1.2;margin-bottom:2px}
+.prod-sub{font-size:.63rem;color:var(--brownl);margin-bottom:4px}
+.prod-price{font-size:.92rem;font-weight:700;color:var(--brown);margin-bottom:6px}
+.sin-precio{font-size:.68rem;color:#bbb;margin-bottom:6px;font-style:italic}
 .added-badge{position:absolute;top:8px;right:8px;background:var(--red);color:white;border-radius:50%;width:20px;height:20px;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center}
-.sin-precio{font-size:.68rem;color:#bbb;margin-bottom:8px;font-style:italic}
+
+/* QTY CONTROL */
+.qty-control{display:flex;align-items:center;gap:5px;background:var(--beige);border-radius:50px;padding:3px 5px;margin-bottom:5px}
+.qty-btn{width:26px;height:26px;border-radius:50%;border:none;background:var(--brown);color:white;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.qty-num{font-size:.85rem;font-weight:700;color:var(--brownd);min-width:22px;text-align:center}
+
+/* MEDIO PACK */
+.medio-pack-btn{background:transparent;border:1.5px solid var(--brown);color:var(--brown);border-radius:50px;padding:4px 10px;font-family:'DM Sans',sans-serif;font-size:.65rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
+.medio-pack-btn.active{background:var(--brown);color:white}
+.medio-pack-badge{position:absolute;top:8px;left:8px;background:var(--brownd);color:var(--gold);border-radius:50px;padding:2px 6px;font-size:.58rem;font-weight:700}
+
+/* LOYALTY BANNERS */
 .loyalty-banner{background:linear-gradient(135deg,#1a7a3c,#145c2d);margin:10px 16px;border-radius:14px;padding:14px 16px;display:none}
 .loyalty-banner.show{display:block}
 .loyalty-banner h3{font-family:'Playfair Display',serif;color:white;font-size:1rem;font-weight:700;margin-bottom:4px}
@@ -52,6 +61,8 @@ header{background:var(--brownd);padding:14px 16px;position:sticky;top:0;z-index:
 .discount-banner.show{display:block}
 .discount-banner h3{font-family:'Playfair Display',serif;color:var(--brownd);font-size:1.1rem;font-weight:900;margin-bottom:4px}
 .discount-banner p{color:var(--brownd);font-size:.78rem;opacity:.85}
+
+/* CART */
 .overlay{position:fixed;inset:0;background:rgba(26,16,8,.55);z-index:200;display:none;align-items:flex-end}
 .overlay.open{display:flex}
 .cart-sheet{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:480px;margin:0 auto;max-height:92vh;overflow-y:auto;animation:slideUp .3s ease}
@@ -63,13 +74,13 @@ header{background:var(--brownd);padding:14px 16px;position:sticky;top:0;z-index:
 .cart-items{padding:10px 16px}
 .cart-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--beige);gap:8px}
 .ci-info{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
-.ci-emoji{font-size:1.4rem;flex-shrink:0}
+.ci-emoji{font-size:1.3rem;flex-shrink:0}
 .ci-name{font-size:.8rem;font-weight:600;color:var(--brownd);line-height:1.2}
 .ci-sub{font-size:.65rem;color:var(--brownl)}
 .ci-price{font-size:.72rem;color:var(--brown);font-weight:600;margin-top:1px}
 .ci-qty{display:flex;align-items:center;gap:5px;flex-shrink:0}
 .cq-btn{width:25px;height:25px;border-radius:50%;border:1.5px solid var(--brown);background:transparent;color:var(--brown);font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
-.cq-num{font-size:.84rem;font-weight:700;min-width:14px;text-align:center}
+.cq-num{font-size:.84rem;font-weight:700;min-width:18px;text-align:center}
 .ci-total{font-size:.82rem;font-weight:700;color:var(--brownd);min-width:54px;text-align:right;flex-shrink:0}
 .cart-empty{text-align:center;padding:36px 20px;color:var(--brownl)}
 .total-box{margin:10px 16px;background:var(--beige);border-radius:14px;padding:13px 16px}
@@ -83,7 +94,7 @@ header{background:var(--brownd);padding:14px 16px;position:sticky;top:0;z-index:
 .cupon-row{display:flex;gap:8px}
 .cupon-input{flex:1;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);color:var(--black);outline:none;text-transform:uppercase}
 .cupon-input:focus{border-color:var(--brown)}
-.cupon-btn{background:var(--brown);color:white;border:none;border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.82rem;cursor:pointer;white-space:nowrap}
+.cupon-btn{background:var(--brown);color:white;border:none;border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.82rem;cursor:pointer}
 .cupon-ok{background:#e8f5e9;border:1.5px solid var(--green);border-radius:10px;padding:9px 13px;color:var(--green);font-size:.78rem;font-weight:600;margin-top:6px;display:none}
 .cupon-ok.show{display:block}
 .cupon-err{background:#fdecea;border:1.5px solid var(--red);border-radius:10px;padding:9px 13px;color:var(--red);font-size:.78rem;font-weight:600;margin-top:6px;display:none}
@@ -124,7 +135,7 @@ footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opaci
 
 <div class="discount-banner" id="discount-banner">
   <h3>🎉 Tenes un descuento especial!</h3>
-  <p id="discount-text">Por tu fidelidad, tenes 5% de descuento en este pedido.</p>
+  <p id="discount-text">Por tu fidelidad, tenes descuento en este pedido.</p>
 </div>
 <div class="loyalty-banner" id="loyalty-banner">
   <h3>🏆 Programa de fidelidad</h3>
@@ -145,8 +156,6 @@ footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opaci
     <div class="sheet-header"><h3>🛒 Tu pedido</h3><button class="close-btn" onclick="closeCart()">✕</button></div>
     <div class="cart-items" id="cart-items"></div>
     <div id="total-box"></div>
-
-    <!-- CUPON -->
     <div class="cupon-section">
       <h4>🎟️ Cupon de descuento</h4>
       <div class="cupon-row">
@@ -156,7 +165,6 @@ footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opaci
       <div class="cupon-ok" id="cupon-ok"></div>
       <div class="cupon-err" id="cupon-err"></div>
     </div>
-
     <div class="turno-section">
       <h4>Turno de entrega</h4>
       <div class="turno-opts">
@@ -175,39 +183,24 @@ footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opaci
 <div class="toast" id="toast"></div>
 
 <script>
-const SURL = 'https://zcktyocumratqojzxyzx.supabase.co';
-const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpja3R5b2N1bXJhdHFvanp4eXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNTU5NzksImV4cCI6MjA5MjgzMTk3OX0.Jj8TCmJyn3j2QHS9KAIcRIv6njnp-8UZ24FNe_iHDNw';
-const db = supabase.createClient(SURL, SKEY);
-
-const CATS = [
-  {id:'all',label:'Todo',emoji:'🛒'},
-  {id:'gaseosa',label:'Gaseosas',emoji:'🥤'},
-  {id:'cerveza',label:'Cervezas',emoji:'🍺'},
-  {id:'agua',label:'Aguas',emoji:'💧'},
-  {id:'jugo',label:'Jugos',emoji:'🧃'},
-  {id:'vino',label:'Vinos',emoji:'🍷'},
-  {id:'alcohol',label:'Alcohol',emoji:'🥃'},
-  {id:'energizante',label:'Energizantes',emoji:'⚡'},
-  {id:'otros',label:'Otros',emoji:'📦'}
-];
-
-let products=[], cart={}, turno='tarde', cat='all';
+const SURL='https://zcktyocumratqojzxyzx.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpja3R5b2N1bXJhdHFvanp4eXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNTU5NzksImV4cCI6MjA5MjgzMTk3OX0.Jj8TCmJyn3j2QHS9KAIcRIv6njnp-8UZ24FNe_iHDNw';
+const db=supabase.createClient(SURL,SKEY);
+const CATS=[{id:'all',label:'Todo',emoji:'🛒'},{id:'gaseosa',label:'Gaseosas',emoji:'🥤'},{id:'cerveza',label:'Cervezas',emoji:'🍺'},{id:'agua',label:'Aguas',emoji:'💧'},{id:'jugo',label:'Jugos',emoji:'🧃'},{id:'vino',label:'Vinos',emoji:'🍷'},{id:'alcohol',label:'Alcohol',emoji:'🥃'},{id:'energizante',label:'Energizantes',emoji:'⚡'},{id:'otros',label:'Otros',emoji:'📦'}];
+let products=[],cart={},turno='tarde',cat='all';
 let loyaltyConfig={enabled:false,pedidos_necesarios:5,descuento_pct:5};
-let clientLoyalty=null, hasDiscount=false, loyaltyCheckTimeout=null;
-let cuponAplicado=null;
+let clientLoyalty=null,hasDiscount=false,loyaltyCheckTimeout=null,cuponAplicado=null;
 
 function fmt(n){return n>0?'$'+Number(n).toLocaleString('es-AR'):'Consultar';}
 function getQty(id){return cart[id]||0;}
+function isMedio(id){return cart[id]===0.5;}
 
 async function loadProducts(){
   try{
     const{data,error}=await db.from('products').select('*').eq('active',true).order('sort_order',{ascending:true});
     if(error)throw error;
-    products=data;
-    renderCatNav();renderProducts();
-  }catch(e){
-    document.getElementById('products-grid').innerHTML='<div class="loading" style="grid-column:1/-1">Error cargando productos. Recarga la pagina.</div>';
-  }
+    products=data;renderCatNav();renderProducts();
+  }catch(e){document.getElementById('products-grid').innerHTML='<div class="loading" style="grid-column:1/-1">Error cargando productos. Recarga la pagina.</div>';}
 }
 
 async function loadLoyaltyConfig(){
@@ -232,9 +225,8 @@ async function checkLoyalty(){
         document.getElementById('loyalty-banner').className='loyalty-banner';
       }else{
         hasDiscount=false;
-        const pct=Math.round(pedidos/necesarios*100);
         document.getElementById('loyalty-text').textContent=`Te faltan ${necesarios-pedidos} pedido${necesarios-pedidos!==1?'s':''} para ganar ${loyaltyConfig.descuento_pct}% de descuento`;
-        document.getElementById('loyalty-bar').style.width=pct+'%';
+        document.getElementById('loyalty-bar').style.width=Math.round(pedidos/necesarios*100)+'%';
         document.getElementById('loyalty-label').textContent=`${pedidos} de ${necesarios} pedidos`;
         document.getElementById('loyalty-banner').className='loyalty-banner show';
         document.getElementById('discount-banner').className='discount-banner';
@@ -250,7 +242,6 @@ function hideLoyaltyBanners(){
   hasDiscount=false;
 }
 
-// CUPON
 async function aplicarCupon(){
   const codigo=document.getElementById('cupon-input').value.trim().toUpperCase();
   const okEl=document.getElementById('cupon-ok');
@@ -262,8 +253,7 @@ async function aplicarCupon(){
     if(error||!data){errEl.textContent='Cupon invalido o no disponible.';errEl.className='cupon-err show';cuponAplicado=null;renderCart();return;}
     cuponAplicado=data;
     okEl.textContent=`Cupon "${codigo}" aplicado: ${data.descuento_pct}% de descuento!`;
-    okEl.className='cupon-ok show';
-    renderCart();
+    okEl.className='cupon-ok show';renderCart();
   }catch(e){errEl.textContent='Cupon invalido o no disponible.';errEl.className='cupon-err show';cuponAplicado=null;renderCart();}
 }
 
@@ -286,20 +276,52 @@ function renderProducts(){
   if(!list.length){document.getElementById('products-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--brownl)">No se encontraron productos</div>';return;}
   document.getElementById('products-grid').innerHTML=list.map(p=>{
     const qty=getQty(p.id);
-    return`<div class="product-card">${qty>0?`<div class="added-badge">${qty}</div>`:''}<div class="prod-emoji">${p.emoji||'🛍️'}</div><div class="prod-name">${p.name}</div><div class="prod-sub">${p.description||''}</div>${p.price>0?`<div class="prod-price">${fmt(p.price)}</div>`:'<div class="sin-precio">Consultar</div>'}<div class="qty-control"><button class="qty-btn" onclick="changeQty('${p.id}',-1)">-</button><span class="qty-num">${qty}</span><button class="qty-btn" onclick="changeQty('${p.id}',+1)">+</button></div></div>`;
+    const esMedio=qty===0.5;
+    const precioMostrar=esMedio?(p.price>0?p.price/2:0):p.price;
+    return`<div class="product-card">
+      ${qty>0?`<div class="added-badge">${esMedio?'½':qty}</div>`:''}
+      ${p.medio_pack?'<div class="medio-pack-badge">½ pack</div>':''}
+      <div class="prod-emoji">${p.emoji||'🛍️'}</div>
+      <div class="prod-name">${p.name}</div>
+      <div class="prod-sub">${p.description||''}</div>
+      ${precioMostrar>0?`<div class="prod-price">${fmt(precioMostrar)}${esMedio?' <span style="font-size:.65rem;opacity:.7">(½)</span>':''}</div>`:'<div class="sin-precio">Consultar</div>'}
+      <div class="qty-control">
+        <button class="qty-btn" onclick="changeQty('${p.id}',-1)">-</button>
+        <span class="qty-num">${qty===0.5?'½':qty}</span>
+        <button class="qty-btn" onclick="changeQty('${p.id}',+1)">+</button>
+      </div>
+      ${p.medio_pack?`<button class="medio-pack-btn${esMedio?' active':''}" onclick="toggleMedioPack('${p.id}',${p.price})">${esMedio?'✓ Medio pack':'Pedir ½ pack'}</button>`:''}
+    </div>`;
   }).join('');
 }
 
 function filterCat(c){cat=c;renderCatNav();renderProducts();}
 
 function changeQty(id,delta){
-  const nw=Math.max(0,getQty(id)+delta);
+  const cur=getQty(id);
+  let nw;
+  if(cur===0.5&&delta===-1)nw=0;
+  else if(cur===0.5&&delta===1)nw=1;
+  else nw=Math.max(0,cur+delta);
   if(nw===0)delete cart[id];else cart[id]=nw;
   updateCartCount();renderProducts();
   if(delta>0&&nw===1)showToast('Agregado al carrito');
 }
 
-function updateCartCount(){document.getElementById('cart-count').textContent=Object.values(cart).reduce((a,b)=>a+b,0);}
+function toggleMedioPack(id,price){
+  if(cart[id]===0.5){
+    delete cart[id];
+  }else{
+    cart[id]=0.5;
+    showToast('Medio pack agregado');
+  }
+  updateCartCount();renderProducts();
+}
+
+function updateCartCount(){
+  const total=Object.values(cart).reduce((a,b)=>a+b,0);
+  document.getElementById('cart-count').textContent=Math.round(total*10)/10;
+}
 
 function openCart(){document.getElementById('overlay').classList.add('open');renderCart();}
 function closeCart(){document.getElementById('overlay').classList.remove('open');}
@@ -315,11 +337,28 @@ function renderCart(){
   let subtotal=0;
   container.innerHTML=items.map(([id,qty])=>{
     const p=products.find(x=>x.id==id);if(!p)return'';
-    const rowTotal=p.price*qty;subtotal+=rowTotal;
-    return`<div class="cart-item"><div class="ci-info"><span class="ci-emoji">${p.emoji||'🛍️'}</span><div><div class="ci-name">${p.name}</div><div class="ci-sub">${p.description||''}</div>${p.price>0?`<div class="ci-price">${fmt(p.price)} c/u</div>`:''}</div></div><div class="ci-qty"><button class="cq-btn" onclick="changeQty('${id}',-1);renderCart()">-</button><span class="cq-num">${qty}</span><button class="cq-btn" onclick="changeQty('${id}',+1);renderCart()">+</button></div><div class="ci-total">${p.price>0?fmt(rowTotal):'-'}</div></div>`;
+    const esMedio=qty===0.5;
+    const precioUnit=esMedio?p.price/2:p.price;
+    const rowTotal=precioUnit*qty;
+    subtotal+=rowTotal;
+    return`<div class="cart-item">
+      <div class="ci-info">
+        <span class="ci-emoji">${p.emoji||'🛍️'}</span>
+        <div>
+          <div class="ci-name">${p.name}${esMedio?' <span style="font-size:.65rem;color:var(--brownl)">(medio pack)</span>':''}</div>
+          <div class="ci-sub">${p.description||''}</div>
+          ${precioUnit>0?`<div class="ci-price">${fmt(precioUnit)} c/u</div>`:''}
+        </div>
+      </div>
+      <div class="ci-qty">
+        <button class="cq-btn" onclick="changeQty('${id}',-1);renderCart()">-</button>
+        <span class="cq-num">${esMedio?'½':qty}</span>
+        <button class="cq-btn" onclick="changeQty('${id}',+1);renderCart()">+</button>
+      </div>
+      <div class="ci-total">${precioUnit>0?fmt(rowTotal):'-'}</div>
+    </div>`;
   }).join('');
 
-  // Calcular descuentos
   const descLoyalty=hasDiscount?Math.round(subtotal*(loyaltyConfig.descuento_pct||5)/100):0;
   const subtotalPostLoyalty=subtotal-descLoyalty;
   const descCupon=cuponAplicado?Math.round(subtotalPostLoyalty*cuponAplicado.descuento_pct/100):0;
@@ -350,9 +389,11 @@ async function sendOrder(){
   let subtotal=0;
   const itemsDetail=items.map(([id,qty])=>{
     const p=products.find(x=>x.id==id);
-    const rowTotal=p&&p.price>0?p.price*qty:0;
+    const esMedio=qty===0.5;
+    const precioUnit=esMedio&&p?p.price/2:p?p.price:0;
+    const rowTotal=precioUnit*qty;
     subtotal+=rowTotal;
-    return{id,name:p?p.name:id,qty,price:p?p.price:0,total:rowTotal};
+    return{id,name:p?p.name:id,qty,esMedio,price:precioUnit,total:rowTotal};
   });
 
   const descLoyalty=hasDiscount?Math.round(subtotal*(loyaltyConfig.descuento_pct||5)/100):0;
@@ -360,29 +401,21 @@ async function sendOrder(){
   const descCupon=cuponAplicado?Math.round(subtotalPostLoyalty*cuponAplicado.descuento_pct/100):0;
   const totalFinal=subtotalPostLoyalty-descCupon;
 
-  // Guardar pedido
   try{await db.from('orders').insert([{negocio,telefono,turno,items:itemsDetail,total:totalFinal,descuento_aplicado:descLoyalty+descCupon,cupon_usado:cuponAplicado?cuponAplicado.codigo:null}]);}catch(e){}
 
-  // Actualizar loyalty
   try{
     const pedidosActuales=clientLoyalty?clientLoyalty.pedidos:0;
     const nuevosPedidos=hasDiscount?0:pedidosActuales+1;
     const existing=await db.from('loyalty').select('*').eq('telefono',telefono).single().catch(()=>({data:null}));
-    if(existing.data){
-      await db.from('loyalty').update({negocio,pedidos:nuevosPedidos,total_gastado:(existing.data.total_gastado||0)+totalFinal,updated_at:new Date().toISOString()}).eq('telefono',telefono);
-    }else{
-      await db.from('loyalty').insert([{telefono,negocio,pedidos:1,total_gastado:totalFinal}]);
-    }
+    if(existing.data){await db.from('loyalty').update({negocio,pedidos:nuevosPedidos,total_gastado:(existing.data.total_gastado||0)+totalFinal,updated_at:new Date().toISOString()}).eq('telefono',telefono);}
+    else{await db.from('loyalty').insert([{telefono,negocio,pedidos:1,total_gastado:totalFinal}]);}
   }catch(e){}
 
-  // Actualizar usos del cupon
-  if(cuponAplicado){
-    try{await db.from('cupones').update({usos:(cuponAplicado.usos||0)+1}).eq('id',cuponAplicado.id);}catch(e){}
-  }
+  if(cuponAplicado){try{await db.from('cupones').update({usos:(cuponAplicado.usos||0)+1}).eq('id',cuponAplicado.id);}catch(e){}}
 
   localStorage.setItem('l4h_last',JSON.stringify({cart:{...cart},negocio,telefono,turno}));
 
-  const lines=itemsDetail.map(i=>`  - ${i.name} x${i.qty}${i.price>0?' -> '+fmt(i.total):''}`).join('\n');
+  const lines=itemsDetail.map(i=>`  - ${i.name}${i.esMedio?' (medio pack)':''} x${i.qty===0.5?'0.5':i.qty}${i.price>0?' -> '+fmt(i.total):''}`).join('\n');
   const turnoLabel=turno==='manana'?'Manana (8:00-12:00)':'Tarde (15:30-19:00)';
   let descLines='';
   if(hasDiscount)descLines+=`\n🏆 Descuento fidelidad (${loyaltyConfig.descuento_pct}%): -${fmt(descLoyalty)}`;
@@ -409,11 +442,7 @@ function repeatLastOrder(){
   }catch(e){showToast('Error al cargar pedido anterior');}
 }
 
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
-}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
 loadProducts();
 loadLoyaltyConfig();
