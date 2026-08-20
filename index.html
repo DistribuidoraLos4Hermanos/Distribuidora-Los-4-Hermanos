@@ -33,6 +33,7 @@ header{background:var(--brownd);padding:14px 16px;position:sticky;top:0;z-index:
 .product-card{background:var(--white);border-radius:14px;padding:13px 10px;box-shadow:0 2px 8px rgba(58,36,24,.09);display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;transition:transform .15s}
 .product-card:hover{transform:translateY(-2px)}
 .prod-emoji{font-size:2.2rem;margin-bottom:5px;line-height:1}
+.prod-img{width:64px;height:64px;object-fit:contain;border-radius:8px;margin-bottom:5px}
 .prod-name{font-size:.75rem;font-weight:600;color:var(--brownd);line-height:1.2;margin-bottom:2px}
 .prod-sub{font-size:.63rem;color:var(--brownl);margin-bottom:4px}
 .prod-price{font-size:.92rem;font-weight:700;color:var(--brown);margin-bottom:6px}
@@ -110,15 +111,19 @@ footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opaci
 </head>
 <body>
 <header>
-  <div class="logo"><h1>Los 4 Hermanos</h1><span>Distribuidora · Cba Sur</span></div>
+  <div class="logo">
+    <h1 id="store-nombre">Los 4 Hermanos</h1>
+    <span id="store-subtitulo">Distribuidora · Cba Sur</span>
+  </div>
   <button class="cart-btn" onclick="openCart()">🛒 Carrito <span class="cart-badge" id="cart-count">0</span></button>
 </header>
+
 <div class="hero">
-  <h2>Hace tu pedido<br>facil y rapido 🚚</h2>
-  <p>Pedidos hasta las 14:30 · Reparto desde las 15:30</p>
+  <h2 id="hero-titulo">Hace tu pedido<br>facil y rapido 🚚</h2>
+  <p id="hero-subtitulo">Pedidos hasta las 14:30 · Reparto desde las 15:30</p>
   <button class="repeat-btn" onclick="repeatLastOrder()">🔄 Repetir pedido anterior</button>
 </div>
-<div class="horario">📅 Lun, Mar, Jue, Vie y Sab &nbsp;·&nbsp; 8:00 a 14:30</div>
+<div class="horario" id="horario-bar">📅 Lun, Mar, Jue, Vie y Sab &nbsp;·&nbsp; 8:00 a 14:30</div>
 
 <div class="discount-banner" id="discount-banner">
   <h3>🎉 Tenes un descuento especial!</h3>
@@ -135,7 +140,7 @@ footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opaci
 <div class="cat-nav" id="cat-nav"></div>
 <div class="sec-title" id="sec-title">Cargando productos...</div>
 <div class="products-grid" id="products-grid"><div class="loading">Cargando...</div></div>
-<footer>Los 4 Hermanos · Zona Sur Cordoba · Tel: 351 621-1515</footer>
+<footer id="store-footer">Los 4 Hermanos · Zona Sur Cordoba · Tel: 351 621-1515</footer>
 
 <div class="overlay" id="overlay" onclick="closeCartOutside(event)">
   <div class="cart-sheet">
@@ -176,17 +181,27 @@ const db=supabase.createClient(SURL,SKEY);
 const CATS=[{id:'all',label:'Todo',emoji:'🛒'},{id:'gaseosa',label:'Gaseosas',emoji:'🥤'},{id:'cerveza',label:'Cervezas',emoji:'🍺'},{id:'agua',label:'Aguas',emoji:'💧'},{id:'jugo',label:'Jugos',emoji:'🧃'},{id:'vino',label:'Vinos',emoji:'🍷'},{id:'alcohol',label:'Alcohol',emoji:'🥃'},{id:'energizante',label:'Energizantes',emoji:'⚡'},{id:'otros',label:'Otros',emoji:'📦'}];
 let products=[],cart={},turno='tarde',cat='all';
 let loyaltyConfig={enabled:false,pedidos_necesarios:5,descuento_pct:5};
+let storeConfig={telefono_wsp:'5493516211515'};
 let clientLoyalty=null,hasDiscount=false,loyaltyCheckTimeout=null,cuponAplicado=null;
 
 function fmt(n){return n>0?'$'+Number(n).toLocaleString('es-AR'):'Consultar';}
 function getQty(id){return cart[id]||0;}
+function fmtQty(qty){return Number.isInteger(qty)?String(qty):qty.toFixed(1).replace('.',',');}
 
-// Step según si el producto permite medio pack
-function getStep(p){return p.medio_pack?0.5:1;}
-
-function fmtQty(qty){
-  // Muestra 0.5, 1, 1.5, 2, etc.
-  return Number.isInteger(qty)?String(qty):qty.toFixed(1).replace('.',',');
+async function loadStoreConfig(){
+  try{
+    const{data}=await db.from('store_config').select('*').eq('id',1).single();
+    if(data){
+      storeConfig=data;
+      document.getElementById('store-nombre').textContent=data.nombre||'Los 4 Hermanos';
+      document.getElementById('store-subtitulo').textContent=data.subtitulo||'Distribuidora · Cba Sur';
+      document.getElementById('hero-titulo').innerHTML=(data.hero_titulo||'Hace tu pedido facil y rapido 🚚').replace(/\\n/g,'<br>');
+      document.getElementById('hero-subtitulo').textContent=data.hero_subtitulo||'Pedidos hasta las 14:30 · Reparto desde las 15:30';
+      document.getElementById('horario-bar').textContent='📅 '+(data.dias||'Lun, Mar, Jue, Vie y Sab')+' · '+( data.horario||'8:00 a 14:30');
+      document.getElementById('store-footer').textContent=(data.nombre||'Los 4 Hermanos')+' · Zona Sur Cordoba · Tel: '+(data.telefono_display||'351 621-1515');
+      document.title=(data.nombre||'Los 4 Hermanos')+' - Distribuidora';
+    }
+  }catch(e){}
 }
 
 async function loadProducts(){
@@ -269,24 +284,24 @@ function renderProducts(){
   const q=(document.getElementById('search-input').value||'').toLowerCase();
   const list=products.filter(p=>(cat==='all'||p.category===cat)&&(!q||p.name.toLowerCase().includes(q)));
   document.getElementById('sec-title').textContent=list.length+' productos';
-  if(!list.length){
-    document.getElementById('products-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--brownl)">No se encontraron productos</div>';
-    return;
-  }
+  if(!list.length){document.getElementById('products-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--brownl)">No se encontraron productos</div>';return;}
   document.getElementById('products-grid').innerHTML=list.map(p=>{
     const qty=getQty(p.id);
-    const precioMostrar=qty>0?p.price*qty:p.price;
+    const rowTotal=qty>0?p.price*qty:0;
+    const imgHtml=p.image_url
+      ?`<img class="prod-img" src="${p.image_url}" alt="${p.name}" onerror="this.style.display='none'">`
+      :`<div class="prod-emoji">${p.emoji||'🛍️'}</div>`;
     return`<div class="product-card">
       ${qty>0?`<div class="added-badge">${fmtQty(qty)}</div>`:''}
       ${p.medio_pack?'<div class="medio-tag">x½</div>':''}
-      <div class="prod-emoji">${p.emoji||'🛍️'}</div>
+      ${imgHtml}
       <div class="prod-name">${p.name}</div>
       <div class="prod-sub">${p.description||''}</div>
-      ${p.price>0?`<div class="prod-price">${qty>0?fmt(precioMostrar)+' total':fmt(p.price)}</div>`:'<div class="sin-precio">Consultar</div>'}
+      ${p.price>0?`<div class="prod-price">${qty>0?fmt(rowTotal)+' total':fmt(p.price)}</div>`:'<div class="sin-precio">Consultar</div>'}
       <div class="qty-control">
-        <button class="qty-btn" onclick="changeQty('${p.id}',-1,${p.medio_pack?'true':'false'})">-</button>
+        <button class="qty-btn" onclick="changeQty('${p.id}',-1,${!!p.medio_pack})">-</button>
         <span class="qty-num">${qty>0?fmtQty(qty):'0'}</span>
-        <button class="qty-btn" onclick="changeQty('${p.id}',+1,${p.medio_pack?'true':'false'})">+</button>
+        <button class="qty-btn" onclick="changeQty('${p.id}',+1,${!!p.medio_pack})">+</button>
       </div>
     </div>`;
   }).join('');
@@ -297,18 +312,14 @@ function filterCat(c){cat=c;renderCatNav();renderProducts();}
 function changeQty(id,delta,medioPack){
   const cur=getQty(id);
   const step=medioPack?0.5:1;
-  // Redondear para evitar errores de punto flotante
   const nw=Math.round((cur+delta*step)*10)/10;
-  if(nw<=0)delete cart[id];
-  else cart[id]=nw;
-  updateCartCount();
-  renderProducts();
+  if(nw<=0)delete cart[id];else cart[id]=nw;
+  updateCartCount();renderProducts();
   if(delta>0&&cur===0)showToast('Agregado al carrito');
 }
 
 function updateCartCount(){
   const total=Object.values(cart).reduce((a,b)=>a+b,0);
-  // Mostrar cantidad total de packs
   document.getElementById('cart-count').textContent=Math.round(total*10)/10;
 }
 
@@ -326,12 +337,10 @@ function renderCart(){
   let subtotal=0;
   container.innerHTML=items.map(([id,qty])=>{
     const p=products.find(x=>x.id==id);if(!p)return'';
-    const rowTotal=p.price*qty;
-    subtotal+=rowTotal;
-    const medioPack=p.medio_pack;
+    const rowTotal=p.price*qty;subtotal+=rowTotal;
     return`<div class="cart-item">
       <div class="ci-info">
-        <span class="ci-emoji">${p.emoji||'🛍️'}</span>
+        <span class="ci-emoji">${p.image_url?`<img src="${p.image_url}" style="width:28px;height:28px;object-fit:contain;border-radius:4px" onerror="this.outerHTML='${p.emoji||'🛍️'}'">`:p.emoji||'🛍️'}</span>
         <div>
           <div class="ci-name">${p.name}</div>
           <div class="ci-sub">${p.description||''}</div>
@@ -339,9 +348,9 @@ function renderCart(){
         </div>
       </div>
       <div class="ci-qty">
-        <button class="cq-btn" onclick="changeQty('${id}',-1,${medioPack});renderCart()">-</button>
+        <button class="cq-btn" onclick="changeQty('${id}',-1,${!!p.medio_pack});renderCart()">-</button>
         <span class="cq-num">${fmtQty(qty)}</span>
-        <button class="cq-btn" onclick="changeQty('${id}',+1,${medioPack});renderCart()">+</button>
+        <button class="cq-btn" onclick="changeQty('${id}',+1,${!!p.medio_pack});renderCart()">+</button>
       </div>
       <div class="ci-total">${p.price>0?fmt(rowTotal):'-'}</div>
     </div>`;
@@ -401,15 +410,15 @@ async function sendOrder(){
 
   localStorage.setItem('l4h_last',JSON.stringify({cart:{...cart},negocio,telefono,turno}));
 
-  // Formatear líneas del pedido
   const lines=itemsDetail.map(i=>`  - ${i.name} x${fmtQty(i.qty)}${i.price>0?' -> '+fmt(i.total):''}`).join('\n');
   const turnoLabel=turno==='manana'?'Manana (8:00-12:00)':'Tarde (15:30-19:00)';
   let descLines='';
   if(hasDiscount)descLines+=`\n🏆 Descuento fidelidad (${loyaltyConfig.descuento_pct}%): -${fmt(descLoyalty)}`;
   if(cuponAplicado)descLines+=`\n🎟️ Cupon "${cuponAplicado.codigo}" (${cuponAplicado.descuento_pct}%): -${fmt(descCupon)}`;
+  const wsp=storeConfig.telefono_wsp||'5493516211515';
   const msg=`PEDIDO - LOS 4 HERMANOS\n\nNegocio: ${negocio}\nTel: ${telefono}\nTurno: ${turnoLabel}\n\nDetalle:\n${lines}\n\nSubtotal: ${fmt(subtotal)}${descLines}\nTOTAL: ${fmt(totalFinal)}\n\nEnviado desde la app`;
 
-  window.open('https://wa.me/5493516211515?text='+encodeURIComponent(msg),'_blank');
+  window.open('https://wa.me/'+wsp+'?text='+encodeURIComponent(msg),'_blank');
   cart={};hasDiscount=false;clientLoyalty=null;cuponAplicado=null;
   hideLoyaltyBanners();quitarCupon();updateCartCount();closeCart();
   showToast('Pedido enviado!');
@@ -431,6 +440,7 @@ function repeatLastOrder(){
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
+loadStoreConfig();
 loadProducts();
 loadLoyaltyConfig();
 </script>
