@@ -44,16 +44,13 @@ header{background:var(--brownd);padding:14px 20px;display:flex;align-items:cente
 .fld input,.fld select{padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);color:var(--black);outline:none}
 .fld input:focus,.fld select:focus{border-color:var(--brown)}
 .fld.full{grid-column:1/-1}
-.form-actions{display:flex;gap:8px;margin-top:14px}
-.btn-cancel{background:transparent;border:1.5px solid var(--beige);color:var(--brownl);border-radius:8px;padding:9px 16px;font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer}
-
-/* CHECKBOX MEDIO PACK */
 .check-row{display:flex;align-items:center;gap:8px;padding:4px 0}
 .check-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--brown);cursor:pointer}
 .check-row label{font-size:.82rem;font-weight:600;color:var(--brownd);cursor:pointer}
-
+.form-actions{display:flex;gap:8px;margin-top:14px}
+.btn-cancel{background:transparent;border:1.5px solid var(--beige);color:var(--brownl);border-radius:8px;padding:9px 16px;font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer}
 .products-table{width:100%;overflow-x:auto;padding-bottom:80px}
-table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:780px}
+table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:900px}
 th{background:var(--beige);padding:10px 12px;text-align:left;font-weight:600;color:var(--brownd);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
 td{padding:9px 12px;border-bottom:1px solid var(--beige);vertical-align:middle}
 tr:hover td{background:rgba(237,230,214,.4)}
@@ -68,8 +65,9 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .save-btn{background:var(--green);color:white;border:none;border-radius:6px;padding:5px 10px;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer}
 .del-btn{background:transparent;border:1.5px solid rgba(192,57,43,.3);color:var(--red);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:.9rem;display:inline-flex;align-items:center;justify-content:center}
 .loading-msg{text-align:center;padding:40px;color:var(--brownl);font-size:.9rem}
-.mp-badge{background:#f0e6ff;color:#6b21a8;border-radius:50px;padding:2px 7px;font-size:.62rem;font-weight:700}
+.prod-thumb{width:32px;height:32px;object-fit:contain;border-radius:4px;border:1px solid var(--beige)}
 
+/* STATS */
 #tab-stats{display:none;padding:14px 16px 80px}
 .period-btns{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .period-btn{padding:7px 14px;border:1.5px solid var(--beige);border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;color:var(--brownl);cursor:pointer;background:var(--white)}
@@ -97,6 +95,8 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .day-bar{background:var(--gold);border-radius:50px;height:8px;transition:width .5s}
 .day-count{font-size:.72rem;font-weight:600;color:var(--brownd);min-width:20px}
 .no-data{text-align:center;padding:20px;color:var(--brownl);font-size:.82rem}
+
+/* PEDIDOS */
 #tab-orders{display:none;padding:14px 16px 80px}
 .orders-search{width:100%;padding:9px 13px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--white);outline:none;margin-bottom:12px}
 .orders-search:focus{border-color:var(--brown)}
@@ -107,6 +107,8 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .order-info{font-size:.72rem;color:var(--brownl);margin-bottom:5px}
 .order-items{font-size:.72rem;color:var(--brownl);border-top:1px solid var(--beige);padding-top:5px;margin-top:5px}
 .order-discount{font-size:.72rem;color:var(--green);font-weight:600}
+
+/* CONFIG */
 #tab-settings{display:none;padding:16px 16px 80px}
 .info-card{background:var(--white);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--beige)}
 .info-card h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);margin-bottom:4px}
@@ -114,6 +116,7 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .settings-field{margin-bottom:10px}
 .settings-field label{font-size:.7rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px}
 .settings-field input{width:100%;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);outline:none}
+.settings-field input:focus{border-color:var(--brown)}
 .save-settings-btn{background:var(--brown);color:white;border:none;border-radius:10px;padding:11px 20px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;margin-top:4px}
 .loyalty-switch-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--beige);margin-bottom:12px}
 .loyalty-switch-label{font-size:.88rem;font-weight:600;color:var(--brownd)}
@@ -197,11 +200,11 @@ tr:hover td{background:rgba(237,230,214,.4)}
         </div>
         <div class="fld"><label>Descripcion</label><input type="text" id="new-desc" placeholder="Ej: Retornable 2.5L"></div>
         <div class="fld"><label>Emoji</label><input type="text" id="new-emoji" placeholder="🥤" maxlength="4"></div>
-        <div class="fld full"><label>URL imagen (opcional)</label><input type="text" id="new-img" placeholder="https://..."></div>
+        <div class="fld full"><label>URL de imagen (opcional)</label><input type="text" id="new-img" placeholder="https://..."></div>
         <div class="fld full">
           <div class="check-row">
             <input type="checkbox" id="new-medio-pack">
-            <label for="new-medio-pack">Permite venta por medio pack (½ pack al 50% del precio)</label>
+            <label for="new-medio-pack">Permite venta por medio pack (incrementos de 0.5)</label>
           </div>
         </div>
       </div>
@@ -212,8 +215,8 @@ tr:hover td{background:rgba(237,230,214,.4)}
     </div>
     <div class="products-table">
       <table>
-        <thead><tr><th>Emoji</th><th>Nombre</th><th>Descripcion</th><th>Categoria</th><th>Precio</th><th>½Pack</th><th>Activo</th><th>Acciones</th></tr></thead>
-        <tbody id="table-body"><tr><td colspan="8" class="loading-msg">Cargando...</td></tr></tbody>
+        <thead><tr><th>Img</th><th>Emoji</th><th>Nombre</th><th>Descripcion</th><th>Categoria</th><th>Precio</th><th>URL Imagen</th><th>½Pack</th><th>Activo</th><th>Acciones</th></tr></thead>
+        <tbody id="table-body"><tr><td colspan="10" class="loading-msg">Cargando...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -236,6 +239,23 @@ tr:hover td{background:rgba(237,230,214,.4)}
 
   <!-- CONFIG -->
   <div id="tab-settings">
+
+    <!-- INFO DE LA TIENDA -->
+    <div class="info-card">
+      <h3>🏪 Informacion de la tienda</h3>
+      <p>Estos datos se muestran en la pagina publica. Los cambios se aplican al instante.</p>
+      <div class="settings-field"><label>Nombre de la tienda</label><input type="text" id="s-nombre" placeholder="Los 4 Hermanos"></div>
+      <div class="settings-field"><label>Subtitulo del header</label><input type="text" id="s-subtitulo" placeholder="Distribuidora · Cba Sur"></div>
+      <div class="settings-field"><label>Titulo del hero (texto grande)</label><input type="text" id="s-hero-titulo" placeholder="Hace tu pedido facil y rapido"></div>
+      <div class="settings-field"><label>Subtitulo del hero</label><input type="text" id="s-hero-subtitulo" placeholder="Pedidos hasta las 14:30 · Reparto desde las 15:30"></div>
+      <div class="settings-field"><label>Dias de atencion</label><input type="text" id="s-dias" placeholder="Lun, Mar, Jue, Vie y Sab"></div>
+      <div class="settings-field"><label>Horario de atencion</label><input type="text" id="s-horario" placeholder="8:00 a 14:30"></div>
+      <div class="settings-field"><label>Telefono WhatsApp (con codigo de pais, sin +)</label><input type="text" id="s-tel-wsp" placeholder="5493516211515"></div>
+      <div class="settings-field"><label>Telefono para mostrar</label><input type="text" id="s-tel-display" placeholder="351 621-1515"></div>
+      <button class="save-settings-btn" onclick="saveStoreConfig()">💾 Guardar informacion</button>
+    </div>
+
+    <!-- CUPONES -->
     <div class="info-card">
       <h3>🎟️ Cupones de descuento</h3>
       <p>Crea codigos que tus clientes pueden ingresar al hacer un pedido.</p>
@@ -246,6 +266,8 @@ tr:hover td{background:rgba(237,230,214,.4)}
       <button class="save-settings-btn" onclick="crearCupon()">Crear cupon</button>
       <div class="cupon-list" id="cupon-list"><div class="loading-msg">Cargando cupones...</div></div>
     </div>
+
+    <!-- FIDELIDAD -->
     <div class="info-card">
       <h3>🎁 Programa de fidelidad</h3>
       <p>Los clientes ganan un descuento despues de cierta cantidad de pedidos.</p>
@@ -257,11 +279,15 @@ tr:hover td{background:rgba(237,230,214,.4)}
       <div class="settings-field"><label>Porcentaje de descuento (%)</label><input type="number" id="loyalty-pct" value="5" min="1" max="50"></div>
       <button class="save-settings-btn" onclick="saveLoyaltyConfig()">Guardar configuracion</button>
     </div>
+
+    <!-- CLIENTES -->
     <div class="info-card">
       <h3>👥 Clientes en el programa</h3>
       <p>Progreso de cada cliente hacia su descuento.</p>
       <div id="loyalty-clients-content"><div class="loading-msg">Cargando...</div></div>
     </div>
+
+    <!-- CONTRASENA -->
     <div class="info-card">
       <h3>🔐 Cambiar contrasena</h3>
       <p></p>
@@ -287,8 +313,11 @@ function fmt(n){return n>0?'$'+Number(n).toLocaleString('es-AR'):'-';}
 function tryLogin(){
   const pw=document.getElementById('pw-input').value;
   const stored=localStorage.getItem(ADMIN_PW_KEY)||DEFAULT_PW;
-  if(pw===stored){document.getElementById('login-screen').style.display='none';document.getElementById('admin-screen').style.display='block';loadProducts();loadLoyaltyConfig();}
-  else{document.getElementById('login-error').style.display='block';document.getElementById('pw-input').value='';}
+  if(pw===stored){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('admin-screen').style.display='block';
+    loadProducts();loadLoyaltyConfig();loadStoreConfigForm();
+  }else{document.getElementById('login-error').style.display='block';document.getElementById('pw-input').value='';}
 }
 function logout(){document.getElementById('admin-screen').style.display='none';document.getElementById('login-screen').style.display='flex';}
 
@@ -304,7 +333,7 @@ const CATS={gaseosa:'Gaseosas',cerveza:'Cervezas',agua:'Aguas',jugo:'Jugos',vino
 
 async function loadProducts(){
   const{data,error}=await db.from('products').select('*').order('sort_order',{ascending:true});
-  if(error){document.getElementById('table-body').innerHTML=`<tr><td colspan="8" class="loading-msg">Error: ${error.message}</td></tr>`;return;}
+  if(error){document.getElementById('table-body').innerHTML=`<tr><td colspan="10" class="loading-msg">Error: ${error.message}</td></tr>`;return;}
   products=data;document.getElementById('prod-count').textContent=products.length;renderTable();
 }
 
@@ -314,11 +343,13 @@ function renderTable(){
   const list=products.filter(p=>(!q||p.name.toLowerCase().includes(q))&&(cf==='all'||p.category===cf));
   document.getElementById('table-body').innerHTML=list.map(p=>`
     <tr>
+      <td>${p.image_url?`<img class="prod-thumb" src="${p.image_url}" onerror="this.style.display='none'">`:'-'}</td>
       <td><input class="td-input" style="width:48px;text-align:center" value="${p.emoji||'🛍️'}" id="emoji-${p.id}"></td>
-      <td><input class="td-input" style="min-width:130px" value="${p.name}" id="name-${p.id}"></td>
+      <td><input class="td-input" style="min-width:120px" value="${p.name}" id="name-${p.id}"></td>
       <td><input class="td-input" style="min-width:100px" value="${p.description||''}" id="desc-${p.id}"></td>
       <td><select class="td-select" id="cat-${p.id}">${Object.entries(CATS).map(([v,l])=>`<option value="${v}"${p.category===v?' selected':''}>${l}</option>`).join('')}</select></td>
       <td><input class="td-input" type="number" style="width:82px;text-align:right" value="${p.price||0}" id="price-${p.id}"></td>
+      <td><input class="td-input" style="min-width:150px" value="${p.image_url||''}" id="img-${p.id}" placeholder="https://..."></td>
       <td style="text-align:center"><input type="checkbox" id="mp-${p.id}" ${p.medio_pack?'checked':''} style="width:16px;height:16px;accent-color:var(--brown)"></td>
       <td><button class="toggle${p.active?'':' off'}" id="tog-${p.id}" onclick="toggleActive('${p.id}')"></button></td>
       <td style="display:flex;gap:5px;align-items:center">
@@ -335,12 +366,14 @@ async function saveRow(id){
     description:document.getElementById('desc-'+id).value,
     category:document.getElementById('cat-'+id).value,
     price:parseInt(document.getElementById('price-'+id).value)||0,
+    image_url:document.getElementById('img-'+id).value||null,
     active:!document.getElementById('tog-'+id).classList.contains('off'),
     medio_pack:document.getElementById('mp-'+id).checked,
   };
   const{error}=await db.from('products').update(payload).eq('id',id);
   if(error){showToast('Error: '+error.message);return;}
   const p=products.find(x=>x.id===id);if(p)Object.assign(p,payload);
+  renderTable();
   showToast('Guardado');
 }
 
@@ -376,6 +409,39 @@ async function addProduct(){
 }
 
 function toggleAddForm(){const f=document.getElementById('add-form');f.className=f.classList.contains('open')?'add-form':'add-form open';}
+
+// STORE CONFIG
+async function loadStoreConfigForm(){
+  try{
+    const{data}=await db.from('store_config').select('*').eq('id',1).single();
+    if(data){
+      document.getElementById('s-nombre').value=data.nombre||'';
+      document.getElementById('s-subtitulo').value=data.subtitulo||'';
+      document.getElementById('s-hero-titulo').value=data.hero_titulo||'';
+      document.getElementById('s-hero-subtitulo').value=data.hero_subtitulo||'';
+      document.getElementById('s-dias').value=data.dias||'';
+      document.getElementById('s-horario').value=data.horario||'';
+      document.getElementById('s-tel-wsp').value=data.telefono_wsp||'';
+      document.getElementById('s-tel-display').value=data.telefono_display||'';
+    }
+  }catch(e){}
+}
+
+async function saveStoreConfig(){
+  const payload={
+    nombre:document.getElementById('s-nombre').value,
+    subtitulo:document.getElementById('s-subtitulo').value,
+    hero_titulo:document.getElementById('s-hero-titulo').value,
+    hero_subtitulo:document.getElementById('s-hero-subtitulo').value,
+    dias:document.getElementById('s-dias').value,
+    horario:document.getElementById('s-horario').value,
+    telefono_wsp:document.getElementById('s-tel-wsp').value,
+    telefono_display:document.getElementById('s-tel-display').value,
+  };
+  const{error}=await db.from('store_config').update(payload).eq('id',1);
+  if(error){showToast('Error al guardar');return;}
+  showToast('✅ Informacion de la tienda guardada');
+}
 
 // CUPONES
 async function loadCupones(){
@@ -476,7 +542,7 @@ function renderOrders(orders){
   document.getElementById('orders-content').innerHTML=orders.map(o=>{
     const fecha=new Date(o.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
     const turnoLabel=o.turno==='manana'?'Manana':'Tarde';
-    const preview=o.items&&o.items.length?o.items.slice(0,4).map(i=>`${i.name}${i.esMedio?' (½)':''} x${i.qty}`).join(', ')+(o.items.length>4?` +${o.items.length-4} mas`:''):'Sin detalle';
+    const preview=o.items&&o.items.length?o.items.slice(0,4).map(i=>`${i.name} x${i.qty}`).join(', ')+(o.items.length>4?` +${o.items.length-4} mas`:''):'Sin detalle';
     const discountLine=o.descuento_aplicado>0?`<div class="order-discount">Descuento: -${fmt(o.descuento_aplicado)}${o.cupon_usado?' (cupon: '+o.cupon_usado+')':''}</div>`:'';
     return`<div class="order-card"><div class="order-top"><div class="order-negocio">${o.negocio||'Sin nombre'}</div><div class="order-total">${fmt(o.total)}</div></div><div class="order-info">Tel: ${o.telefono||'-'} · Turno: ${turnoLabel} · ${fecha}</div>${discountLine}<div class="order-items">${preview}</div></div>`;
   }).join('');
