@@ -41,8 +41,9 @@ header{background:var(--brownd);padding:14px 20px;display:flex;align-items:cente
 @media(max-width:600px){.form-grid{grid-template-columns:1fr}}
 .fld{display:flex;flex-direction:column;gap:3px}
 .fld label{font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px}
-.fld input,.fld select{padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);color:var(--black);outline:none}
-.fld input:focus,.fld select:focus{border-color:var(--brown)}
+.fld input,.fld select,.fld textarea{padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);color:var(--black);outline:none}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--brown)}
+.fld textarea{resize:vertical;min-height:80px;line-height:1.5}
 .fld.full{grid-column:1/-1}
 .check-row{display:flex;align-items:center;gap:8px;padding:4px 0}
 .check-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--brown);cursor:pointer}
@@ -115,16 +116,21 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .info-card p{font-size:.75rem;color:var(--brownl);margin-bottom:14px}
 .settings-field{margin-bottom:10px}
 .settings-field label{font-size:.7rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px}
-.settings-field input{width:100%;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);outline:none}
-.settings-field input:focus{border-color:var(--brown)}
+.settings-field input,.settings-field textarea{width:100%;padding:10px 13px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);outline:none}
+.settings-field input:focus,.settings-field textarea:focus{border-color:var(--brown)}
+.settings-field textarea{resize:vertical;min-height:90px;line-height:1.5}
 .save-settings-btn{background:var(--brown);color:white;border:none;border-radius:10px;padding:11px 20px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;margin-top:4px}
-.loyalty-switch-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--beige);margin-bottom:12px}
-.loyalty-switch-label{font-size:.88rem;font-weight:600;color:var(--brownd)}
-.loyalty-switch-sub{font-size:.72rem;color:var(--brownl);margin-top:2px}
+
+/* SWITCH GRANDE */
+.switch-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--beige);margin-bottom:12px}
+.switch-label-wrap{}
+.switch-label{font-size:.88rem;font-weight:600;color:var(--brownd)}
+.switch-sub{font-size:.72rem;color:var(--brownl);margin-top:2px}
 .big-toggle{width:52px;height:30px;background:var(--brown);border-radius:50px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
 .big-toggle.off{background:#ccc}
 .big-toggle::after{content:'';position:absolute;width:24px;height:24px;background:white;border-radius:50%;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .big-toggle.off::after{left:25px}
+
 .loyalty-clients-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:8px}
 .loyalty-clients-table th{background:var(--beige);padding:8px 10px;text-align:left;font-weight:600;color:var(--brownd);font-size:.68rem;text-transform:uppercase}
 .loyalty-clients-table td{padding:8px 10px;border-bottom:1px solid var(--beige)}
@@ -240,6 +246,19 @@ tr:hover td{background:rgba(237,230,214,.4)}
   <!-- CONFIG -->
   <div id="tab-settings">
 
+    <!-- TURNO MAÑANA -->
+    <div class="info-card">
+      <h3>🌅 Turno de reparto mañana</h3>
+      <p>Cuando esta desactivado, los clientes solo pueden elegir el turno tarde al hacer su pedido.</p>
+      <div class="switch-row">
+        <div class="switch-label-wrap">
+          <div class="switch-label">Turno mañana (8:00 - 12:00)</div>
+          <div class="switch-sub" id="turno-manana-label">Desactivado</div>
+        </div>
+        <button class="big-toggle off" id="turno-manana-toggle" onclick="toggleTurnoManana()"></button>
+      </div>
+    </div>
+
     <!-- INFO DE LA TIENDA -->
     <div class="info-card">
       <h3>🏪 Informacion de la tienda</h3>
@@ -253,6 +272,17 @@ tr:hover td{background:rgba(237,230,214,.4)}
       <div class="settings-field"><label>Telefono WhatsApp (con codigo de pais, sin +)</label><input type="text" id="s-tel-wsp" placeholder="5493516211515"></div>
       <div class="settings-field"><label>Telefono para mostrar</label><input type="text" id="s-tel-display" placeholder="351 621-1515"></div>
       <button class="save-settings-btn" onclick="saveStoreConfig()">💾 Guardar informacion</button>
+    </div>
+
+    <!-- QUIENES SOMOS -->
+    <div class="info-card">
+      <h3>👥 Quienes somos</h3>
+      <p>Este contenido aparece cuando el cliente toca el boton "Quienes somos" en la tienda. Podes dejar vacio lo que no quieras mostrar.</p>
+      <div class="settings-field"><label>📖 Nuestra historia</label><textarea id="s-historia" placeholder="Contanos como nacio la distribuidora, cuantos anos tienen, quien la fundo..."></textarea></div>
+      <div class="settings-field"><label>🎯 Mision</label><textarea id="s-mision" placeholder="¿Que hace la distribuidora? ¿A quien sirve? ¿Cual es su proposito?"></textarea></div>
+      <div class="settings-field"><label>🔭 Vision</label><textarea id="s-vision" placeholder="¿A donde quiere llegar la distribuidora en el futuro?"></textarea></div>
+      <div class="settings-field"><label>⭐ Mas sobre nosotros (valores, equipo, zona de cobertura, etc.)</label><textarea id="s-extra" placeholder="Cualquier informacion adicional que quieras compartir con tus clientes..."></textarea></div>
+      <button class="save-settings-btn" onclick="saveQuienesSomos()">💾 Guardar contenido</button>
     </div>
 
     <!-- CUPONES -->
@@ -271,8 +301,11 @@ tr:hover td{background:rgba(237,230,214,.4)}
     <div class="info-card">
       <h3>🎁 Programa de fidelidad</h3>
       <p>Los clientes ganan un descuento despues de cierta cantidad de pedidos.</p>
-      <div class="loyalty-switch-row">
-        <div><div class="loyalty-switch-label">Activar programa de fidelidad</div><div class="loyalty-switch-sub" id="loyalty-status-label">Desactivado</div></div>
+      <div class="switch-row">
+        <div class="switch-label-wrap">
+          <div class="switch-label">Activar programa de fidelidad</div>
+          <div class="switch-sub" id="loyalty-status-label">Desactivado</div>
+        </div>
         <button class="big-toggle off" id="loyalty-toggle" onclick="toggleLoyalty()"></button>
       </div>
       <div class="settings-field"><label>Pedidos necesarios para ganar descuento</label><input type="number" id="loyalty-pedidos" value="5" min="1" max="50"></div>
@@ -308,6 +341,7 @@ const ADMIN_PW_KEY='l4h_admin_pw';
 const DEFAULT_PW='hermanos2024';
 let products=[],allOrders=[],currentPeriod='week';
 let loyaltyConfig={enabled:false,pedidos_necesarios:5,descuento_pct:5};
+let turnoMananaActivo=false;
 function fmt(n){return n>0?'$'+Number(n).toLocaleString('es-AR'):'-';}
 
 function tryLogin(){
@@ -373,8 +407,7 @@ async function saveRow(id){
   const{error}=await db.from('products').update(payload).eq('id',id);
   if(error){showToast('Error: '+error.message);return;}
   const p=products.find(x=>x.id===id);if(p)Object.assign(p,payload);
-  renderTable();
-  showToast('Guardado');
+  renderTable();showToast('Guardado');
 }
 
 async function toggleActive(id){
@@ -423,8 +456,28 @@ async function loadStoreConfigForm(){
       document.getElementById('s-horario').value=data.horario||'';
       document.getElementById('s-tel-wsp').value=data.telefono_wsp||'';
       document.getElementById('s-tel-display').value=data.telefono_display||'';
+      document.getElementById('s-historia').value=data.quienes_somos_historia||'';
+      document.getElementById('s-mision').value=data.quienes_somos_mision||'';
+      document.getElementById('s-vision').value=data.quienes_somos_vision||'';
+      document.getElementById('s-extra').value=data.quienes_somos_extra||'';
+
+      // Turno mañana
+      turnoMananaActivo=data.turno_manana_activo!==false;
+      const btn=document.getElementById('turno-manana-toggle');
+      btn.className='big-toggle'+(turnoMananaActivo?'':' off');
+      document.getElementById('turno-manana-label').textContent=turnoMananaActivo?'Activado — los clientes pueden elegir reparto mañana':'Desactivado — solo se muestra el turno tarde';
     }
   }catch(e){}
+}
+
+async function toggleTurnoManana(){
+  turnoMananaActivo=!turnoMananaActivo;
+  const btn=document.getElementById('turno-manana-toggle');
+  btn.className='big-toggle'+(turnoMananaActivo?'':' off');
+  document.getElementById('turno-manana-label').textContent=turnoMananaActivo?'Activado — los clientes pueden elegir reparto mañana':'Desactivado — solo se muestra el turno tarde';
+  const{error}=await db.from('store_config').update({turno_manana_activo:turnoMananaActivo}).eq('id',1);
+  if(error){showToast('Error al guardar');return;}
+  showToast(turnoMananaActivo?'✅ Turno mañana activado':'✅ Turno mañana desactivado');
 }
 
 async function saveStoreConfig(){
@@ -441,6 +494,18 @@ async function saveStoreConfig(){
   const{error}=await db.from('store_config').update(payload).eq('id',1);
   if(error){showToast('Error al guardar');return;}
   showToast('✅ Informacion de la tienda guardada');
+}
+
+async function saveQuienesSomos(){
+  const payload={
+    quienes_somos_historia:document.getElementById('s-historia').value,
+    quienes_somos_mision:document.getElementById('s-mision').value,
+    quienes_somos_vision:document.getElementById('s-vision').value,
+    quienes_somos_extra:document.getElementById('s-extra').value,
+  };
+  const{error}=await db.from('store_config').update(payload).eq('id',1);
+  if(error){showToast('Error al guardar');return;}
+  showToast('✅ Contenido de Quienes somos guardado');
 }
 
 // CUPONES
@@ -552,7 +617,16 @@ function renderOrders(orders){
 async function loadLoyaltyConfig(){
   try{
     const{data}=await db.from('loyalty_config').select('*').eq('id',1).single();
-    if(data){loyaltyConfig=data;const btn=document.getElementById('loyalty-toggle');if(btn){btn.className='big-toggle'+(data.enabled?'':' off');document.getElementById('loyalty-status-label').textContent=data.enabled?'Activado':'Desactivado';document.getElementById('loyalty-pedidos').value=data.pedidos_necesarios||5;document.getElementById('loyalty-pct').value=data.descuento_pct||5;}}
+    if(data){
+      loyaltyConfig=data;
+      const btn=document.getElementById('loyalty-toggle');
+      if(btn){
+        btn.className='big-toggle'+(data.enabled?'':' off');
+        document.getElementById('loyalty-status-label').textContent=data.enabled?'Activado':'Desactivado';
+        document.getElementById('loyalty-pedidos').value=data.pedidos_necesarios||5;
+        document.getElementById('loyalty-pct').value=data.descuento_pct||5;
+      }
+    }
   }catch(e){}
 }
 
