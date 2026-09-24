@@ -30,8 +30,6 @@ header{background:var(--brownd);padding:14px 20px;display:flex;align-items:cente
 .tab.active{color:var(--brown);border-color:var(--brown)}
 .badge{background:var(--brown);color:white;border-radius:50px;padding:2px 8px;font-size:.68rem;font-weight:700;margin-left:4px}
 .badge-red{background:var(--red);color:white;border-radius:50px;padding:2px 8px;font-size:.68rem;font-weight:700;margin-left:4px}
-
-/* TABLA PRODUCTOS */
 .toolbar{padding:12px 16px;background:var(--white);border-bottom:1px solid var(--beige);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .toolbar input[type=text]{flex:1;min-width:150px;padding:8px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.83rem;background:var(--cream);outline:none}
 .btn-primary{background:var(--brown);color:white;border:none;border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap}
@@ -102,19 +100,30 @@ tr:hover td{background:rgba(237,230,214,.4)}
 
 /* PEDIDOS */
 #tab-orders{display:none;padding:14px 16px 40px}
-.orders-search{width:100%;padding:9px 13px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--white);outline:none;margin-bottom:12px}
+.orders-filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.orders-search{padding:9px 13px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--white);outline:none;flex:1;min-width:140px}
 .orders-search:focus{border-color:var(--brown)}
-.order-card{background:var(--white);border-radius:12px;padding:13px;margin-bottom:8px;border:1px solid var(--beige)}
-.order-card.impreso{border-color:var(--green);background:#f0fff4}
+.orders-select{padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;background:var(--white);outline:none}
+
+/* Separador de día */
+.day-separator{display:flex;align-items:center;gap:10px;margin:16px 0 8px}
+.day-separator-line{flex:1;height:1px;background:var(--beige)}
+.day-separator-label{font-size:.72rem;font-weight:700;color:var(--brownl);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;background:var(--cream);padding:0 4px}
+.day-total{font-size:.72rem;font-weight:600;color:var(--brown);background:var(--beige);border-radius:50px;padding:2px 10px}
+
+.order-card{background:var(--white);border-radius:12px;padding:13px;margin-bottom:8px;border:1px solid var(--beige);transition:border-color .2s}
+.order-card.impreso{border-color:#b7e4c7;background:#f0fff4}
 .order-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
 .order-negocio{font-size:.85rem;font-weight:700;color:var(--brownd)}
 .order-total{font-size:.88rem;font-weight:700;color:var(--brown)}
 .order-info{font-size:.72rem;color:var(--brownl);margin-bottom:5px}
-.order-items{font-size:.72rem;color:var(--brownl);border-top:1px solid var(--beige);padding-top:5px;margin-top:5px}
+.order-items-text{font-size:.72rem;color:var(--brownl);border-top:1px solid var(--beige);padding-top:5px;margin-top:5px}
 .order-discount{font-size:.72rem;color:var(--green);font-weight:600}
-.order-actions{display:flex;gap:6px;margin-top:8px}
+.order-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
 .btn-imprimir{background:var(--brown);color:white;border:none;border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:.74rem;font-weight:600;cursor:pointer}
-.btn-impreso{background:var(--green);color:white;border:none;border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:.74rem;font-weight:600;cursor:pointer}
+.btn-reimprimir{background:transparent;border:1.5px solid var(--green);color:var(--green);border-radius:8px;padding:6px 12px;font-family:'DM Sans',sans-serif;font-size:.74rem;font-weight:600;cursor:pointer}
+.btn-eliminar{background:transparent;border:1.5px solid rgba(192,57,43,.4);color:var(--red);border-radius:8px;padding:6px 10px;font-family:'DM Sans',sans-serif;font-size:.74rem;font-weight:600;cursor:pointer;margin-left:auto}
+.impreso-tag{background:#d4edda;color:#155724;border-radius:50px;padding:3px 10px;font-size:.68rem;font-weight:700}
 
 /* BOLETA */
 #tab-boleta{display:none;padding:16px}
@@ -146,13 +155,13 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .bt-row{display:flex;justify-content:space-between;font-size:.84rem;padding:3px 0;color:var(--brownd)}
 .bt-row.main{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;border-top:1.5px solid rgba(92,61,46,.3);margin-top:6px;padding-top:8px}
 .descuento-row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
-.descuento-row input{width:80px;padding:8px 10px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;text-align:center;outline:none;background:var(--cream)}
+.descuento-row input{width:100px;padding:8px 10px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;text-align:center;outline:none;background:var(--cream)}
 .descuento-row label{font-size:.8rem;color:var(--brownl)}
 .boleta-btns{display:flex;gap:8px;flex-wrap:wrap}
 
 /* IMPRESION */
-@media print {
-  body > *:not(#print-area){display:none!important}
+@media print{
+  body>*:not(#print-area){display:none!important}
   #print-area{display:block!important}
   @page{margin:10mm}
 }
@@ -367,9 +376,9 @@ tr:hover td{background:rgba(237,230,214,.4)}
 
   <!-- PEDIDOS -->
   <div id="tab-orders">
-    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      <input type="text" class="orders-search" id="orders-search" placeholder="Buscar por negocio o telefono..." oninput="filterOrders()" style="margin-bottom:0;flex:1">
-      <select id="orders-filter" onchange="filterOrders()" style="padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;background:var(--white);outline:none">
+    <div class="orders-filters">
+      <input type="text" class="orders-search" id="orders-search" placeholder="Buscar por negocio o telefono..." oninput="filterOrders()">
+      <select class="orders-select" id="orders-filter" onchange="filterOrders()">
         <option value="all">Todos</option>
         <option value="pendiente">Pendientes</option>
         <option value="impreso">Impresos</option>
@@ -446,9 +455,7 @@ tr:hover td{background:rgba(237,230,214,.4)}
   </div>
 </div>
 
-<!-- AREA DE IMPRESION -->
 <div id="print-area"></div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -495,9 +502,7 @@ const CATS={gaseosa:'Gaseosas',cerveza:'Cervezas',agua:'Aguas',jugo:'Jugos',vino
 async function loadProducts(){
   const{data,error}=await db.from('products').select('*').order('sort_order',{ascending:true});
   if(error){document.getElementById('table-body').innerHTML=`<tr><td colspan="10" class="loading-msg">Error: ${error.message}</td></tr>`;return;}
-  products=data;
-  document.getElementById('prod-count').textContent=products.length;
-  renderTable();
+  products=data;document.getElementById('prod-count').textContent=products.length;renderTable();
 }
 
 function renderTable(){
@@ -640,7 +645,7 @@ async function guardarBoleta(){
   const total=subtotal-descuento;
   const{error}=await db.from('orders').insert([{negocio,telefono,turno:'tarde',items,total,descuento_aplicado:descuento,origen:'manual',impreso:false,stock_descontado:false}]);
   if(error){showToast('Error al guardar: '+error.message);return;}
-  showToast('✅ Pedido guardado correctamente');
+  showToast('✅ Pedido guardado');
 }
 
 async function imprimirBoleta(){
@@ -652,11 +657,8 @@ async function imprimirBoleta(){
   const items=boletaItems.map(i=>{const t=i.price*i.qty;subtotal+=t;return{id:i.id,name:i.name,qty:i.qty,price:i.price,total:t};});
   const total=subtotal-descuento;
   const fecha=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
-
-  // Guardar y descontar stock
-  const{data:savedOrder,error}=await db.from('orders').insert([{negocio,telefono,turno:'tarde',items,total,descuento_aplicado:descuento,origen:'manual',impreso:true,stock_descontado:true}]).select().single();
-  if(!error&&savedOrder)await descontarStock(items);
-
+  const{error}=await db.from('orders').insert([{negocio,telefono,turno:'tarde',items,total,descuento_aplicado:descuento,origen:'manual',impreso:true,stock_descontado:true}]);
+  if(!error)await descontarStock(items);
   generarVistaBoleta(negocio,telefono,items,subtotal,descuento,total,fecha);
   window.print();
   limpiarBoleta();
@@ -703,20 +705,26 @@ async function imprimirPedidoExistente(orderId){
   let subtotal=items.reduce((s,i)=>s+(i.total||0),0);
   const descuento=order.descuento_aplicado||0;
   const total=order.total||0;
-
-  // Marcar como impreso y descontar stock si no se hizo
   if(!order.stock_descontado){
     await db.from('orders').update({impreso:true,stock_descontado:true}).eq('id',orderId);
     await descontarStock(items);
     order.impreso=true;order.stock_descontado=true;
-    renderOrders(allOrders);
-  } else {
+  }else{
     await db.from('orders').update({impreso:true}).eq('id',orderId);
-    order.impreso=true;renderOrders(allOrders);
+    order.impreso=true;
   }
-
+  renderOrders(getFilteredOrders());
   generarVistaBoleta(order.negocio||'',order.telefono||'',items,subtotal,descuento,total,fecha);
   window.print();
+}
+
+async function eliminarPedido(orderId){
+  if(!confirm('¿Seguro que querés eliminar este pedido? Esta acción no se puede deshacer.'))return;
+  const{error}=await db.from('orders').delete().eq('id',orderId);
+  if(error){showToast('Error al eliminar');return;}
+  allOrders=allOrders.filter(o=>o.id!==orderId);
+  renderOrders(getFilteredOrders());
+  showToast('Pedido eliminado');
 }
 
 async function descontarStock(items){
@@ -738,8 +746,7 @@ async function loadStock(){
   const{data:stockRows}=await db.from('stock').select('*');
   stockData={};
   if(stockRows)stockRows.forEach(r=>{stockData[r.product_id]=r;});
-  renderStockTable();
-  checkStockAlerts();
+  renderStockTable();checkStockAlerts();
 }
 
 function renderStockTable(){
@@ -747,8 +754,7 @@ function renderStockTable(){
   const list=products.filter(p=>!q||p.name.toLowerCase().includes(q));
   document.getElementById('stock-body').innerHTML=list.map(p=>{
     const s=stockData[p.id]||{cantidad:0,cantidad_minima:0};
-    const cant=s.cantidad||0;
-    const min=s.cantidad_minima||0;
+    const cant=s.cantidad||0;const min=s.cantidad_minima||0;
     let estado='';
     if(cant===0)estado='<span class="stock-sin">Sin stock</span>';
     else if(min>0&&cant<=min)estado='<span class="stock-bajo">Stock bajo</span>';
@@ -770,13 +776,8 @@ async function guardarStock(productId){
   const min=parseFloat(document.getElementById('sm-'+productId).value)||0;
   const existing=stockData[productId];
   let error;
-  if(existing){
-    ({error}=await db.from('stock').update({cantidad:cant,cantidad_minima:min,updated_at:new Date().toISOString()}).eq('product_id',productId));
-  }else{
-    const{error:e}=await db.from('stock').insert([{product_id:productId,cantidad:cant,cantidad_minima:min}]);
-    error=e;
-    if(!error)stockData[productId]={cantidad:cant,cantidad_minima:min};
-  }
+  if(existing){({error}=await db.from('stock').update({cantidad:cant,cantidad_minima:min,updated_at:new Date().toISOString()}).eq('product_id',productId));}
+  else{({error}=await db.from('stock').insert([{product_id:productId,cantidad:cant,cantidad_minima:min}]));if(!error)stockData[productId]={cantidad:cant,cantidad_minima:min};}
   if(error){showToast('Error: '+error.message);return;}
   if(stockData[productId]){stockData[productId].cantidad=cant;stockData[productId].cantidad_minima=min;}
   else stockData[productId]={cantidad:cant,cantidad_minima:min};
@@ -784,45 +785,30 @@ async function guardarStock(productId){
 }
 
 async function guardarTodoStock(){
-  const list=products;
   let ok=0;
-  for(const p of list){
+  for(const p of products){
     const cantEl=document.getElementById('sc-'+p.id);
     const minEl=document.getElementById('sm-'+p.id);
     if(!cantEl)continue;
     const cant=parseFloat(cantEl.value)||0;
     const min=parseFloat(minEl.value)||0;
     const existing=stockData[p.id];
-    if(existing){
-      await db.from('stock').update({cantidad:cant,cantidad_minima:min,updated_at:new Date().toISOString()}).eq('product_id',p.id);
-      stockData[p.id].cantidad=cant;stockData[p.id].cantidad_minima=min;
-    }else{
-      await db.from('stock').insert([{product_id:p.id,cantidad:cant,cantidad_minima:min}]);
-      stockData[p.id]={cantidad:cant,cantidad_minima:min};
-    }
+    if(existing){await db.from('stock').update({cantidad:cant,cantidad_minima:min,updated_at:new Date().toISOString()}).eq('product_id',p.id);stockData[p.id].cantidad=cant;stockData[p.id].cantidad_minima=min;}
+    else{await db.from('stock').insert([{product_id:p.id,cantidad:cant,cantidad_minima:min}]);stockData[p.id]={cantidad:cant,cantidad_minima:min};}
     ok++;
   }
   renderStockTable();checkStockAlerts();showToast(`✅ Stock guardado (${ok} productos)`);
 }
 
 function checkStockAlerts(){
-  const bajos=products.filter(p=>{
-    const s=stockData[p.id];
-    if(!s)return false;
-    return s.cantidad_minima>0&&s.cantidad<=s.cantidad_minima;
-  });
+  const bajos=products.filter(p=>{const s=stockData[p.id];return s&&s.cantidad_minima>0&&s.cantidad<=s.cantidad_minima;});
   const alertDiv=document.getElementById('stock-alert');
   const countBadge=document.getElementById('stock-alert-count');
   if(bajos.length>0){
     alertDiv.className='stock-alert show';
-    document.getElementById('stock-alert-items').innerHTML=bajos.map(p=>{
-      const s=stockData[p.id];
-      return`<div class="stock-alert-item">⚠️ ${p.name} — Stock: ${s.cantidad} (mínimo: ${s.cantidad_minima})</div>`;
-    }).join('');
+    document.getElementById('stock-alert-items').innerHTML=bajos.map(p=>{const s=stockData[p.id];return`<div class="stock-alert-item">⚠️ ${p.name} — Stock: ${s.cantidad} (mínimo: ${s.cantidad_minima})</div>`;}).join('');
     countBadge.textContent=bajos.length;countBadge.style.display='inline';
-  }else{
-    alertDiv.className='stock-alert';countBadge.style.display='none';
-  }
+  }else{alertDiv.className='stock-alert';countBadge.style.display='none';}
 }
 
 // ========================
@@ -837,7 +823,7 @@ async function loadStats(){
   else if(currentPeriod==='month'){const d=new Date();d.setDate(1);d.setHours(0,0,0,0);query=query.gte('created_at',d.toISOString());}
   const{data,error}=await query;
   if(error){document.getElementById('stats-content').innerHTML=`<div class="no-data">Error: ${error.message}</div>`;return;}
-  if(!data||!data.length){document.getElementById('stats-content').innerHTML='<div class="no-data">No hay pedidos en este periodo todavia.</div>';return;}
+  if(!data||!data.length){document.getElementById('stats-content').innerHTML='<div class="no-data">No hay pedidos todavia.</div>';return;}
   renderStats(data);
 }
 
@@ -880,42 +866,74 @@ function renderStats(orders){
 // ========================
 async function loadOrders(){
   document.getElementById('orders-content').innerHTML='<div class="loading-msg">Cargando...</div>';
-  const{data,error}=await db.from('orders').select('*').order('created_at',{ascending:false}).limit(300);
+  const{data,error}=await db.from('orders').select('*').order('created_at',{ascending:false}).limit(500);
   if(error){document.getElementById('orders-content').innerHTML=`<div class="loading-msg">Error: ${error.message}</div>`;return;}
-  allOrders=data||[];renderOrders(allOrders);
+  allOrders=data||[];
+  renderOrders(getFilteredOrders());
 }
 
-function filterOrders(){
+function getFilteredOrders(){
   const q=(document.getElementById('orders-search').value||'').toLowerCase();
   const f=document.getElementById('orders-filter').value;
   let filtered=allOrders.filter(o=>(o.negocio||'').toLowerCase().includes(q)||(o.telefono||'').includes(q));
   if(f==='pendiente')filtered=filtered.filter(o=>!o.impreso);
   if(f==='impreso')filtered=filtered.filter(o=>o.impreso);
-  renderOrders(filtered);
+  return filtered;
 }
+
+function filterOrders(){renderOrders(getFilteredOrders());}
 
 function renderOrders(orders){
   if(!orders.length){document.getElementById('orders-content').innerHTML='<div class="loading-msg">No hay pedidos.</div>';return;}
-  document.getElementById('orders-content').innerHTML=orders.map(o=>{
-    const fecha=new Date(o.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
-    const turnoLabel=o.turno==='manana'?'Mañana':'Tarde';
-    const origenLabel=o.origen==='manual'?'📝 Manual':'🌐 Web';
-    const preview=o.items&&o.items.length?o.items.slice(0,4).map(i=>`${i.name} x${i.qty}`).join(', ')+(o.items.length>4?` +${o.items.length-4} mas`:''):'Sin detalle';
-    const discountLine=o.descuento_aplicado>0?`<div class="order-discount">Descuento: -${fmt(o.descuento_aplicado)}${o.cupon_usado?' (cupon: '+o.cupon_usado+')':''}</div>`:'';
-    const impBtn=o.impreso
-      ?`<button class="btn-impreso" onclick="imprimirPedidoExistente('${o.id}')">✅ Reimprimir</button>`
-      :`<button class="btn-imprimir" onclick="imprimirPedidoExistente('${o.id}')">🖨️ Imprimir y descontar stock</button>`;
-    return`<div class="order-card${o.impreso?' impreso':''}">
-      <div class="order-top">
-        <div class="order-negocio">${o.negocio||'Sin nombre'} <span style="font-size:.68rem;color:var(--brownl);font-weight:400">${origenLabel}</span></div>
-        <div class="order-total">${fmt(o.total)}</div>
-      </div>
-      <div class="order-info">Tel: ${o.telefono||'-'} · Turno: ${turnoLabel} · ${fecha}</div>
-      ${discountLine}
-      <div class="order-items">${preview}</div>
-      <div class="order-actions">${impBtn}</div>
+
+  // Agrupar por día
+  const grupos={};
+  orders.forEach(o=>{
+    const fecha=new Date(o.created_at);
+    const hoy=new Date();
+    const ayer=new Date();ayer.setDate(ayer.getDate()-1);
+    let label;
+    if(fecha.toDateString()===hoy.toDateString())label='HOY — '+fecha.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
+    else if(fecha.toDateString()===ayer.toDateString())label='AYER — '+fecha.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
+    else label=fecha.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    if(!grupos[label])grupos[label]=[];
+    grupos[label].push(o);
+  });
+
+  let html='';
+  for(const [dia,pedidos] of Object.entries(grupos)){
+    const totalDia=pedidos.reduce((s,o)=>s+(o.total||0),0);
+    html+=`<div class="day-separator">
+      <div class="day-separator-line"></div>
+      <span class="day-separator-label">${dia}</span>
+      <span class="day-total">${fmt(totalDia)}</span>
+      <div class="day-separator-line"></div>
     </div>`;
-  }).join('');
+    html+=pedidos.map(o=>{
+      const hora=new Date(o.created_at).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+      const origenLabel=o.origen==='manual'?'📝 Manual':'🌐 Web';
+      const turnoLabel=o.turno==='manana'?'Mañana':'Tarde';
+      const preview=o.items&&o.items.length?o.items.slice(0,4).map(i=>`${i.name} x${fmtQty(i.qty)}`).join(', ')+(o.items.length>4?` +${o.items.length-4} mas`:''):'Sin detalle';
+      const discountLine=o.descuento_aplicado>0?`<div class="order-discount">Descuento: -${fmt(o.descuento_aplicado)}${o.cupon_usado?' (cupon: '+o.cupon_usado+')':''}</div>`:'';
+      const impBtn=o.impreso
+        ?`<span class="impreso-tag">✅ Impreso</span><button class="btn-reimprimir" onclick="imprimirPedidoExistente('${o.id}')">🖨️ Reimprimir</button>`
+        :`<button class="btn-imprimir" onclick="imprimirPedidoExistente('${o.id}')">🖨️ Imprimir y descontar stock</button>`;
+      return`<div class="order-card${o.impreso?' impreso':''}">
+        <div class="order-top">
+          <div class="order-negocio">${o.negocio||'Sin nombre'} <span style="font-size:.68rem;color:var(--brownl);font-weight:400">${origenLabel}</span></div>
+          <div class="order-total">${fmt(o.total)}</div>
+        </div>
+        <div class="order-info">${hora} · Tel: ${o.telefono||'-'} · Turno: ${turnoLabel}</div>
+        ${discountLine}
+        <div class="order-items-text">${preview}</div>
+        <div class="order-actions">
+          ${impBtn}
+          <button class="btn-eliminar" onclick="eliminarPedido('${o.id}')">🗑️ Eliminar</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('orders-content').innerHTML=html;
 }
 
 // ========================
@@ -958,8 +976,7 @@ async function saveStoreConfig(){
   const payload={nombre:document.getElementById('s-nombre').value,subtitulo:document.getElementById('s-subtitulo').value,hero_titulo:document.getElementById('s-hero-titulo').value,hero_subtitulo:document.getElementById('s-hero-subtitulo').value,dias:document.getElementById('s-dias').value,horario:document.getElementById('s-horario').value,telefono_wsp:document.getElementById('s-tel-wsp').value,telefono_display:document.getElementById('s-tel-display').value};
   const{error}=await db.from('store_config').update(payload).eq('id',1);
   if(error){showToast('Error al guardar');return;}
-  Object.assign(storeInfo,payload);
-  showToast('✅ Informacion guardada');
+  Object.assign(storeInfo,payload);showToast('✅ Informacion guardada');
 }
 
 async function saveQuienesSomos(){
@@ -990,26 +1007,14 @@ async function crearCupon(){
   loadCupones();showToast('Cupon creado!');
 }
 
-async function toggleCupon(id,activo){
-  await db.from('cupones').update({activo:!activo}).eq('id',id);
-  loadCupones();showToast(activo?'Cupon desactivado':'Cupon activado');
-}
-
-async function deleteCupon(id){
-  if(!confirm('Eliminar este cupon?'))return;
-  await db.from('cupones').delete().eq('id',id);
-  loadCupones();showToast('Cupon eliminado');
-}
+async function toggleCupon(id,activo){await db.from('cupones').update({activo:!activo}).eq('id',id);loadCupones();showToast(activo?'Cupon desactivado':'Cupon activado');}
+async function deleteCupon(id){if(!confirm('Eliminar este cupon?'))return;await db.from('cupones').delete().eq('id',id);loadCupones();showToast('Cupon eliminado');}
 
 // LOYALTY
 async function loadLoyaltyConfig(){
   try{
     const{data}=await db.from('loyalty_config').select('*').eq('id',1).single();
-    if(data){
-      loyaltyConfig=data;
-      const btn=document.getElementById('loyalty-toggle');
-      if(btn){btn.className='big-toggle'+(data.enabled?'':' off');document.getElementById('loyalty-status-label').textContent=data.enabled?'Activado':'Desactivado';document.getElementById('loyalty-pedidos').value=data.pedidos_necesarios||5;document.getElementById('loyalty-pct').value=data.descuento_pct||5;}
-    }
+    if(data){loyaltyConfig=data;const btn=document.getElementById('loyalty-toggle');if(btn){btn.className='big-toggle'+(data.enabled?'':' off');document.getElementById('loyalty-status-label').textContent=data.enabled?'Activado':'Desactivado';document.getElementById('loyalty-pedidos').value=data.pedidos_necesarios||5;document.getElementById('loyalty-pct').value=data.descuento_pct||5;}}
   }catch(e){}
 }
 
@@ -1052,7 +1057,6 @@ function changePassword(){
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
-// Cerrar autocomplete al hacer click afuera
 document.addEventListener('click',e=>{if(!e.target.closest('.boleta-search-wrap'))document.getElementById('b-autocomplete').className='autocomplete-list';});
 
 ['tab-stats','tab-orders','tab-boleta','tab-stock','tab-settings'].forEach(id=>{document.getElementById(id).style.display='none';});
