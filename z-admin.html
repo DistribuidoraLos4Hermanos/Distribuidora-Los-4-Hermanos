@@ -163,27 +163,39 @@ tr:hover td{background:rgba(237,230,214,.4)}
 @media print{
   body>*:not(#print-area){display:none!important}
   #print-area{display:block!important}
-  @page{margin:10mm}
+  /* Media hoja A4: 148mm de alto, sin márgenes laterales grandes */
+  @page{size:A4;margin:6mm 8mm}
+  /* La boleta ocupa exactamente media hoja; si hay más productos se extiende naturalmente */
+  .boleta-print{
+    width:100%;
+    min-height:128mm;   /* media hoja A4 menos márgenes */
+    max-width:100%;
+    box-sizing:border-box;
+    page-break-inside:avoid;
+  }
+  /* Línea de corte al pie siempre visible */
+  .bp-corte{display:block!important}
 }
 #print-area{display:none}
-.boleta-print{font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:10px}
-.bp-header{display:flex;align-items:center;gap:16px;border-bottom:3px solid #2d7a27;padding-bottom:10px;margin-bottom:10px}
-.bp-logo{width:70px;height:70px;background:#1a5c15;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:10px;text-align:center;line-height:1.2;flex-shrink:0}
+.boleta-print{font-family:Arial,sans-serif;width:100%;max-width:190mm;margin:0 auto;padding:6px 0}
+.bp-corte{display:none;text-align:center;font-size:.65rem;color:#aaa;letter-spacing:3px;margin-top:8px;border-top:1px dashed #bbb;padding-top:4px}
+.bp-header{display:flex;align-items:center;gap:10px;border-bottom:2.5px solid #2d7a27;padding-bottom:7px;margin-bottom:7px}
+.bp-logo{width:50px;height:50px;background:#1a5c15;border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:8px;text-align:center;line-height:1.2;flex-shrink:0}
 .bp-title{flex:1}
-.bp-title h1{font-size:1.4rem;font-weight:900;color:#1a1008;text-align:center;text-transform:uppercase;border-bottom:2px solid #2d7a27;padding-bottom:4px;margin-bottom:4px}
-.bp-title p{font-size:.78rem;color:#555;text-align:center}
-.bp-info{display:flex;justify-content:space-between;font-size:.78rem;color:#333;margin-bottom:8px;flex-wrap:wrap;gap:8px}
-.bp-cliente{font-size:.86rem;font-weight:700;margin-bottom:10px;border:1.5px solid #ccc;padding:6px 10px;border-radius:6px}
-.bp-table{width:100%;border-collapse:collapse;margin-bottom:10px}
-.bp-table th{background:#2d7a27;color:white;padding:7px 10px;text-align:left;font-size:.78rem;text-transform:uppercase}
+.bp-title h1{font-size:1.1rem;font-weight:900;color:#1a1008;text-align:center;text-transform:uppercase;border-bottom:1.5px solid #2d7a27;padding-bottom:3px;margin-bottom:3px}
+.bp-title p{font-size:.68rem;color:#555;text-align:center}
+.bp-info{display:flex;justify-content:space-between;font-size:.7rem;color:#333;margin-bottom:6px;flex-wrap:wrap;gap:4px}
+.bp-cliente{font-size:.82rem;font-weight:700;margin-bottom:7px;border:1.5px solid #ccc;padding:4px 9px;border-radius:5px}
+.bp-table{width:100%;border-collapse:collapse;margin-bottom:7px}
+.bp-table th{background:#2d7a27;color:white;padding:5px 8px;text-align:left;font-size:.7rem;text-transform:uppercase}
 .bp-table th:last-child,.bp-table td:last-child{text-align:right}
-.bp-table th:first-child,.bp-table td:first-child{text-align:center;width:60px}
-.bp-table td{padding:6px 10px;border-bottom:1px solid #eee;font-size:.82rem}
+.bp-table th:first-child,.bp-table td:first-child{text-align:center;width:46px}
+.bp-table td{padding:4px 8px;border-bottom:1px solid #eee;font-size:.76rem}
 .bp-table tr:nth-child(even) td{background:#f9f9f9}
-.bp-totales{margin-left:auto;width:220px}
-.bp-tot-row{display:flex;justify-content:space-between;font-size:.82rem;padding:4px 0;border-bottom:1px solid #eee}
-.bp-tot-row.main{font-weight:700;font-size:.95rem;background:#2d7a27;color:white;padding:6px 8px;border-radius:4px;margin-top:4px;border:none}
-.bp-footer{text-align:center;font-size:.72rem;color:#777;margin-top:14px;border-top:1px solid #eee;padding-top:8px}
+.bp-totales{margin-left:auto;width:190px}
+.bp-tot-row{display:flex;justify-content:space-between;font-size:.76rem;padding:3px 0;border-bottom:1px solid #eee}
+.bp-tot-row.main{font-weight:700;font-size:.88rem;background:#2d7a27;color:white;padding:5px 7px;border-radius:4px;margin-top:3px;border:none}
+.bp-footer{text-align:center;font-size:.65rem;color:#777;margin-top:8px;border-top:1px solid #eee;padding-top:5px}
 
 /* STOCK */
 #tab-stock{display:none;padding:14px 16px 40px}
@@ -718,7 +730,6 @@ function generarVistaBoleta(negocio,telefono,items,subtotal,descuento,total,fech
       <thead><tr><th>CANT</th><th>PRODUCTO</th><th>PRECIO C/U</th><th>TOTAL</th></tr></thead>
       <tbody>
         ${items.map(i=>`<tr><td>${fmtQty(i.qty)}</td><td>${i.name}</td><td>${i.price>0?fmt(i.price):'$ -'}</td><td>${i.total>0?fmt(i.total):'$ -'}</td></tr>`).join('')}
-        ${Array(Math.max(0,12-items.length)).fill('<tr><td>&nbsp;</td><td></td><td>$ -</td><td>$ -</td></tr>').join('')}
       </tbody>
     </table>
     <div style="display:flex;justify-content:flex-end">
@@ -729,6 +740,7 @@ function generarVistaBoleta(negocio,telefono,items,subtotal,descuento,total,fech
       </div>
     </div>
     <div class="bp-footer">Los 4 Hermanos — Zona Sur Córdoba — Tel: ${storeInfo.telefono_display||'351 621-1515'}</div>
+    <div class="bp-corte">✂ &nbsp;&nbsp; cortar aquí &nbsp;&nbsp; ✂</div>
   </div>`;
 }
 
