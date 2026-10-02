@@ -274,6 +274,7 @@ tr:hover td{background:rgba(237,230,214,.4)}
     <div class="tab" onclick="showTab('stock')">📦 Stock <span class="badge-red" id="stock-alert-count" style="display:none">!</span></div>
     <div class="tab" onclick="showTab('stats')">Estadisticas</div>
     <div class="tab" onclick="showTab('orders')">Pedidos</div>
+    <div class="tab" onclick="showTab('clientes')">👥 Clientes</div>
     <div class="tab" onclick="showTab('settings')">Config</div>
   </div>
 
@@ -391,9 +392,31 @@ tr:hover td{background:rgba(237,230,214,.4)}
         <option value="pendiente">Pendientes</option>
         <option value="impreso">Impresos</option>
       </select>
-      <button class="btn-green" onclick="imprimirListaCamion()" style="white-space:nowrap">🚛 Lista del camión</button>
+      <button class="btn-green" onclick="imprimirListaCamion('completa')" style="white-space:nowrap">🚛 Lista del camión</button>
+      <button class="btn-green" onclick="imprimirListaCamion('zonas')" style="white-space:nowrap;background:#2563a8">📍 Por zona</button>
     </div>
     <div id="orders-content"><div class="loading-msg">Cargando pedidos...</div></div>
+  </div>
+
+  <!-- CLIENTES -->
+  <div id="tab-clientes" style="display:none;padding:14px 16px 40px">
+    <div class="info-card">
+      <h3>🗺️ Zonas de reparto</h3>
+      <p>Administra las zonas. Los clientes se asignan por número de teléfono.</p>
+      <div style="display:flex;gap:8px;margin-top:10px;margin-bottom:12px">
+        <input type="text" id="nueva-zona-nombre" placeholder="Nombre de la nueva zona..." style="flex:1;padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);outline:none">
+        <button class="btn-primary" onclick="crearZona()">+ Zona</button>
+      </div>
+      <div id="zonas-list"><div class="loading-msg">Cargando zonas...</div></div>
+    </div>
+    <div class="info-card">
+      <h3>📋 Clientes y zonas asignadas</h3>
+      <p>Busca un cliente por teléfono y asígnale una zona.</p>
+      <div style="display:flex;gap:8px;margin-top:10px;margin-bottom:12px">
+        <input type="text" id="buscar-cliente-tel" placeholder="Buscar por teléfono..." oninput="buscarClienteTel()" style="flex:1;padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);outline:none">
+      </div>
+      <div id="clientes-list"><div class="loading-msg">Cargando clientes...</div></div>
+    </div>
   </div>
 
   <!-- CONFIG -->
@@ -527,11 +550,12 @@ function tryLogin(){
 function logout(){document.getElementById('admin-screen').style.display='none';document.getElementById('login-screen').style.display='flex';}
 
 function showTab(tab){
-  ['products','boleta','stock','stats','orders','settings'].forEach(t=>{
+  ['products','boleta','stock','stats','orders','clientes','settings'].forEach(t=>{
     document.getElementById('tab-'+t).style.display=t===tab?'block':'none';
   });
+  if(tab==='clientes'){loadZonas();loadClientes();}
   document.querySelectorAll('.tab').forEach((el,i)=>{
-    el.className='tab'+(['products','boleta','stock','stats','orders','settings'][i]===tab?' active':'');
+    el.className='tab'+(['products','boleta','stock','stats','orders','clientes','settings'][i]===tab?' active':'');
   });
   if(tab==='stats')loadStats();
   if(tab==='orders')loadOrders();
@@ -700,7 +724,7 @@ async function imprimirBoleta(){
   const total=subtotal-descuento;
   const fecha=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
   const{error}=await db.from('orders').insert([{negocio,telefono,turno:'tarde',items,total,descuento_aplicado:descuento,origen:'manual',impreso:true,stock_descontado:true}]);
-  if(!error)await descontarStock(items);
+  if(!error){await descontarStock(items);syncCliente(telefono,negocio);}
   generarVistaBoleta(negocio,telefono,items,subtotal,descuento,total,fecha);
   window.print();
   limpiarBoleta();
@@ -755,6 +779,7 @@ async function imprimirPedidoExistente(orderId){
     await db.from('orders').update({impreso:true}).eq('id',orderId);
     order.impreso=true;
   }
+  syncCliente(order.telefono||'',order.negocio||'');
   renderOrders(getFilteredOrders());
   generarVistaBoleta(order.negocio||'',order.telefono||'',items,subtotal,descuento,total,fecha);
   window.print();
@@ -1197,54 +1222,142 @@ async function guardarEdicionPedido(){
 }
 
 // ========================
+// ========================
+// ZONAS Y CLIENTES
+// ========================
+let allZonas=[];
+let allClientes=[];
+
+async function loadZonas(){
+  try{
+    const r=await fetch(`${SURL}/rest/v1/zonas?select=*&order=nombre.asc`,{headers:{apikey:SKEY,Authorization:'Bearer '+SKEY}});
+    allZonas=await r.json();
+    renderZonasList();
+  }catch(e){document.getElementById('zonas-list').innerHTML='<div class="no-data">Error al cargar zonas</div>';}
+}
+
+async function crearZona(){
+  const nombre=document.getElementById('nueva-zona-nombre').value.trim();
+  if(!nombre){showToast('Ingresa un nombre para la zona');return;}
+  try{
+    await fetch(`${SURL}/rest/v1/zonas`,{method:'POST',headers:{apikey:SKEY,Authorization:'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({nombre})});
+    document.getElementById('nueva-zona-nombre').value='';
+    showToast('Zona creada');
+    loadZonas();
+  }catch(e){showToast('Error al crear zona');}
+}
+
+async function renombrarZona(id,nombre){
+  try{
+    await fetch(`${SURL}/rest/v1/zonas?id=eq.${id}`,{method:'PATCH',headers:{apikey:SKEY,Authorization:'Bearer '+SKEY,'Content-Type':'application/json'},body:JSON.stringify({nombre})});
+    showToast('Zona renombrada');
+    loadZonas();
+  }catch(e){showToast('Error');}
+}
+
+async function eliminarZona(id){
+  if(!confirm('¿Eliminar esta zona? Los clientes asignados quedarán sin zona.'))return;
+  try{
+    // Desvincular clientes de esta zona
+    await fetch(`${SURL}/rest/v1/clientes?zona_id=eq.${id}`,{method:'PATCH',headers:{apikey:SKEY,Authorization:'Bearer '+SKEY,'Content-Type':'application/json'},body:JSON.stringify({zona_id:null})});
+    await fetch(`${SURL}/rest/v1/zonas?id=eq.${id}`,{method:'DELETE',headers:{apikey:SKEY,Authorization:'Bearer '+SKEY}});
+    showToast('Zona eliminada');
+    loadZonas();loadClientes();
+  }catch(e){showToast('Error al eliminar zona');}
+}
+
+function renderZonasList(){
+  const el=document.getElementById('zonas-list');
+  if(!allZonas.length){el.innerHTML='<div class="no-data">No hay zonas. Crea una arriba.</div>';return;}
+  el.innerHTML=allZonas.map(z=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--beige)">
+      <input type="text" value="${z.nombre}" id="zona-nombre-${z.id}" style="flex:1;padding:7px 10px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);outline:none">
+      <button class="save-btn" onclick="renombrarZona(${z.id},document.getElementById('zona-nombre-${z.id}').value.trim())">Guardar</button>
+      <button class="del-btn" onclick="eliminarZona(${z.id})">🗑</button>
+    </div>`).join('');
+}
+
+async function loadClientes(filtro=''){
+  try{
+    let url=`${SURL}/rest/v1/clientes?select=*,zonas(nombre)&order=negocio.asc`;
+    if(filtro)url+=`&telefono=ilike.*${filtro}*`;
+    const r=await fetch(url,{headers:{apikey:SKEY,Authorization:'Bearer '+SKEY}});
+    allClientes=await r.json();
+    renderClientesList();
+  }catch(e){document.getElementById('clientes-list').innerHTML='<div class="no-data">Error al cargar clientes</div>';}
+}
+
+function buscarClienteTel(){
+  const v=document.getElementById('buscar-cliente-tel').value.trim();
+  loadClientes(v);
+}
+
+async function asignarZonaCliente(tel,zona_id){
+  try{
+    const existing=allClientes.find(c=>c.telefono===tel);
+    if(existing){
+      await fetch(`${SURL}/rest/v1/clientes?telefono=eq.${encodeURIComponent(tel)}`,{method:'PATCH',headers:{apikey:SKEY,Authorization:'Bearer '+SKEY,'Content-Type':'application/json'},body:JSON.stringify({zona_id:zona_id||null})});
+    }
+    showToast('Zona asignada');
+    loadClientes(document.getElementById('buscar-cliente-tel').value.trim());
+  }catch(e){showToast('Error al asignar zona');}
+}
+
+function renderClientesList(){
+  const el=document.getElementById('clientes-list');
+  if(!allClientes.length){el.innerHTML='<div class="no-data">No se encontraron clientes.</div>';return;}
+  const optsZona=`<option value="">Sin zona</option>`+allZonas.map(z=>`<option value="${z.id}">${z.nombre}</option>`).join('');
+  el.innerHTML=allClientes.map(c=>{
+    const zonaActual=c.zona_id||'';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--beige);flex-wrap:wrap">
+      <div style="flex:1;min-width:120px">
+        <div style="font-size:.84rem;font-weight:600;color:var(--brownd)">${c.negocio||'Sin nombre'}</div>
+        <div style="font-size:.74rem;color:var(--brownl)">📞 ${c.telefono}</div>
+      </div>
+      <select onchange="asignarZonaCliente('${c.telefono}',this.value)" style="padding:7px 10px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;background:var(--cream);color:var(--black);outline:none;cursor:pointer">
+        ${optsZona.replace(`value="${zonaActual}"`,`value="${zonaActual}" selected`)}
+      </select>
+    </div>`;
+  }).join('');
+}
+
+// Sincronizar cliente cuando llega un pedido
+async function syncCliente(telefono,negocio){
+  if(!telefono)return;
+  try{
+    const r=await fetch(`${SURL}/rest/v1/clientes?telefono=eq.${encodeURIComponent(telefono)}&select=id`,{headers:{apikey:SKEY,Authorization:'Bearer '+SKEY}});
+    const arr=await r.json();
+    if(!arr||!arr.length){
+      await fetch(`${SURL}/rest/v1/clientes`,{method:'POST',headers:{apikey:SKEY,Authorization:'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({telefono,negocio})});
+    }else if(negocio){
+      await fetch(`${SURL}/rest/v1/clientes?telefono=eq.${encodeURIComponent(telefono)}`,{method:'PATCH',headers:{apikey:SKEY,Authorization:'Bearer '+SKEY,'Content-Type':'application/json'},body:JSON.stringify({negocio})});
+    }
+  }catch(e){}
+}
+
+async function getZonaCliente(telefono){
+  if(!telefono)return null;
+  try{
+    const r=await fetch(`${SURL}/rest/v1/clientes?telefono=eq.${encodeURIComponent(telefono)}&select=zona_id,zonas(nombre)`,{headers:{apikey:SKEY,Authorization:'Bearer '+SKEY}});
+    const arr=await r.json();
+    if(arr&&arr.length&&arr[0].zonas)return arr[0].zonas.nombre;
+  }catch(e){}
+  return null;
+}
+
+// ========================
 // LISTA DEL CAMION
 // ========================
-function imprimirListaCamion(){
-  const hoy=new Date();
-  const pedidosHoy=allOrders.filter(o=>{
-    if(!o.impreso)return false;
-    const fecha=new Date(o.created_at);
-    return fecha.toDateString()===hoy.toDateString();
-  });
-  if(!pedidosHoy.length){showToast('No hay pedidos impresos de hoy');return;}
-  // Agrupar por producto
-  const mapa={};
-  pedidosHoy.forEach(o=>{
-    if(!o.items||!Array.isArray(o.items))return;
-    o.items.forEach(item=>{
-      const key=item.name;
-      if(!mapa[key]){mapa[key]={name:item.name,qty:0};}
-      mapa[key].qty+=Number(item.qty)||0;
-    });
-  });
-  const lista=Object.values(mapa).sort((a,b)=>a.name.localeCompare(b.name,'es'));
+function buildListaTable(lista,label){
   const totalItems=lista.reduce((s,i)=>s+i.qty,0);
-  const fechaStr=hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  const negocios=pedidosHoy.map(o=>o.negocio||'Sin nombre').join(', ');
-
-  const html=`
-  <div style="font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:16px">
-    <div style="display:flex;align-items:center;gap:14px;border-bottom:3px solid #1a7a3c;padding-bottom:10px;margin-bottom:14px">
-      <div style="background:#1a5c15;border-radius:8px;width:60px;height:60px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:9px;text-align:center;line-height:1.3;flex-shrink:0">DISTRI<br>LOS 4<br>HERMANOS</div>
-      <div style="flex:1;text-align:center">
-        <h1 style="font-size:1.5rem;font-weight:900;text-transform:uppercase;color:#1a1008;margin:0">Lista del Camión</h1>
-        <p style="margin:4px 0 0;font-size:.82rem;color:#555">Distribuidora Los 4 Hermanos</p>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:.78rem;color:#444;margin-bottom:10px;flex-wrap:wrap;gap:6px">
-      <span>📅 ${fechaStr}</span>
-      <span>📦 ${pedidosHoy.length} pedido${pedidosHoy.length>1?'s':''} · ${totalItems} unidades totales</span>
-    </div>
-    <div style="font-size:.75rem;color:#666;margin-bottom:14px;border:1px solid #ddd;border-radius:6px;padding:6px 10px">
-      <strong>Clientes:</strong> ${negocios}
-    </div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
+  return `
+    <table style="width:100%;border-collapse:collapse;margin-bottom:8px">
       <thead>
         <tr style="background:#1a7a3c;color:white">
           <th style="padding:9px 12px;text-align:left;font-size:.78rem;text-transform:uppercase">#</th>
           <th style="padding:9px 12px;text-align:left;font-size:.78rem;text-transform:uppercase">Producto</th>
           <th style="padding:9px 12px;text-align:center;font-size:.78rem;text-transform:uppercase;width:100px">Cantidad</th>
-          <th style="padding:9px 12px;text-align:center;font-size:.78rem;text-transform:uppercase;width:80px">✓ Cargado</th>
+          <th style="padding:9px 12px;text-align:center;font-size:.78rem;text-transform:uppercase;width:80px">✓</th>
         </tr>
       </thead>
       <tbody>
@@ -1258,18 +1371,105 @@ function imprimirListaCamion(){
           </td>
         </tr>`).join('')}
         <tr style="background:#e8f5e9">
-          <td colspan="2" style="padding:10px 12px;font-weight:700;font-size:.9rem;color:#1a5c15">TOTAL</td>
+          <td colspan="2" style="padding:10px 12px;font-weight:700;font-size:.9rem;color:#1a5c15">TOTAL${label?' — '+label:''}</td>
           <td style="padding:10px 12px;text-align:center;font-weight:700;font-size:1.1rem;color:#1a5c15">${totalItems}</td>
           <td></td>
         </tr>
       </tbody>
-    </table>
-    <div style="text-align:center;font-size:.7rem;color:#999;border-top:1px solid #eee;padding-top:8px">
+    </table>`;
+}
+
+async function imprimirListaCamion(modo='completa'){
+  const hoy=new Date();
+  const pedidosHoy=allOrders.filter(o=>{
+    if(!o.impreso)return false;
+    const fecha=new Date(o.created_at);
+    return fecha.toDateString()===hoy.toDateString();
+  });
+  if(!pedidosHoy.length){showToast('No hay pedidos impresos de hoy');return;}
+
+  const fechaStr=hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const negocios=pedidosHoy.map(o=>o.negocio||'Sin nombre').join(', ');
+  const header=`
+  <div style="font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:16px">
+    <div style="display:flex;align-items:center;gap:14px;border-bottom:3px solid #1a7a3c;padding-bottom:10px;margin-bottom:14px">
+      <div style="background:#1a5c15;border-radius:8px;width:60px;height:60px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:9px;text-align:center;line-height:1.3;flex-shrink:0">DISTRI<br>LOS 4<br>HERMANOS</div>
+      <div style="flex:1;text-align:center">
+        <h1 style="font-size:1.5rem;font-weight:900;text-transform:uppercase;color:#1a1008;margin:0">Lista del Camión${modo==='zonas'?' — Por Zona':''}</h1>
+        <p style="margin:4px 0 0;font-size:.82rem;color:#555">Distribuidora Los 4 Hermanos</p>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:.78rem;color:#444;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+      <span>📅 ${fechaStr}</span>
+      <span>📦 ${pedidosHoy.length} pedido${pedidosHoy.length>1?'s':''}</span>
+    </div>
+    <div style="font-size:.75rem;color:#666;margin-bottom:14px;border:1px solid #ddd;border-radius:6px;padding:6px 10px">
+      <strong>Clientes:</strong> ${negocios}
+    </div>`;
+
+  let body='';
+
+  if(modo==='completa'){
+    const mapa={};
+    pedidosHoy.forEach(o=>{
+      if(!o.items||!Array.isArray(o.items))return;
+      o.items.forEach(item=>{
+        if(!mapa[item.name]){mapa[item.name]={name:item.name,qty:0};}
+        mapa[item.name].qty+=Number(item.qty)||0;
+      });
+    });
+    const lista=Object.values(mapa).sort((a,b)=>a.name.localeCompare(b.name,'es'));
+    body=buildListaTable(lista,'');
+  } else {
+    // Por zona: obtener zona de cada pedido via clientes
+    showToast('Cargando zonas...');
+    // Cargar todos los clientes con zona de una vez
+    let clientMap={};
+    try{
+      const r=await fetch(`${SURL}/rest/v1/clientes?select=telefono,zona_id,zonas(nombre)`,{headers:{apikey:SKEY,Authorization:'Bearer '+SKEY}});
+      const arr=await r.json();
+      arr.forEach(c=>{clientMap[c.telefono]={zona:c.zonas?c.zonas.nombre:null,zona_id:c.zona_id};});
+    }catch(e){}
+
+    // Agrupar pedidos por zona
+    const porZona={};// zona_nombre -> {mapa}
+    pedidosHoy.forEach(o=>{
+      const cl=clientMap[o.telefono];
+      const zonaKey=cl&&cl.zona?cl.zona:'Sin zona';
+      if(!porZona[zonaKey])porZona[zonaKey]={};
+      if(!o.items||!Array.isArray(o.items))return;
+      o.items.forEach(item=>{
+        if(!porZona[zonaKey][item.name]){porZona[zonaKey][item.name]={name:item.name,qty:0};}
+        porZona[zonaKey][item.name].qty+=Number(item.qty)||0;
+      });
+    });
+
+    // Ordenar: zonas con nombre primero, "Sin zona" al final
+    const zonasOrdenadas=Object.keys(porZona).sort((a,b)=>{
+      if(a==='Sin zona')return 1;if(b==='Sin zona')return -1;
+      return a.localeCompare(b,'es');
+    });
+
+    body=zonasOrdenadas.map(zona=>{
+      const lista=Object.values(porZona[zona]).sort((a,b)=>a.name.localeCompare(b.name,'es'));
+      return `<div style="margin-bottom:20px">
+        <div style="background:#2563a8;color:white;padding:8px 14px;border-radius:8px 8px 0 0;font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px">📍 ${zona}</div>
+        ${buildListaTable(lista,zona)}
+      </div>`;
+    }).join('');
+  }
+
+  const totalGeneral=pedidosHoy.reduce((s,o)=>s+(o.items&&Array.isArray(o.items)?o.items.reduce((ss,i)=>ss+Number(i.qty||0),0):0),0);
+  const footer=`
+    <div style="display:flex;justify-content:space-between;background:#e8f5e9;border-radius:8px;padding:12px 16px;font-weight:700;font-size:1rem;color:#1a5c15;margin-top:4px">
+      <span>TOTAL GENERAL</span><span>${totalGeneral} unidades</span>
+    </div>
+    <div style="text-align:center;font-size:.7rem;color:#999;border-top:1px solid #eee;padding-top:8px;margin-top:12px">
       Los 4 Hermanos — Tel: ${storeInfo.telefono_display||'351 621-1515'} — Generado: ${hoy.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}
     </div>
   </div>`;
 
-  document.getElementById('print-area').innerHTML=html;
+  document.getElementById('print-area').innerHTML=header+body+footer;
   window.print();
 }
 
@@ -1280,7 +1480,7 @@ document.addEventListener('click',e=>{
   if(e.target===modal)cerrarModalEditar();
 });
 
-['tab-stats','tab-orders','tab-boleta','tab-stock','tab-settings'].forEach(id=>{document.getElementById(id).style.display='none';});
+['tab-stats','tab-orders','tab-boleta','tab-stock','tab-settings','tab-clientes'].forEach(id=>{document.getElementById(id).style.display='none';});
 </script>
 </body>
 </html>
