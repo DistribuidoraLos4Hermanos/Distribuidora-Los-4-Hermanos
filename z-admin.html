@@ -383,6 +383,7 @@ tr:hover td{background:rgba(237,230,214,.4)}
         <option value="pendiente">Pendientes</option>
         <option value="impreso">Impresos</option>
       </select>
+      <button class="btn-green" onclick="imprimirListaCamion()" style="white-space:nowrap">🚛 Lista del camión</button>
     </div>
     <div id="orders-content"><div class="loading-msg">Cargando pedidos...</div></div>
   </div>
@@ -1056,6 +1057,83 @@ function changePassword(){
 }
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ========================
+// LISTA DEL CAMION
+// ========================
+function imprimirListaCamion(){
+  const hoy=new Date();
+  const pedidosHoy=allOrders.filter(o=>{
+    if(!o.impreso)return false;
+    const fecha=new Date(o.created_at);
+    return fecha.toDateString()===hoy.toDateString();
+  });
+  if(!pedidosHoy.length){showToast('No hay pedidos impresos de hoy');return;}
+  // Agrupar por producto
+  const mapa={};
+  pedidosHoy.forEach(o=>{
+    if(!o.items||!Array.isArray(o.items))return;
+    o.items.forEach(item=>{
+      const key=item.name;
+      if(!mapa[key]){mapa[key]={name:item.name,qty:0};}
+      mapa[key].qty+=Number(item.qty)||0;
+    });
+  });
+  const lista=Object.values(mapa).sort((a,b)=>b.qty-a.qty);
+  const totalItems=lista.reduce((s,i)=>s+i.qty,0);
+  const fechaStr=hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const negocios=pedidosHoy.map(o=>o.negocio||'Sin nombre').join(', ');
+
+  const html=`
+  <div style="font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:16px">
+    <div style="display:flex;align-items:center;gap:14px;border-bottom:3px solid #1a7a3c;padding-bottom:10px;margin-bottom:14px">
+      <div style="background:#1a5c15;border-radius:8px;width:60px;height:60px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:9px;text-align:center;line-height:1.3;flex-shrink:0">DISTRI<br>LOS 4<br>HERMANOS</div>
+      <div style="flex:1;text-align:center">
+        <h1 style="font-size:1.5rem;font-weight:900;text-transform:uppercase;color:#1a1008;margin:0">Lista del Camión</h1>
+        <p style="margin:4px 0 0;font-size:.82rem;color:#555">Distribuidora Los 4 Hermanos</p>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:.78rem;color:#444;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+      <span>📅 ${fechaStr}</span>
+      <span>📦 ${pedidosHoy.length} pedido${pedidosHoy.length>1?'s':''} · ${totalItems} unidades totales</span>
+    </div>
+    <div style="font-size:.75rem;color:#666;margin-bottom:14px;border:1px solid #ddd;border-radius:6px;padding:6px 10px">
+      <strong>Clientes:</strong> ${negocios}
+    </div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
+      <thead>
+        <tr style="background:#1a7a3c;color:white">
+          <th style="padding:9px 12px;text-align:left;font-size:.78rem;text-transform:uppercase">#</th>
+          <th style="padding:9px 12px;text-align:left;font-size:.78rem;text-transform:uppercase">Producto</th>
+          <th style="padding:9px 12px;text-align:center;font-size:.78rem;text-transform:uppercase;width:100px">Cantidad</th>
+          <th style="padding:9px 12px;text-align:center;font-size:.78rem;text-transform:uppercase;width:80px">✓ Cargado</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${lista.map((item,i)=>`
+        <tr style="${i%2===0?'background:#f9f9f9':''}">
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:.8rem;color:#888">${i+1}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:.88rem;font-weight:600">${item.name}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:1.1rem;font-weight:700;color:#1a5c15">${fmtQty(item.qty)}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center">
+            <div style="width:22px;height:22px;border:2px solid #999;border-radius:4px;margin:0 auto"></div>
+          </td>
+        </tr>`).join('')}
+        <tr style="background:#e8f5e9">
+          <td colspan="2" style="padding:10px 12px;font-weight:700;font-size:.9rem;color:#1a5c15">TOTAL</td>
+          <td style="padding:10px 12px;text-align:center;font-weight:700;font-size:1.1rem;color:#1a5c15">${totalItems}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="text-align:center;font-size:.7rem;color:#999;border-top:1px solid #eee;padding-top:8px">
+      Los 4 Hermanos — Tel: ${storeInfo.telefono_display||'351 621-1515'} — Generado: ${hoy.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}
+    </div>
+  </div>`;
+
+  document.getElementById('print-area').innerHTML=html;
+  window.print();
+}
 
 document.addEventListener('click',e=>{if(!e.target.closest('.boleta-search-wrap'))document.getElementById('b-autocomplete').className='autocomplete-list';});
 
