@@ -163,22 +163,18 @@ tr:hover td{background:rgba(237,230,214,.4)}
 @media print{
   body>*:not(#print-area){display:none!important}
   #print-area{display:block!important}
-  /* Media hoja A4: 148mm de alto, sin márgenes laterales grandes */
-  @page{size:A4;margin:6mm 8mm}
-  /* La boleta ocupa exactamente media hoja; si hay más productos se extiende naturalmente */
+  @page{size:A4 portrait;margin:5mm 8mm}
+  /* Media hoja = ~138mm alto. La boleta arranca desde ahí y crece si necesita más */
   .boleta-print{
-    width:100%;
-    min-height:128mm;   /* media hoja A4 menos márgenes */
-    max-width:100%;
+    width:195mm;
+    min-height:138mm;
     box-sizing:border-box;
-    page-break-inside:avoid;
   }
-  /* Línea de corte al pie siempre visible */
   .bp-corte{display:block!important}
 }
 #print-area{display:none}
-.boleta-print{font-family:Arial,sans-serif;width:100%;max-width:190mm;margin:0 auto;padding:6px 0}
-.bp-corte{display:none;text-align:center;font-size:.65rem;color:#aaa;letter-spacing:3px;margin-top:8px;border-top:1px dashed #bbb;padding-top:4px}
+.boleta-print{font-family:Arial,sans-serif;width:100%;max-width:195mm;margin:0 auto;padding:6px 0}
+.bp-corte{display:none;text-align:center;font-size:.65rem;color:#aaa;letter-spacing:2px;margin-top:10px;border-top:1.5px dashed #bbb;padding-top:5px}
 .bp-header{display:flex;align-items:center;gap:10px;border-bottom:2.5px solid #2d7a27;padding-bottom:7px;margin-bottom:7px}
 .bp-logo{width:50px;height:50px;background:#1a5c15;border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:8px;text-align:center;line-height:1.2;flex-shrink:0}
 .bp-title{flex:1}
@@ -735,8 +731,8 @@ function generarVistaBoleta(negocio,telefono,items,subtotal,descuento,total,fech
     <div style="display:flex;justify-content:flex-end">
       <div class="bp-totales">
         <div class="bp-tot-row"><span>SUB TOTAL</span><span>${fmt(subtotal)}</span></div>
-        <div class="bp-tot-row"><span>DESCUENTO</span><span>${descuento>0?fmt(descuento):'$ -'}</span></div>
-        <div class="bp-tot-row main"><span>Total</span><span>${fmt(total)}</span></div>
+        ${descuento>0?`<div class="bp-tot-row"><span>DESCUENTO</span><span>-${fmt(descuento)}</span></div>`:''}
+        <div class="bp-tot-row main"><span>TOTAL</span><span>${fmt(total)}</span></div>
       </div>
     </div>
     <div class="bp-footer">Los 4 Hermanos — Zona Sur Córdoba — Tel: ${storeInfo.telefono_display||'351 621-1515'}</div>
