@@ -231,7 +231,7 @@ footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opaci
     <div class="client-form">
       <h4>Tus datos</h4>
       <div class="form-field"><label>Nombre del negocio</label><input type="text" id="negocio" placeholder="Kiosco / Almacen..." oninput="checkLoyalty()"></div>
-      <div class="form-field"><label>Telefono de contacto</label><input type="tel" id="telefono" placeholder="351 000-0000" oninput="checkLoyalty()"></div>
+      <div class="form-field"><label>Telefono de contacto <span style="color:var(--red)">*</span></label><input type="tel" id="telefono" placeholder="351 000-0000" oninput="checkLoyalty()" required></div>
     </div>
     <button class="send-btn" onclick="sendOrder()">Enviar pedido por WhatsApp</button>
   </div>
