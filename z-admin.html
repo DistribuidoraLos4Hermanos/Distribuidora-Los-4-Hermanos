@@ -459,6 +459,39 @@ tr:hover td{background:rgba(237,230,214,.4)}
 <div id="print-area"></div>
 <div class="toast" id="toast"></div>
 
+<!-- MODAL EDITAR PEDIDO -->
+<div id="modal-editar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;padding:12px">
+  <div style="background:var(--white);border-radius:18px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd)">✏️ Editar pedido</h3>
+      <button onclick="cerrarModalEditar()" style="background:transparent;border:none;font-size:1.3rem;cursor:pointer;color:var(--brownl)">✕</button>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Cliente</div>
+      <input id="edit-negocio" type="text" style="width:100%;padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);outline:none">
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Teléfono</div>
+      <input id="edit-telefono" type="text" style="width:100%;padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.86rem;background:var(--cream);outline:none">
+    </div>
+    <div style="font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Productos</div>
+    <!-- buscador para agregar -->
+    <div style="position:relative;margin-bottom:10px">
+      <input id="edit-search" type="text" placeholder="Agregar producto..." oninput="buscarEditProduct()" autocomplete="off"
+        style="width:100%;padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);outline:none">
+      <div id="edit-autocomplete" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--beige);border-radius:0 0 10px 10px;max-height:180px;overflow-y:auto;z-index:50"></div>
+    </div>
+    <div id="edit-items-list" style="margin-bottom:12px"></div>
+    <div id="edit-total-row" style="background:var(--beige);border-radius:8px;padding:10px 14px;font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--brownd);display:flex;justify-content:space-between;margin-bottom:14px">
+      <span>TOTAL</span><span id="edit-total-val">$0</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-primary" onclick="guardarEdicionPedido()" style="flex:1">💾 Guardar cambios</button>
+      <button onclick="cerrarModalEditar()" style="background:transparent;border:1.5px solid var(--beige);color:var(--brownl);border-radius:8px;padding:9px 16px;font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SURL='https://zcktyocumratqojzxyzx.supabase.co';
 const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpja3R5b2N1bXJhdHFvanp4eXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNTU5NzksImV4cCI6MjA5MjgzMTk3OX0.Jj8TCmJyn3j2QHS9KAIcRIv6njnp-8UZ24FNe_iHDNw';
@@ -929,6 +962,7 @@ function renderOrders(orders){
         <div class="order-items-text">${preview}</div>
         <div class="order-actions">
           ${impBtn}
+          <button style="background:transparent;border:1.5px solid var(--brown);color:var(--brown);border-radius:8px;padding:6px 12px;font-family:'DM Sans',sans-serif;font-size:.74rem;font-weight:600;cursor:pointer" onclick="abrirModalEditar('${o.id}')">✏️ Editar</button>
           <button class="btn-eliminar" onclick="eliminarPedido('${o.id}')">🗑️ Eliminar</button>
         </div>
       </div>`;
@@ -1059,6 +1093,102 @@ function changePassword(){
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
 // ========================
+// EDITAR PEDIDO
+// ========================
+let editOrderId=null;
+let editItems=[];
+let editSearchTimeout=null;
+
+function abrirModalEditar(orderId){
+  const o=allOrders.find(x=>x.id===orderId);if(!o)return;
+  editOrderId=orderId;
+  editItems=(o.items||[]).map(i=>({...i}));
+  document.getElementById('edit-negocio').value=o.negocio||'';
+  document.getElementById('edit-telefono').value=o.telefono||'';
+  document.getElementById('edit-search').value='';
+  document.getElementById('edit-autocomplete').style.display='none';
+  renderEditItems();
+  const modal=document.getElementById('modal-editar');
+  modal.style.display='flex';
+}
+
+function cerrarModalEditar(){
+  document.getElementById('modal-editar').style.display='none';
+  editOrderId=null;editItems=[];
+}
+
+function renderEditItems(){
+  let subtotal=0;
+  const container=document.getElementById('edit-items-list');
+  if(!editItems.length){container.innerHTML='<div style="text-align:center;padding:12px;color:var(--brownl);font-size:.82rem">Sin productos</div>';document.getElementById('edit-total-val').textContent='$0';return;}
+  container.innerHTML=editItems.map((item,i)=>{
+    const rowTotal=item.price*item.qty;subtotal+=rowTotal;
+    return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--beige)">
+      <input type="number" value="${item.qty}" min="0.5" step="0.5"
+        style="width:60px;padding:5px 7px;border:1.5px solid var(--beige);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.84rem;text-align:center;outline:none;background:var(--cream)"
+        onchange="cambiarCantEdit(${i},this.value)">
+      <div style="flex:1;font-size:.82rem;font-weight:600;color:var(--brownd)">${item.name}</div>
+      <div style="font-size:.8rem;font-weight:700;color:var(--brown);min-width:70px;text-align:right">${item.price>0?fmt(rowTotal):'-'}</div>
+      <button onclick="quitarItemEdit(${i})" style="background:transparent;border:none;color:var(--red);font-size:1rem;cursor:pointer;padding:0 2px">✕</button>
+    </div>`;
+  }).join('');
+  document.getElementById('edit-total-val').textContent=fmt(subtotal);
+}
+
+function cambiarCantEdit(i,val){
+  const v=parseFloat(val)||0;
+  if(v<=0){editItems.splice(i,1);}else{editItems[i].qty=Math.round(v*10)/10;}
+  renderEditItems();
+}
+
+function quitarItemEdit(i){editItems.splice(i,1);renderEditItems();}
+
+function buscarEditProduct(){
+  const q=(document.getElementById('edit-search').value||'').toLowerCase().trim();
+  const ac=document.getElementById('edit-autocomplete');
+  clearTimeout(editSearchTimeout);
+  if(q.length<1){ac.style.display='none';return;}
+  editSearchTimeout=setTimeout(()=>{
+    const results=products.filter(p=>p.active&&p.name.toLowerCase().includes(q)).slice(0,8);
+    if(!results.length){ac.style.display='none';return;}
+    ac.innerHTML=results.map(p=>`<div onclick="agregarItemEdit('${p.id}')"
+      style="padding:9px 13px;cursor:pointer;font-size:.84rem;border-bottom:1px solid var(--beige);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-weight:600;color:var(--brownd)">${p.emoji||'🛍️'} ${p.name}</span>
+      <span style="font-size:.75rem;color:var(--brownl)">${p.price>0?fmt(p.price):'-'}</span>
+    </div>`).join('');
+    ac.style.display='block';
+  },180);
+}
+
+function agregarItemEdit(id){
+  const p=products.find(x=>x.id===id);if(!p)return;
+  const existing=editItems.find(i=>i.id===id);
+  if(existing){existing.qty+=p.medio_pack?0.5:1;}
+  else{editItems.push({id:p.id,name:p.name,price:p.price,qty:p.medio_pack?0.5:1,total:p.price*(p.medio_pack?0.5:1)});}
+  document.getElementById('edit-search').value='';
+  document.getElementById('edit-autocomplete').style.display='none';
+  renderEditItems();
+}
+
+async function guardarEdicionPedido(){
+  if(!editOrderId)return;
+  let subtotal=0;
+  const items=editItems.map(i=>{const t=i.price*i.qty;subtotal+=t;return{id:i.id,name:i.name,qty:i.qty,price:i.price,total:t};});
+  const o=allOrders.find(x=>x.id===editOrderId);
+  const descuento=o?o.descuento_aplicado||0:0;
+  const total=subtotal-descuento;
+  const negocio=document.getElementById('edit-negocio').value.trim()||'Sin nombre';
+  const telefono=document.getElementById('edit-telefono').value.trim();
+  const{error}=await db.from('orders').update({negocio,telefono,items,total}).eq('id',editOrderId);
+  if(error){showToast('Error al guardar: '+error.message);return;}
+  // actualizar en memoria
+  if(o){Object.assign(o,{negocio,telefono,items,total});}
+  cerrarModalEditar();
+  renderOrders(getFilteredOrders());
+  showToast('✅ Pedido actualizado');
+}
+
+// ========================
 // LISTA DEL CAMION
 // ========================
 function imprimirListaCamion(){
@@ -1079,7 +1209,7 @@ function imprimirListaCamion(){
       mapa[key].qty+=Number(item.qty)||0;
     });
   });
-  const lista=Object.values(mapa).sort((a,b)=>b.qty-a.qty);
+  const lista=Object.values(mapa).sort((a,b)=>a.name.localeCompare(b.name,'es'));
   const totalItems=lista.reduce((s,i)=>s+i.qty,0);
   const fechaStr=hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const negocios=pedidosHoy.map(o=>o.negocio||'Sin nombre').join(', ');
@@ -1135,7 +1265,12 @@ function imprimirListaCamion(){
   window.print();
 }
 
-document.addEventListener('click',e=>{if(!e.target.closest('.boleta-search-wrap'))document.getElementById('b-autocomplete').className='autocomplete-list';});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.boleta-search-wrap'))document.getElementById('b-autocomplete').className='autocomplete-list';
+  if(!e.target.closest('#edit-search')&&!e.target.closest('#edit-autocomplete'))document.getElementById('edit-autocomplete').style.display='none';
+  const modal=document.getElementById('modal-editar');
+  if(e.target===modal)cerrarModalEditar();
+});
 
 ['tab-stats','tab-orders','tab-boleta','tab-stock','tab-settings'].forEach(id=>{document.getElementById(id).style.display='none';});
 </script>
