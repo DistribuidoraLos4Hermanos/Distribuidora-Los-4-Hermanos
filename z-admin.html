@@ -332,12 +332,16 @@ tr:hover td{background:rgba(237,230,214,.4)}
     <div class="boleta-form">
       <h3>🧾 Nueva boleta</h3>
       <div class="boleta-cliente-row">
-        <input type="text" id="b-negocio" placeholder="Nombre del negocio / cliente">
         <div style="position:relative">
-          <input type="text" id="b-telefono" placeholder="Telefono (opcional)" oninput="onTelefonoBoleta()" style="width:100%">
+          <input type="text" id="b-negocio" placeholder="Nombre del negocio / cliente" oninput="onNegocioBoleta()" autocomplete="off" style="width:100%">
+          <div id="b-negocio-autocomplete" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--beige);border-radius:0 0 10px 10px;max-height:160px;overflow-y:auto;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.1)"></div>
+        </div>
+        <div style="position:relative">
+          <input type="text" id="b-telefono" placeholder="Teléfono *" oninput="onTelefonoBoleta()" style="width:100%">
           <span id="b-zona-label" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:.68rem;color:#2563a8;font-weight:600;pointer-events:none;white-space:nowrap"></span>
         </div>
       </div>
+      <div id="b-tel-aviso" style="display:none;font-size:.72rem;color:var(--red);padding:3px 2px 0;margin-top:-4px">⚠️ Este cliente no está registrado — ingresá el teléfono para guardarlo.</div>
       <div class="boleta-search-wrap">
         <input type="text" id="b-search" placeholder="Buscar producto para agregar..." oninput="buscarProductoBoleta()" autocomplete="off">
         <div class="autocomplete-list" id="b-autocomplete"></div>
@@ -723,6 +727,7 @@ function limpiarBoleta(){
 
 async function guardarBoleta(){
   if(!boletaItems.length){showToast('Agrega productos primero');return;}
+  if(telefonoObligatorio()){showToast('⚠️ Ingresá el teléfono — este cliente no está registrado');return;}
   const negocio=document.getElementById('b-negocio').value.trim()||'Sin nombre';
   const telefono=document.getElementById('b-telefono').value.trim();
   const descuento=parseFloat(document.getElementById('b-descuento').value)||0;
@@ -736,6 +741,7 @@ async function guardarBoleta(){
 
 async function imprimirBoleta(){
   if(!boletaItems.length){showToast('Agrega productos primero');return;}
+  if(telefonoObligatorio()){showToast('⚠️ Ingresá el teléfono — este cliente no está registrado');return;}
   const negocio=document.getElementById('b-negocio').value.trim()||'Sin nombre';
   const telefono=document.getElementById('b-telefono').value.trim();
   const descuento=parseFloat(document.getElementById('b-descuento').value)||0;
@@ -1365,17 +1371,96 @@ async function getZonaCliente(telefono){
   return null;
 }
 
-// Auto-completar zona en boleta cuando se escribe el teléfono
+// ========================
+// BOLETA: autocomplete de cliente por nombre
+// ========================
+let negocioSearchTimeout=null;
+let clienteSeleccionado=false;// true cuando se eligió un cliente ya registrado
+
+async function onNegocioBoleta(){
+  clienteSeleccionado=false;
+  actualizarAvisoTel();
+  const q=document.getElementById('b-negocio').value.trim();
+  const dd=document.getElementById('b-negocio-autocomplete');
+  clearTimeout(negocioSearchTimeout);
+  if(q.length<2){dd.style.display='none';return;}
+  negocioSearchTimeout=setTimeout(async()=>{
+    try{
+      const r=await fetch(`${SURL}/rest/v1/clientes?negocio=ilike.*${encodeURIComponent(q)}*&select=negocio,telefono,zonas(nombre)&limit=6`,{headers:{apikey:SKEY,Authorization:'Bearer '+SKEY}});
+      const arr=await r.json();
+      if(!arr||!arr.length){dd.style.display='none';return;}
+      dd.innerHTML=arr.map(c=>`
+        <div onclick="elegirClienteBoleta(${JSON.stringify(c).replace(/"/g,'&quot;')})"
+          style="padding:9px 14px;cursor:pointer;font-size:.83rem;border-bottom:1px solid var(--beige);display:flex;justify-content:space-between;align-items:center"
+          onmouseover="this.style.background='var(--beige)'" onmouseout="this.style.background=''">
+          <span><strong>${c.negocio}</strong></span>
+          <span style="font-size:.72rem;color:var(--brownl)">📞 ${c.telefono}${c.zonas?' &nbsp;📍 '+c.zonas.nombre:''}</span>
+        </div>`).join('');
+      dd.style.display='block';
+    }catch(e){dd.style.display='none';}
+  },350);
+}
+
+function elegirClienteBoleta(c){
+  document.getElementById('b-negocio').value=c.negocio;
+  document.getElementById('b-telefono').value=c.telefono||'';
+  const zonaEl=document.getElementById('b-zona-label');
+  if(zonaEl)zonaEl.textContent=c.zonas?'📍 '+c.zonas.nombre:'';
+  document.getElementById('b-negocio-autocomplete').style.display='none';
+  clienteSeleccionado=true;
+  actualizarAvisoTel();
+}
+
+function actualizarAvisoTel(){
+  const aviso=document.getElementById('b-tel-aviso');
+  const tel=document.getElementById('b-telefono').value.trim();
+  // Mostrar aviso solo si hay nombre pero no tiene teléfono y no eligió de la lista
+  const negocio=document.getElementById('b-negocio').value.trim();
+  if(negocio&&!clienteSeleccionado&&!tel){
+    aviso.style.display='block';
+  }else{
+    aviso.style.display='none';
+  }
+}
+
+function telefonoObligatorio(){
+  // Retorna true si el teléfono es obligatorio en el contexto actual
+  const tel=document.getElementById('b-telefono').value.trim();
+  if(clienteSeleccionado||tel)return false;// tiene teléfono o cliente registrado → ok
+  return true;// no registrado y sin teléfono → obligatorio
+}
+
+// Auto-completar zona cuando se escribe el teléfono manualmente
 let zonaAutoTimeout=null;
 async function onTelefonoBoleta(){
   const tel=document.getElementById('b-telefono').value.trim();
   const zonaEl=document.getElementById('b-zona-label');
   if(zonaEl)zonaEl.textContent='';
+  actualizarAvisoTel();
   clearTimeout(zonaAutoTimeout);
   if(tel.length<7)return;
   zonaAutoTimeout=setTimeout(async()=>{
-    const zona=await getZonaCliente(tel);
-    if(zonaEl&&zona)zonaEl.textContent='📍 '+zona;
+    // Si se escribe un teléfono nuevo, buscar si ya existe ese cliente
+    try{
+      const r=await fetch(`${SURL}/rest/v1/clientes?telefono=eq.${encodeURIComponent(tel)}&select=negocio,zonas(nombre)`,{headers:{apikey:SKEY,Authorization:'Bearer '+SKEY}});
+      const arr=await r.json();
+      if(arr&&arr.length){
+        // Cliente conocido por teléfono
+        if(!document.getElementById('b-negocio').value.trim()&&arr[0].negocio){
+          document.getElementById('b-negocio').value=arr[0].negocio;
+        }
+        if(zonaEl&&arr[0].zonas)zonaEl.textContent='📍 '+arr[0].zonas.nombre;
+        clienteSeleccionado=true;
+      }else{
+        // Teléfono nuevo, no registrado
+        clienteSeleccionado=false;
+        if(zonaEl)zonaEl.textContent='';
+      }
+      actualizarAvisoTel();
+    }catch(e){
+      const zona=await getZonaCliente(tel);
+      if(zonaEl&&zona)zonaEl.textContent='📍 '+zona;
+    }
   },600);
 }
 
@@ -1590,6 +1675,7 @@ async function imprimirListaCamion(modo='completa', zonasElegidas=null){
 document.addEventListener('click',e=>{
   if(!e.target.closest('.boleta-search-wrap'))document.getElementById('b-autocomplete').className='autocomplete-list';
   if(!e.target.closest('#edit-search')&&!e.target.closest('#edit-autocomplete'))document.getElementById('edit-autocomplete').style.display='none';
+  if(!e.target.closest('#b-negocio')&&!e.target.closest('#b-negocio-autocomplete'))document.getElementById('b-negocio-autocomplete').style.display='none';
   const modal=document.getElementById('modal-editar');
   if(e.target===modal)cerrarModalEditar();
   const modalZ=document.getElementById('modal-selector-zonas');
