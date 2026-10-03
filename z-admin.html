@@ -333,7 +333,10 @@ tr:hover td{background:rgba(237,230,214,.4)}
       <h3>🧾 Nueva boleta</h3>
       <div class="boleta-cliente-row">
         <input type="text" id="b-negocio" placeholder="Nombre del negocio / cliente">
-        <input type="text" id="b-telefono" placeholder="Telefono (opcional)">
+        <div style="position:relative">
+          <input type="text" id="b-telefono" placeholder="Telefono (opcional)" oninput="onTelefonoBoleta()" style="width:100%">
+          <span id="b-zona-label" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:.68rem;color:#2563a8;font-weight:600;pointer-events:none;white-space:nowrap"></span>
+        </div>
       </div>
       <div class="boleta-search-wrap">
         <input type="text" id="b-search" placeholder="Buscar producto para agregar..." oninput="buscarProductoBoleta()" autocomplete="off">
@@ -393,7 +396,7 @@ tr:hover td{background:rgba(237,230,214,.4)}
         <option value="impreso">Impresos</option>
       </select>
       <button class="btn-green" onclick="imprimirListaCamion('completa')" style="white-space:nowrap">🚛 Lista del camión</button>
-      <button class="btn-green" onclick="imprimirListaCamion('zonas')" style="white-space:nowrap;background:#2563a8">📍 Por zona</button>
+      <button class="btn-green" onclick="abrirSelectorZonas()" style="white-space:nowrap;background:#2563a8">📍 Por zona</button>
     </div>
     <div id="orders-content"><div class="loading-msg">Cargando pedidos...</div></div>
   </div>
@@ -489,6 +492,22 @@ tr:hover td{background:rgba(237,230,214,.4)}
 
 <div id="print-area"></div>
 <div class="toast" id="toast"></div>
+
+<!-- MODAL SELECTOR ZONAS -->
+<div id="modal-selector-zonas" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--white);border-radius:18px;width:100%;max-width:380px;padding:22px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd)">📍 Elegir zonas para el camión</h3>
+      <button onclick="cerrarSelectorZonas()" style="background:transparent;border:none;font-size:1.3rem;cursor:pointer;color:var(--brownl)">✕</button>
+    </div>
+    <p style="font-size:.76rem;color:var(--brownl);margin-bottom:14px">Seleccioná las zonas que vas a repartir hoy.</p>
+    <div id="zonas-checkboxes" style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-primary" onclick="imprimirZonasSeleccionadas()" style="flex:1">🖨️ Imprimir lista</button>
+      <button onclick="cerrarSelectorZonas()" style="background:transparent;border:1.5px solid var(--beige);color:var(--brownl);border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer">Cancelar</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL EDITAR PEDIDO -->
 <div id="modal-editar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;padding:12px">
@@ -698,6 +717,7 @@ function limpiarBoleta(){
   document.getElementById('b-telefono').value='';
   document.getElementById('b-descuento').value='0';
   document.getElementById('b-search').value='';
+  const zl=document.getElementById('b-zona-label');if(zl)zl.textContent='';
   renderBoleta();
 }
 
@@ -1345,6 +1365,71 @@ async function getZonaCliente(telefono){
   return null;
 }
 
+// Auto-completar zona en boleta cuando se escribe el teléfono
+let zonaAutoTimeout=null;
+async function onTelefonoBoleta(){
+  const tel=document.getElementById('b-telefono').value.trim();
+  const zonaEl=document.getElementById('b-zona-label');
+  if(zonaEl)zonaEl.textContent='';
+  clearTimeout(zonaAutoTimeout);
+  if(tel.length<7)return;
+  zonaAutoTimeout=setTimeout(async()=>{
+    const zona=await getZonaCliente(tel);
+    if(zonaEl&&zona)zonaEl.textContent='📍 '+zona;
+  },600);
+}
+
+// ========================
+// MODAL SELECTOR DE ZONAS
+// ========================
+async function abrirSelectorZonas(){
+  // Cargar zonas frescas
+  try{
+    const r=await fetch(`${SURL}/rest/v1/zonas?select=*&order=nombre.asc`,{headers:{apikey:SKEY,Authorization:'Bearer '+SKEY}});
+    allZonas=await r.json();
+  }catch(e){}
+
+  const contenedor=document.getElementById('zonas-checkboxes');
+  if(!allZonas.length){
+    contenedor.innerHTML='<div style="font-size:.82rem;color:var(--brownl)">No hay zonas creadas. Creá una en la pestaña 👥 Clientes.</div>';
+  }else{
+    // Opción "Todas" + una por zona
+    contenedor.innerHTML=`
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 12px;border:1.5px solid var(--beige);border-radius:10px;font-size:.86rem;font-weight:600;color:var(--brownd)">
+        <input type="checkbox" id="zona-check-todas" onchange="toggleTodasZonas(this.checked)" style="width:18px;height:18px;accent-color:var(--brown);cursor:pointer">
+        Todas las zonas
+      </label>
+      <div style="height:1px;background:var(--beige);margin:2px 0"></div>
+      ${allZonas.map(z=>`
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 12px;border:1.5px solid var(--beige);border-radius:10px;font-size:.84rem;color:var(--brownd)" data-zona-label>
+          <input type="checkbox" class="zona-check" value="${z.id}" data-nombre="${z.nombre}" style="width:18px;height:18px;accent-color:var(--brown);cursor:pointer">
+          ${z.nombre}
+        </label>`).join('')}
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 12px;border:1.5px solid var(--beige);border-radius:10px;font-size:.84rem;color:var(--brownl)" data-zona-label>
+        <input type="checkbox" class="zona-check" value="sin-zona" data-nombre="Sin zona" style="width:18px;height:18px;accent-color:var(--brown);cursor:pointer">
+        Sin zona asignada
+      </label>`;
+  }
+  const modal=document.getElementById('modal-selector-zonas');
+  modal.style.display='flex';
+}
+
+function cerrarSelectorZonas(){
+  document.getElementById('modal-selector-zonas').style.display='none';
+}
+
+function toggleTodasZonas(checked){
+  document.querySelectorAll('.zona-check').forEach(cb=>cb.checked=checked);
+}
+
+async function imprimirZonasSeleccionadas(){
+  const checks=[...document.querySelectorAll('.zona-check:checked')];
+  if(!checks.length){showToast('Seleccioná al menos una zona');return;}
+  const zonasElegidas=checks.map(c=>({id:c.value,nombre:c.dataset.nombre}));
+  cerrarSelectorZonas();
+  await imprimirListaCamion('zonas',zonasElegidas);
+}
+
 // ========================
 // LISTA DEL CAMION
 // ========================
@@ -1379,7 +1464,7 @@ function buildListaTable(lista,label){
     </table>`;
 }
 
-async function imprimirListaCamion(modo='completa'){
+async function imprimirListaCamion(modo='completa', zonasElegidas=null){
   const hoy=new Date();
   const pedidosHoy=allOrders.filter(o=>{
     if(!o.impreso)return false;
@@ -1389,25 +1474,9 @@ async function imprimirListaCamion(modo='completa'){
   if(!pedidosHoy.length){showToast('No hay pedidos impresos de hoy');return;}
 
   const fechaStr=hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  const negocios=pedidosHoy.map(o=>o.negocio||'Sin nombre').join(', ');
-  const header=`
-  <div style="font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:16px">
-    <div style="display:flex;align-items:center;gap:14px;border-bottom:3px solid #1a7a3c;padding-bottom:10px;margin-bottom:14px">
-      <div style="background:#1a5c15;border-radius:8px;width:60px;height:60px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:9px;text-align:center;line-height:1.3;flex-shrink:0">DISTRI<br>LOS 4<br>HERMANOS</div>
-      <div style="flex:1;text-align:center">
-        <h1 style="font-size:1.5rem;font-weight:900;text-transform:uppercase;color:#1a1008;margin:0">Lista del Camión${modo==='zonas'?' — Por Zona':''}</h1>
-        <p style="margin:4px 0 0;font-size:.82rem;color:#555">Distribuidora Los 4 Hermanos</p>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:.78rem;color:#444;margin-bottom:10px;flex-wrap:wrap;gap:6px">
-      <span>📅 ${fechaStr}</span>
-      <span>📦 ${pedidosHoy.length} pedido${pedidosHoy.length>1?'s':''}</span>
-    </div>
-    <div style="font-size:.75rem;color:#666;margin-bottom:14px;border:1px solid #ddd;border-radius:6px;padding:6px 10px">
-      <strong>Clientes:</strong> ${negocios}
-    </div>`;
 
   let body='';
+  let pedidosEnLista=pedidosHoy;// puede filtrarse por zona
 
   if(modo==='completa'){
     const mapa={};
@@ -1421,28 +1490,47 @@ async function imprimirListaCamion(modo='completa'){
     const lista=Object.values(mapa).sort((a,b)=>a.name.localeCompare(b.name,'es'));
     body=buildListaTable(lista,'');
   } else {
-    // Por zona: obtener zona de cada pedido via clientes
-    showToast('Cargando zonas...');
+    // Por zona con filtro de zonas seleccionadas
     // Cargar todos los clientes con zona de una vez
     let clientMap={};
     try{
       const r=await fetch(`${SURL}/rest/v1/clientes?select=telefono,zona_id,zonas(nombre)`,{headers:{apikey:SKEY,Authorization:'Bearer '+SKEY}});
       const arr=await r.json();
-      arr.forEach(c=>{clientMap[c.telefono]={zona:c.zonas?c.zonas.nombre:null,zona_id:c.zona_id};});
+      arr.forEach(c=>{clientMap[c.telefono]={zona:c.zonas?c.zonas.nombre:null,zona_id:c.zona_id?String(c.zona_id):null};});
     }catch(e){}
 
-    // Agrupar pedidos por zona
-    const porZona={};// zona_nombre -> {mapa}
+    // Ids de zonas seleccionadas (string para comparar)
+    const idsElegidos=zonasElegidas?zonasElegidas.map(z=>String(z.id)):null;
+    const incluyeSinZona=!idsElegidos||idsElegidos.includes('sin-zona');
+
+    // Agrupar pedidos por zona filtrando por selección
+    const porZona={};
     pedidosHoy.forEach(o=>{
       const cl=clientMap[o.telefono];
       const zonaKey=cl&&cl.zona?cl.zona:'Sin zona';
-      if(!porZona[zonaKey])porZona[zonaKey]={};
+      const zonaId=cl&&cl.zona_id?cl.zona_id:null;
+
+      // Filtrar: si hay zonas elegidas, solo incluir las que corresponden
+      if(idsElegidos){
+        if(zonaKey==='Sin zona'&&!incluyeSinZona)return;
+        if(zonaKey!=='Sin zona'&&!idsElegidos.includes(zonaId))return;
+      }
+
+      if(!porZona[zonaKey])porZona[zonaKey]={pedidos:[],mapa:{}};
+      porZona[zonaKey].pedidos.push(o);
       if(!o.items||!Array.isArray(o.items))return;
       o.items.forEach(item=>{
-        if(!porZona[zonaKey][item.name]){porZona[zonaKey][item.name]={name:item.name,qty:0};}
-        porZona[zonaKey][item.name].qty+=Number(item.qty)||0;
+        if(!porZona[zonaKey].mapa[item.name]){porZona[zonaKey].mapa[item.name]={name:item.name,qty:0};}
+        porZona[zonaKey].mapa[item.name].qty+=Number(item.qty)||0;
       });
     });
+
+    if(!Object.keys(porZona).length){
+      showToast('No hay pedidos en las zonas seleccionadas');return;
+    }
+
+    // Recolectar pedidos filtrados para el encabezado
+    pedidosEnLista=Object.values(porZona).flatMap(z=>z.pedidos);
 
     // Ordenar: zonas con nombre primero, "Sin zona" al final
     const zonasOrdenadas=Object.keys(porZona).sort((a,b)=>{
@@ -1450,16 +1538,42 @@ async function imprimirListaCamion(modo='completa'){
       return a.localeCompare(b,'es');
     });
 
+    const titulosZonas=zonasElegidas?zonasElegidas.filter(z=>z.id!=='sin-zona').map(z=>z.nombre).join(', ')+(incluyeSinZona?' + Sin zona':''):'Todas';
+
     body=zonasOrdenadas.map(zona=>{
-      const lista=Object.values(porZona[zona]).sort((a,b)=>a.name.localeCompare(b.name,'es'));
-      return `<div style="margin-bottom:20px">
-        <div style="background:#2563a8;color:white;padding:8px 14px;border-radius:8px 8px 0 0;font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px">📍 ${zona}</div>
+      const lista=Object.values(porZona[zona].mapa).sort((a,b)=>a.name.localeCompare(b.name,'es'));
+      const negociosZona=porZona[zona].pedidos.map(o=>o.negocio||'Sin nombre').join(', ');
+      return `<div style="margin-bottom:24px;page-break-inside:avoid">
+        <div style="background:#2563a8;color:white;padding:10px 14px;border-radius:8px 8px 0 0;font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center">
+          <span>📍 ${zona}</span>
+          <span style="font-size:.72rem;font-weight:400;opacity:.85">${porZona[zona].pedidos.length} pedido${porZona[zona].pedidos.length>1?'s':''}</span>
+        </div>
+        <div style="font-size:.7rem;color:#666;padding:4px 10px 6px;border:1px solid #ddd;border-top:none;background:#f5f5f5">Clientes: ${negociosZona}</div>
         ${buildListaTable(lista,zona)}
       </div>`;
     }).join('');
   }
 
-  const totalGeneral=pedidosHoy.reduce((s,o)=>s+(o.items&&Array.isArray(o.items)?o.items.reduce((ss,i)=>ss+Number(i.qty||0),0):0),0);
+  const negocios=pedidosEnLista.map(o=>o.negocio||'Sin nombre').join(', ');
+  const subtituloModo=modo==='zonas'?' — Por Zona':'';
+  const header=`
+  <div style="font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:16px">
+    <div style="display:flex;align-items:center;gap:14px;border-bottom:3px solid #1a7a3c;padding-bottom:10px;margin-bottom:14px">
+      <div style="background:#1a5c15;border-radius:8px;width:60px;height:60px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:9px;text-align:center;line-height:1.3;flex-shrink:0">DISTRI<br>LOS 4<br>HERMANOS</div>
+      <div style="flex:1;text-align:center">
+        <h1 style="font-size:1.5rem;font-weight:900;text-transform:uppercase;color:#1a1008;margin:0">Lista del Camión${subtituloModo}</h1>
+        <p style="margin:4px 0 0;font-size:.82rem;color:#555">Distribuidora Los 4 Hermanos</p>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:.78rem;color:#444;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+      <span>📅 ${fechaStr}</span>
+      <span>📦 ${pedidosEnLista.length} pedido${pedidosEnLista.length>1?'s':''}</span>
+    </div>
+    <div style="font-size:.75rem;color:#666;margin-bottom:14px;border:1px solid #ddd;border-radius:6px;padding:6px 10px">
+      <strong>Clientes:</strong> ${negocios}
+    </div>`;
+
+  const totalGeneral=pedidosEnLista.reduce((s,o)=>s+(o.items&&Array.isArray(o.items)?o.items.reduce((ss,i)=>ss+Number(i.qty||0),0):0),0);
   const footer=`
     <div style="display:flex;justify-content:space-between;background:#e8f5e9;border-radius:8px;padding:12px 16px;font-weight:700;font-size:1rem;color:#1a5c15;margin-top:4px">
       <span>TOTAL GENERAL</span><span>${totalGeneral} unidades</span>
@@ -1478,6 +1592,8 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('#edit-search')&&!e.target.closest('#edit-autocomplete'))document.getElementById('edit-autocomplete').style.display='none';
   const modal=document.getElementById('modal-editar');
   if(e.target===modal)cerrarModalEditar();
+  const modalZ=document.getElementById('modal-selector-zonas');
+  if(e.target===modalZ)cerrarSelectorZonas();
 });
 
 ['tab-stats','tab-orders','tab-boleta','tab-stock','tab-settings','tab-clientes'].forEach(id=>{document.getElementById(id).style.display='none';});
