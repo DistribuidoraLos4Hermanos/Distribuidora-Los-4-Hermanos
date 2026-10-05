@@ -601,27 +601,40 @@ function renderTable(){
   document.getElementById('table-body').innerHTML=list.map(p=>`
     <tr>
       <td>${p.image_url?`<img class="prod-thumb" src="${p.image_url}" onerror="this.style.display='none'">`:'-'}</td>
-      <td><input class="td-input" style="width:48px;text-align:center" value="${p.emoji||'🛍️'}" id="emoji-${p.id}"></td>
-      <td><input class="td-input" style="min-width:120px" value="${p.name}" id="name-${p.id}"></td>
-      <td><input class="td-input" style="min-width:100px" value="${p.description||''}" id="desc-${p.id}"></td>
-      <td><select class="td-select" id="cat-${p.id}">${Object.entries(CATS).map(([v,l])=>`<option value="${v}"${p.category===v?' selected':''}>${l}</option>`).join('')}</select></td>
-      <td><input class="td-input" type="number" style="width:82px;text-align:right" value="${p.price||0}" id="price-${p.id}"></td>
-      <td><input class="td-input" style="min-width:140px" value="${p.image_url||''}" id="img-${p.id}" placeholder="https://..."></td>
-      <td style="text-align:center"><input type="checkbox" id="mp-${p.id}" ${p.medio_pack?'checked':''} style="width:16px;height:16px;accent-color:var(--brown)"></td>
+      <td><input class="td-input" style="width:48px;text-align:center" value="${p.emoji||'🛍️'}" id="emoji-${p.id}" oninput="autoSave('${p.id}')"></td>
+      <td><input class="td-input" style="min-width:120px" value="${p.name}" id="name-${p.id}" oninput="autoSave('${p.id}')"></td>
+      <td><input class="td-input" style="min-width:100px" value="${p.description||''}" id="desc-${p.id}" oninput="autoSave('${p.id}')"></td>
+      <td><select class="td-select" id="cat-${p.id}" onchange="autoSave('${p.id}')">${Object.entries(CATS).map(([v,l])=>`<option value="${v}"${p.category===v?' selected':''}>${l}</option>`).join('')}</select></td>
+      <td><input class="td-input" type="number" style="width:82px;text-align:right" value="${p.price||0}" id="price-${p.id}" oninput="autoSave('${p.id}')"></td>
+      <td><input class="td-input" style="min-width:140px" value="${p.image_url||''}" id="img-${p.id}" placeholder="https://..." oninput="autoSave('${p.id}')"></td>
+      <td style="text-align:center"><input type="checkbox" id="mp-${p.id}" ${p.medio_pack?'checked':''} style="width:16px;height:16px;accent-color:var(--brown)" onchange="autoSave('${p.id}')"></td>
       <td><button class="toggle${p.active?'':' off'}" id="tog-${p.id}" onclick="toggleActive('${p.id}')"></button></td>
       <td style="display:flex;gap:5px;align-items:center">
-        <button class="save-btn" onclick="saveRow('${p.id}')">Guardar</button>
+        <span id="save-status-${p.id}" style="font-size:.7rem;color:var(--brownl);min-width:48px;text-align:center"></span>
         <button class="del-btn" onclick="deleteProduct('${p.id}')">X</button>
       </td>
     </tr>`).join('');
 }
 
-async function saveRow(id){
+const autoSaveTimers={};
+function autoSave(id){
+  const statusEl=document.getElementById('save-status-'+id);
+  if(statusEl)statusEl.textContent='✏️';
+  clearTimeout(autoSaveTimers[id]);
+  autoSaveTimers[id]=setTimeout(()=>saveRow(id,true),900);
+}
+
+async function saveRow(id,silent=false){
+  const statusEl=document.getElementById('save-status-'+id);
   const payload={emoji:document.getElementById('emoji-'+id).value,name:document.getElementById('name-'+id).value,description:document.getElementById('desc-'+id).value,category:document.getElementById('cat-'+id).value,price:parseInt(document.getElementById('price-'+id).value)||0,image_url:document.getElementById('img-'+id).value||null,active:!document.getElementById('tog-'+id).classList.contains('off'),medio_pack:document.getElementById('mp-'+id).checked};
   const{error}=await db.from('products').update(payload).eq('id',id);
-  if(error){showToast('Error: '+error.message);return;}
+  if(error){if(statusEl)statusEl.textContent='❌';showToast('Error: '+error.message);return;}
   const p=products.find(x=>x.id===id);if(p)Object.assign(p,payload);
-  renderTable();showToast('Guardado');
+  if(silent){
+    if(statusEl){statusEl.textContent='✅';setTimeout(()=>{if(statusEl)statusEl.textContent='';},2000);}
+  }else{
+    renderTable();showToast('Guardado');
+  }
 }
 
 async function toggleActive(id){
