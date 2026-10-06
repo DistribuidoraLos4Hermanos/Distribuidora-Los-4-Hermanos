@@ -794,6 +794,7 @@ async function guardarBoleta(){
   const total=baseTotal+recargoFiado;
   const{error}=await db.from('orders').insert([{negocio,telefono,turno:'tarde',items,total,descuento_aplicado:descuento,recargo_fiado:recargoFiado,origen:'manual',impreso:false,stock_descontado:false}]);
   if(error){showToast('Error al guardar: '+error.message);return;}
+  if(telefono)syncCliente(telefono,negocio);
   showToast('✅ Pedido guardado');
 }
 
