@@ -406,6 +406,7 @@ tr:hover td{background:rgba(237,230,214,.4)}
         <option value="pendiente">Pendientes</option>
         <option value="impreso">Impresos</option>
       </select>
+      <button class="btn-green" onclick="imprimirNoImpresosDelDia()" style="white-space:nowrap;background:#e07b00" title="Imprime todos los pedidos de hoy que todavía no fueron impresos">🖨️ Imprimir no impresos</button>
       <button class="btn-green" onclick="imprimirListaCamion('completa')" style="white-space:nowrap">🚛 Lista del camión</button>
       <button class="btn-green" onclick="abrirSelectorZonas()" style="white-space:nowrap;background:#2563a8">📍 Por zona</button>
       <button class="btn-green" onclick="exportarYLimpiarDia()" style="white-space:nowrap;background:#7c3aed" title="Exporta un CSV con los pedidos del día y los elimina de la base de datos">📥 Cierre del día</button>
@@ -427,8 +428,10 @@ tr:hover td{background:rgba(237,230,214,.4)}
     <div class="info-card">
       <h3>📋 Clientes y zonas asignadas</h3>
       <p>Busca un cliente por teléfono y asígnale una zona.</p>
-      <div style="display:flex;gap:8px;margin-top:10px;margin-bottom:12px">
-        <input type="text" id="buscar-cliente-tel" placeholder="Buscar por teléfono..." oninput="buscarClienteTel()" style="flex:1;padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);outline:none">
+      <div style="display:flex;gap:8px;margin-top:10px;margin-bottom:10px;flex-wrap:wrap">
+        <input type="text" id="buscar-cliente-tel" placeholder="Buscar por nombre o teléfono..." oninput="buscarClienteTel()" style="flex:1;min-width:180px;padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);outline:none">
+        <button onclick="seleccionarTodosClientes()" style="padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;background:transparent;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;color:var(--brownl);cursor:pointer;white-space:nowrap">☑️ Todos</button>
+        <button onclick="imprimirClientesSeleccionados()" style="padding:9px 14px;background:var(--brown);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap">🖨️ Imprimir seleccionados</button>
       </div>
       <div id="clientes-list"><div class="loading-msg">Cargando clientes...</div></div>
     </div>
@@ -816,6 +819,11 @@ async function imprimirBoleta(){
 }
 
 function generarVistaBoleta(negocio,telefono,items,subtotal,descuento,total,fecha,esFiado,fiadoPct,recargoFiado){
+  // El title de la página determina el nombre del PDF al guardar
+  const titleOriginal=document.title;
+  const fechaCorta=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+  document.title=`Pedido ${negocio||telefono||'cliente'} — ${fechaCorta}`;
+  window.addEventListener('afterprint',function restoreTitle(){document.title=titleOriginal;window.removeEventListener('afterprint',restoreTitle);});
   document.getElementById('print-area').innerHTML=`
   <div class="boleta-print">
     <div class="bp-header">
@@ -1444,7 +1452,9 @@ function renderClientesList(){
   const optsZona=`<option value="">Sin zona</option>`+allZonas.map(z=>`<option value="${z.id}">${z.nombre}</option>`).join('');
   el.innerHTML=allClientes.map(c=>{
     const zonaActual=c.zona_id||'';
+    const zonaNombre=c.zonas?c.zonas.nombre:'Sin zona';
     return `<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--beige);flex-wrap:wrap">
+      <input type="checkbox" class="cliente-cb" data-tel="${c.telefono}" data-negocio="${(c.negocio||'').replace(/"/g,'&quot;')}" data-zona="${zonaNombre}" style="width:18px;height:18px;accent-color:var(--brown);cursor:pointer;flex-shrink:0">
       <div style="flex:1;min-width:120px">
         <div style="font-size:.84rem;font-weight:600;color:var(--brownd)">${c.negocio||'Sin nombre'}</div>
         <div style="font-size:.74rem;color:var(--brownl)">📞 ${c.telefono}</div>
@@ -1454,6 +1464,53 @@ function renderClientesList(){
       </select>
     </div>`;
   }).join('');
+}
+
+function seleccionarTodosClientes(){
+  const cbs=document.querySelectorAll('.cliente-cb');
+  const todosChecked=[...cbs].every(cb=>cb.checked);
+  cbs.forEach(cb=>cb.checked=!todosChecked);
+}
+
+function imprimirClientesSeleccionados(){
+  const cbs=document.querySelectorAll('.cliente-cb:checked');
+  if(!cbs.length){alert('Seleccioná al menos un cliente.');return;}
+  const seleccionados=[...cbs].map(cb=>({
+    tel:cb.dataset.tel,
+    negocio:cb.dataset.negocio,
+    zona:cb.dataset.zona
+  }));
+  const fecha=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const filas=seleccionados.map((c,i)=>`
+    <tr>
+      <td style="padding:8px 10px;font-size:.82rem;font-weight:600;color:#1A1008;border-bottom:1px solid #EDE6D6">${i+1}</td>
+      <td style="padding:8px 10px;font-size:.82rem;font-weight:600;color:#1A1008;border-bottom:1px solid #EDE6D6">${c.negocio||'Sin nombre'}</td>
+      <td style="padding:8px 10px;font-size:.82rem;color:#5C3D2E;border-bottom:1px solid #EDE6D6">${c.tel}</td>
+      <td style="padding:8px 10px;font-size:.82rem;color:#5C3D2E;border-bottom:1px solid #EDE6D6">${c.zona||'Sin zona'}</td>
+    </tr>`).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Clientes seleccionados</title>
+  <style>
+    body{font-family:'DM Sans',Arial,sans-serif;padding:24px;color:#1A1008;background:#fff}
+    h1{font-family:Georgia,serif;font-size:1.3rem;color:#3A2418;margin-bottom:2px}
+    .sub{font-size:.78rem;color:#8B6248;margin-bottom:18px}
+    table{width:100%;border-collapse:collapse;font-size:.82rem}
+    th{background:#EDE6D6;padding:9px 10px;text-align:left;font-size:.72rem;font-weight:700;color:#3A2418;text-transform:uppercase;letter-spacing:.5px}
+    @media print{body{padding:10px}}
+  </style></head>
+  <body>
+    <h1>📋 Listado de Clientes</h1>
+    <div class="sub">Distribuidora Los 4 Hermanos &nbsp;·&nbsp; ${fecha} &nbsp;·&nbsp; ${seleccionados.length} cliente${seleccionados.length!==1?'s':''}</div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>Negocio / Nombre</th><th>Teléfono</th><th>Zona</th>
+      </tr></thead>
+      <tbody>${filas}</tbody>
+    </table>
+    <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`;
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
 }
 
 // Sincronizar cliente cuando llega un pedido
@@ -1779,6 +1836,87 @@ async function imprimirListaCamion(modo='completa', zonasElegidas=null){
 
   document.getElementById('print-area').innerHTML=header+body+footer;
   window.print();
+}
+
+// ========================
+// IMPRIMIR NO IMPRESOS DEL DÍA
+// ========================
+async function imprimirNoImpresosDelDia(){
+  const hoy=new Date();
+  const noImpresos=allOrders.filter(o=>{
+    if(o.impreso)return false;
+    const fecha=new Date(o.created_at);
+    return fecha.toDateString()===hoy.toDateString();
+  });
+  if(!noImpresos.length){showToast('✅ Todos los pedidos de hoy ya fueron impresos');return;}
+  if(!confirm(`Hay ${noImpresos.length} pedido${noImpresos.length>1?'s':''} sin imprimir hoy.\n¿Querés imprimirlos todos y marcarlos como impresos?`))return;
+
+  const fechaStr=hoy.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const filas=noImpresos.map((o,i)=>{
+    const productos=(o.items||[]).map(i=>`${i.name} x${fmtQty(i.qty)}`).join(', ');
+    const recargoFiado=o.recargo_fiado||0;
+    const esFiado=recargoFiado>0;
+    const fiadoLinea=esFiado?`<tr><td colspan="2" style="padding:3px 0;font-size:.72rem;color:#c0392b;font-weight:600">⚠️ FIADO — Recargo: +$${recargoFiado.toLocaleString('es-AR')}</td></tr>`:'';
+    return `
+    <div style="page-break-inside:avoid;border:1px solid #ddd;border-radius:8px;padding:14px;margin-bottom:16px;background:#fff">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #3A2418;padding-bottom:8px;margin-bottom:10px">
+        <div>
+          <div style="font-family:Georgia,serif;font-size:1rem;font-weight:700;color:#3A2418">Distribuidora Los 4 Hermanos</div>
+          <div style="font-size:.7rem;color:#8B6248">Tel: ${storeInfo.telefono_display||'351 621-1515'}</div>
+        </div>
+        <div style="text-align:right;font-size:.72rem;color:#555">
+          <div>${fechaStr}</div>
+          <div style="font-size:.68rem">Pedido #${i+1}</div>
+        </div>
+      </div>
+      ${esFiado?`<div style="background:#c0392b;color:white;text-align:center;padding:5px;font-weight:700;font-size:.78rem;border-radius:5px;margin-bottom:8px">⚠️ VENTA EN FIADO</div>`:''}
+      <table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:10px">
+        <tr><td style="padding:2px 0;color:#555;width:90px">Cliente:</td><td style="font-weight:700;color:#1A1008">${o.negocio||'Sin nombre'}</td></tr>
+        <tr><td style="padding:2px 0;color:#555">Teléfono:</td><td style="color:#1A1008">${o.telefono||'—'}</td></tr>
+        <tr><td style="padding:2px 0;color:#555">Turno:</td><td style="color:#1A1008">${o.turno==='manana'?'Mañana (8-12)':'Tarde (14-18)'}</td></tr>
+      </table>
+      <div style="background:#f5f0e8;border-radius:6px;padding:8px 10px;font-size:.78rem;margin-bottom:10px">
+        <div style="font-weight:700;color:#3A2418;margin-bottom:4px">Detalle del pedido:</div>
+        ${(o.items||[]).map(it=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #ede6d6"><span>${it.name} x${fmtQty(it.qty)}</span><span style="font-weight:600">$${(it.total||0).toLocaleString('es-AR')}</span></div>`).join('')}
+      </div>
+      <table style="width:100%;font-size:.82rem">
+        ${o.descuento_aplicado>0?`<tr><td style="color:#555">Descuento:</td><td style="text-align:right;color:#c0392b">-$${(o.descuento_aplicado||0).toLocaleString('es-AR')}</td></tr>`:''}
+        ${fiadoLinea}
+        <tr><td style="font-weight:700;font-size:.9rem;padding-top:4px">TOTAL${esFiado?' (FIADO)':''}:</td><td style="text-align:right;font-weight:700;font-size:.9rem;padding-top:4px">$${(o.total||0).toLocaleString('es-AR')}</td></tr>
+      </table>
+    </div>`;
+  }).join('');
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Pedidos no impresos — ${hoy.toLocaleDateString('es-AR')}</title>
+  <style>
+    body{font-family:'DM Sans',Arial,sans-serif;padding:16px;background:#fff;color:#1A1008}
+    @media print{body{padding:4px}.no-print{display:none}}
+  </style></head>
+  <body>
+    <div class="no-print" style="margin-bottom:12px;padding:10px;background:#f5f0e8;border-radius:8px;font-size:.82rem;color:#5C3D2E">
+      <strong>${noImpresos.length} pedido${noImpresos.length>1?'s':''}  sin imprimir de hoy.</strong> Al cerrar esta ventana, quedarán marcados como impresos.
+    </div>
+    ${filas}
+    <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`;
+
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+
+  // Marcar todos como impresos + descontar stock si no fue descontado
+  for(const o of noImpresos){
+    if(!o.stock_descontado){
+      await db.from('orders').update({impreso:true,stock_descontado:true}).eq('id',o.id);
+      await descontarStock(o.items||[]);
+      o.impreso=true;o.stock_descontado=true;
+    }else{
+      await db.from('orders').update({impreso:true}).eq('id',o.id);
+      o.impreso=true;
+    }
+  }
+  renderOrders(getFilteredOrders());
+  showToast(`✅ ${noImpresos.length} pedido${noImpresos.length>1?'s':''} marcado${noImpresos.length>1?'s':''} como impresos`);
 }
 
 // ========================
