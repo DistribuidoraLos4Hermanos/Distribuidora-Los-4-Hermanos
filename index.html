@@ -502,7 +502,7 @@ async function sendOrder(){
   if(hasDiscount)descLines+=`\n🏆 Descuento fidelidad (${loyaltyConfig.descuento_pct}%): -${fmt(descLoyalty)}`;
   if(cuponAplicado)descLines+=`\n🎟️ Cupon "${cuponAplicado.codigo}" (${cuponAplicado.descuento_pct}%): -${fmt(descCupon)}`;
   const wsp=storeConfig.telefono_wsp||'5493516211515';
-  const msg=`PEDIDO - LOS 4 HERMANOS\n\nNegocio: ${negocio}\nTel: ${telefono}\nTurno: ${turnoLabel}\n\nDetalle:\n${lines}\n\nSubtotal: ${fmt(subtotal)}${descLines}\nTOTAL: ${fmt(totalFinal)}\n\nEnviado desde la app`;
+  const msg=`PEDIDO - LOS 4 HERMANOS\n\nNegocio: ${negocio}\nTel: ${telefono}\nTurno: ${turnoLabel}\n\nDetalle:\n${lines}\n\nSubtotal: ${fmt(subtotal)}${descLines}\nTOTAL: ${fmt(totalFinal)}\n\n💳 Alias de pago: verso.iran.menta (Ramallo Angel Guillermo)\nPor favor enviá el comprobante de pago por este mismo chat.`;
 
   window.open('https://wa.me/'+wsp+'?text='+encodeURIComponent(msg),'_blank');
   cart={};hasDiscount=false;clientLoyalty=null;cuponAplicado=null;
