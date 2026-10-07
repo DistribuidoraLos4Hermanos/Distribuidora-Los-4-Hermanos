@@ -2296,6 +2296,11 @@ async function renderBalanceMes(){
     }
   }
 
+  // Fiado del mes
+  const pedidosFiados=ordenes.filter(o=>(o.recargo_fiado||0)>0);
+  const totalFiado=pedidosFiados.reduce((s,o)=>s+(o.total||0),0);
+  const cantFiado=pedidosFiados.length;
+
   // KPIs
   const diasTranscurridos=diasData.filter(d=>!d.esFuturo).length;
   const diasRestantes=diasEnMes-diasTranscurridos;
@@ -2323,6 +2328,11 @@ async function renderBalanceMes(){
       <div style="font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">${esMesActual?'🔮 Proyección':'📅 Promedio/día'}</div>
       <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:var(--brownd)">$${esMesActual?Math.round(proyeccion).toLocaleString('es-AR'):Math.round(promedioNeto).toLocaleString('es-AR')}</div>
       <div style="font-size:.68rem;color:var(--brownl);margin-top:4px">${esMesActual?`Al cierre del mes (${diasRestantes} días restantes)`:'Neta promedio por día activo'}</div>
+    </div>
+    <div style="background:#fff5f5;border-radius:14px;padding:14px;border:1px solid #fecaca;grid-column:1/-1">
+      <div style="font-size:.68rem;font-weight:600;color:#c0392b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">⚠️ Mercadería fiada</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:#c0392b">$${totalFiado.toLocaleString('es-AR')}</div>
+      <div style="font-size:.68rem;color:#e07b00;margin-top:4px">${cantFiado} pedido${cantFiado!==1?'s':''} en fiado este mes</div>
     </div>`;
 
   // Gráfico de barras
