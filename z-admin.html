@@ -275,6 +275,7 @@ tr:hover td{background:rgba(237,230,214,.4)}
     <div class="tab" onclick="showTab('stats')">Estadisticas</div>
     <div class="tab" onclick="showTab('orders')">Pedidos</div>
     <div class="tab" onclick="showTab('clientes')">👥 Clientes</div>
+    <div class="tab" onclick="showTab('finanzas')">💰 Finanzas</div>
     <div class="tab" onclick="showTab('settings')">Config</div>
   </div>
 
@@ -434,6 +435,65 @@ tr:hover td{background:rgba(237,230,214,.4)}
         <button onclick="imprimirClientesSeleccionados()" style="padding:9px 14px;background:var(--brown);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap">🖨️ Imprimir seleccionados</button>
       </div>
       <div id="clientes-list"><div class="loading-msg">Cargando clientes...</div></div>
+    </div>
+  </div>
+
+  <!-- FINANZAS -->
+  <div id="tab-finanzas" style="display:none;padding:14px 16px 60px">
+
+    <!-- KPIs del mes -->
+    <div id="fin-kpis" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px"></div>
+
+    <!-- Balance diario / mensual -->
+    <div class="info-card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd)">📅 Balance del mes</h3>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select id="fin-mes" onchange="loadFinanzas()" style="padding:7px 10px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;background:var(--cream);outline:none;cursor:pointer">
+            <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+            <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+            <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+            <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+          </select>
+          <select id="fin-anio" onchange="loadFinanzas()" style="padding:7px 10px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;background:var(--cream);outline:none;cursor:pointer"></select>
+        </div>
+      </div>
+      <!-- Gráfico de barras -->
+      <div id="fin-chart" style="overflow-x:auto;padding-bottom:4px"></div>
+      <!-- Tabla días -->
+      <div id="fin-tabla-dias" style="margin-top:14px"></div>
+    </div>
+
+    <!-- Gastos fijos -->
+    <div class="info-card" style="margin-bottom:12px">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);margin-bottom:10px">🔧 Gastos fijos mensuales</h3>
+      <p style="font-size:.78rem;color:var(--brownl);margin-bottom:12px">El sistema divide cada gasto por los días del mes para el balance diario.</p>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <input type="text" id="gf-nombre" placeholder="Nombre del gasto (ej: Luz)" style="flex:1;min-width:140px;padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);outline:none">
+        <input type="number" id="gf-monto" placeholder="Monto mensual $" style="width:160px;padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);outline:none">
+        <button class="btn-primary" onclick="agregarGastoFijo()">+ Agregar</button>
+      </div>
+      <div id="gastos-fijos-list"><div class="loading-msg">Cargando...</div></div>
+    </div>
+
+    <!-- Tabla precios compra/venta -->
+    <div class="info-card">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);margin-bottom:4px">📦 Precios de compra y venta</h3>
+      <p style="font-size:.78rem;color:var(--brownl);margin-bottom:12px">El precio de venta está sincronizado con la lista de productos. El precio de compra es solo visible acá.</p>
+      <div id="fin-alerta-margen" style="display:none;background:#fef3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 12px;font-size:.8rem;color:#856404;margin-bottom:10px"></div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:.8rem;min-width:500px">
+          <thead>
+            <tr>
+              <th style="background:var(--beige);padding:9px 12px;text-align:left;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Producto</th>
+              <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Precio venta</th>
+              <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Precio compra</th>
+              <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Margen</th>
+            </tr>
+          </thead>
+          <tbody id="fin-productos-body"><tr><td colspan="4" class="loading-msg">Cargando...</td></tr></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -609,17 +669,18 @@ function tryLogin(){
 function logout(){document.getElementById('admin-screen').style.display='none';document.getElementById('login-screen').style.display='flex';}
 
 function showTab(tab){
-  ['products','boleta','stock','stats','orders','clientes','settings'].forEach(t=>{
+  ['products','boleta','stock','stats','orders','clientes','finanzas','settings'].forEach(t=>{
     document.getElementById('tab-'+t).style.display=t===tab?'block':'none';
   });
   if(tab==='clientes'){loadZonas();loadClientes();}
   document.querySelectorAll('.tab').forEach((el,i)=>{
-    el.className='tab'+(['products','boleta','stock','stats','orders','clientes','settings'][i]===tab?' active':'');
+    el.className='tab'+(['products','boleta','stock','stats','orders','clientes','finanzas','settings'][i]===tab?' active':'');
   });
   if(tab==='stats')loadStats();
   if(tab==='orders')loadOrders();
   if(tab==='settings'){loadLoyaltyClients();loadCupones();loadOfertas();}
   if(tab==='stock')loadStock();
+  if(tab==='finanzas')loadFinanzas();
 }
 
 const CATS={gaseosa:'Gaseosas',cerveza:'Cervezas',agua:'Aguas',jugo:'Jugos',vino:'Vinos',alcohol:'Alcohol',energizante:'Energizantes',otros:'Otros'};
@@ -2062,7 +2123,269 @@ document.addEventListener('click',e=>{
   if(e.target===modalZ)cerrarSelectorZonas();
 });
 
-['tab-stats','tab-orders','tab-boleta','tab-stock','tab-settings','tab-clientes'].forEach(id=>{document.getElementById(id).style.display='none';});
+['tab-stats','tab-orders','tab-boleta','tab-stock','tab-settings','tab-clientes','tab-finanzas'].forEach(id=>{document.getElementById(id).style.display='none';});
+
+// ========================
+// FINANZAS
+// ========================
+let gastosFijos=[];
+let finProductos=[];
+
+async function loadFinanzas(){
+  await Promise.all([loadGastosFijos(),loadFinProductos()]);
+  renderBalanceMes();
+}
+
+// --- GASTOS FIJOS ---
+async function loadGastosFijos(){
+  const{data,error}=await db.from('gastos_fijos').select('*').order('created_at',{ascending:true});
+  if(error){showToast('Error cargando gastos: '+error.message);return;}
+  gastosFijos=data||[];
+  renderGastosFijos();
+}
+
+function renderGastosFijos(){
+  const el=document.getElementById('gastos-fijos-list');
+  if(!gastosFijos.length){el.innerHTML='<div class="no-data">No hay gastos fijos cargados.</div>';return;}
+  el.innerHTML=gastosFijos.map(g=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--beige);flex-wrap:wrap">
+      <div style="flex:1;min-width:120px">
+        <div style="font-size:.84rem;font-weight:600;color:var(--brownd)">${g.nombre}</div>
+        <div style="font-size:.72rem;color:var(--brownl)">$${(g.monto_mensual||0).toLocaleString('es-AR')} / mes → $${Math.round((g.monto_mensual||0)/30).toLocaleString('es-AR')} / día aprox.</div>
+      </div>
+      <input type="number" value="${g.monto_mensual||0}" onchange="actualizarGastoFijo('${g.id}',this.value)" style="width:130px;padding:7px 10px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);outline:none">
+      <button onclick="eliminarGastoFijo('${g.id}')" style="background:transparent;border:1.5px solid rgba(192,57,43,.3);color:var(--red);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:.85rem">✕</button>
+    </div>`).join('');
+}
+
+async function agregarGastoFijo(){
+  const nombre=document.getElementById('gf-nombre').value.trim();
+  const monto=parseFloat(document.getElementById('gf-monto').value)||0;
+  if(!nombre){showToast('Ingresá el nombre del gasto');return;}
+  const{error}=await db.from('gastos_fijos').insert([{nombre,monto_mensual:monto}]);
+  if(error){showToast('Error: '+error.message);return;}
+  document.getElementById('gf-nombre').value='';
+  document.getElementById('gf-monto').value='';
+  await loadGastosFijos();
+  renderBalanceMes();
+  showToast('✅ Gasto agregado');
+}
+
+async function actualizarGastoFijo(id,valor){
+  const monto=parseFloat(valor)||0;
+  await db.from('gastos_fijos').update({monto_mensual:monto}).eq('id',id);
+  const g=gastosFijos.find(x=>x.id===id);if(g)g.monto_mensual=monto;
+  renderGastosFijos();
+  renderBalanceMes();
+}
+
+async function eliminarGastoFijo(id){
+  if(!confirm('¿Eliminar este gasto fijo?'))return;
+  await db.from('gastos_fijos').delete().eq('id',id);
+  gastosFijos=gastosFijos.filter(g=>g.id!==id);
+  renderGastosFijos();
+  renderBalanceMes();
+}
+
+// --- PRODUCTOS (precio compra/venta) ---
+async function loadFinProductos(){
+  const{data,error}=await db.from('products').select('id,name,price,precio_compra,active,category').order('name',{ascending:true});
+  if(error)return;
+  finProductos=data||[];
+  renderFinProductos();
+}
+
+function renderFinProductos(){
+  const body=document.getElementById('fin-productos-body');
+  const alertEl=document.getElementById('fin-alerta-margen');
+  const activos=finProductos.filter(p=>p.active);
+  const negativos=activos.filter(p=>(p.precio_compra||0)>0&&(p.price||0)<=(p.precio_compra||0));
+  if(negativos.length){
+    alertEl.style.display='block';
+    alertEl.innerHTML='⚠️ <strong>Margen negativo o cero:</strong> '+negativos.map(p=>p.name).join(', ')+'. Revisá los precios.';
+  }else{
+    alertEl.style.display='none';
+  }
+  body.innerHTML=activos.map(p=>{
+    const venta=p.price||0;
+    const compra=p.precio_compra||0;
+    const margen=venta>0&&compra>0?Math.round((venta-compra)/venta*100):null;
+    const margenColor=margen===null?'var(--brownl)':margen<=0?'var(--red)':margen<20?'#e07b00':'var(--green)';
+    const margenTexto=margen===null?'—':margen+'%';
+    return`<tr>
+      <td style="padding:8px 12px;border-bottom:1px solid var(--beige);font-size:.82rem;font-weight:600;color:var(--brownd)">${p.name}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid var(--beige);text-align:right">
+        <input type="number" value="${venta}" onchange="actualizarPrecioVentaFin('${p.id}',this.value)" style="width:90px;padding:5px 8px;border:1.5px solid var(--beige);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.82rem;background:var(--cream);outline:none;text-align:right">
+      </td>
+      <td style="padding:8px 12px;border-bottom:1px solid var(--beige);text-align:right">
+        <input type="number" value="${compra||''}" placeholder="0" onchange="actualizarPrecioCompra('${p.id}',this.value)" style="width:90px;padding:5px 8px;border:1.5px solid var(--beige);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.82rem;background:var(--cream);outline:none;text-align:right">
+      </td>
+      <td style="padding:8px 12px;border-bottom:1px solid var(--beige);text-align:right;font-weight:700;color:${margenColor}">${margenTexto}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function actualizarPrecioVentaFin(id,valor){
+  const price=parseInt(valor)||0;
+  await db.from('products').update({price}).eq('id',id);
+  const p=finProductos.find(x=>x.id===id);if(p)p.price=price;
+  // también actualizar en el array global de productos si está cargado
+  const pg=products.find(x=>x.id===id);if(pg)pg.price=price;
+  renderFinProductos();
+  renderBalanceMes();
+}
+
+async function actualizarPrecioCompra(id,valor){
+  const precio_compra=parseInt(valor)||0;
+  await db.from('products').update({precio_compra}).eq('id',id);
+  const p=finProductos.find(x=>x.id===id);if(p)p.precio_compra=precio_compra;
+  renderFinProductos();
+  renderBalanceMes();
+}
+
+// --- BALANCE MENSUAL ---
+async function renderBalanceMes(){
+  const mes=parseInt(document.getElementById('fin-mes').value);
+  const anio=parseInt(document.getElementById('fin-anio').value);
+  const hoy=new Date();
+  const diasEnMes=new Date(anio,mes+1,0).getDate();
+
+  // Traer pedidos del mes
+  const inicio=new Date(anio,mes,1).toISOString();
+  const fin=new Date(anio,mes+1,0,23,59,59).toISOString();
+  const{data:pedidosMes}=await db.from('orders').select('*').gte('created_at',inicio).lte('created_at',fin);
+  const ordenes=pedidosMes||[];
+
+  // Mapa de precio_compra por producto id
+  const compraMap={};
+  finProductos.forEach(p=>{compraMap[p.id]=p.precio_compra||0;});
+
+  // Gasto diario = total gastos fijos / días del mes
+  const totalGastosMensuales=gastosFijos.reduce((s,g)=>s+(g.monto_mensual||0),0);
+  const gastoDiario=diasEnMes>0?totalGastosMensuales/diasEnMes:0;
+
+  // Calcular por día
+  const diasData=[];
+  let totalVentas=0,totalCosto=0,totalGastos=0,totalNeto=0;
+  let diasConVentas=0;
+
+  for(let d=1;d<=diasEnMes;d++){
+    const fechaDia=new Date(anio,mes,d);
+    const esFuturo=fechaDia>hoy&&!(fechaDia.toDateString()===hoy.toDateString());
+    const pedidosDia=ordenes.filter(o=>{
+      const f=new Date(o.created_at);
+      return f.getDate()===d&&f.getMonth()===mes&&f.getFullYear()===anio;
+    });
+    // Ventas = suma de totales
+    const ventas=pedidosDia.reduce((s,o)=>s+(o.total||0),0);
+    // Costo = suma de (precio_compra * qty) por item
+    let costo=0;
+    pedidosDia.forEach(o=>{
+      (o.items||[]).forEach(item=>{
+        const pc=compraMap[item.id]||0;
+        costo+=pc*(item.qty||0);
+      });
+    });
+    const gastos=esFuturo?0:gastoDiario;
+    const bruta=ventas-costo;
+    const neta=bruta-gastos;
+    diasData.push({d,ventas,costo,gastos:esFuturo?0:gastoDiario,bruta,neta,esFuturo,pedidos:pedidosDia.length});
+    if(!esFuturo){
+      totalVentas+=ventas;totalCosto+=costo;totalGastos+=gastoDiario;totalNeto+=neta;
+      if(ventas>0)diasConVentas++;
+    }
+  }
+
+  // KPIs
+  const diasTranscurridos=diasData.filter(d=>!d.esFuturo).length;
+  const diasRestantes=diasEnMes-diasTranscurridos;
+  const promedioNeto=diasConVentas>0?totalNeto/diasConVentas:0;
+  const proyeccion=totalNeto+(promedioNeto*diasRestantes);
+  const esMesActual=mes===hoy.getMonth()&&anio===hoy.getFullYear();
+
+  document.getElementById('fin-kpis').innerHTML=`
+    <div style="background:var(--white);border-radius:14px;padding:14px;border:1px solid var(--beige)">
+      <div style="font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">💰 Ventas del mes</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:var(--brownd)">$${totalVentas.toLocaleString('es-AR')}</div>
+      <div style="font-size:.68rem;color:var(--brownl);margin-top:4px">Costo: $${totalCosto.toLocaleString('es-AR')}</div>
+    </div>
+    <div style="background:var(--white);border-radius:14px;padding:14px;border:1px solid var(--beige)">
+      <div style="font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">📊 Ganancia bruta</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:${totalVentas-totalCosto>=0?'var(--green)':'var(--red)'}">$${(totalVentas-totalCosto).toLocaleString('es-AR')}</div>
+      <div style="font-size:.68rem;color:var(--brownl);margin-top:4px">Gastos: -$${totalGastos.toLocaleString('es-AR')}</div>
+    </div>
+    <div style="background:var(--white);border-radius:14px;padding:14px;border:1px solid var(--beige)">
+      <div style="font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">✅ Ganancia neta</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:${totalNeto>=0?'var(--green)':'var(--red)'}">$${totalNeto.toLocaleString('es-AR')}</div>
+      <div style="font-size:.68rem;color:var(--brownl);margin-top:4px">${diasConVentas} día${diasConVentas!==1?'s':''} con ventas</div>
+    </div>
+    <div style="background:var(--white);border-radius:14px;padding:14px;border:1px solid var(--beige)">
+      <div style="font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">${esMesActual?'🔮 Proyección':'📅 Promedio/día'}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:var(--brownd)">$${esMesActual?Math.round(proyeccion).toLocaleString('es-AR'):Math.round(promedioNeto).toLocaleString('es-AR')}</div>
+      <div style="font-size:.68rem;color:var(--brownl);margin-top:4px">${esMesActual?`Al cierre del mes (${diasRestantes} días restantes)`:'Neta promedio por día activo'}</div>
+    </div>`;
+
+  // Gráfico de barras
+  const maxVentas=Math.max(...diasData.map(d=>d.ventas),1);
+  const barras=diasData.map(d=>{
+    const pct=Math.round(d.ventas/maxVentas*100);
+    const color=d.esFuturo?'#e8e0d4':d.neta>=0?'var(--green)':'var(--red)';
+    return`<div style="display:flex;flex-direction:column;align-items:center;min-width:22px;flex:1">
+      <div style="font-size:.58rem;color:${d.neta<0&&!d.esFuturo?'var(--red)':'var(--brownl)'};margin-bottom:2px;white-space:nowrap">${d.ventas>0?'$'+(d.ventas/1000).toFixed(0)+'k':''}</div>
+      <div style="width:100%;background:${color};border-radius:3px 3px 0 0;height:${Math.max(pct*0.8,d.ventas>0?3:0)}px;transition:height .3s;min-height:${d.ventas>0?2:0}px"></div>
+      <div style="font-size:.6rem;color:var(--brownl);margin-top:3px">${d.d}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('fin-chart').innerHTML=`
+    <div style="font-size:.72rem;color:var(--brownl);margin-bottom:6px">Ventas diarias — verde: ganancia neta positiva, rojo: negativa</div>
+    <div style="display:flex;align-items:flex-end;gap:2px;height:90px;padding:0 2px">${barras}</div>`;
+
+  // Tabla de días
+  const filasDias=diasData.filter(d=>d.ventas>0||(!d.esFuturo&&d.d<=hoy.getDate()&&mes===hoy.getMonth()&&anio===hoy.getFullYear())).map(d=>{
+    const netoColor=d.neta>=0?'var(--green)':'var(--red)';
+    const fechaLabel=new Date(anio,mes,d.d).toLocaleDateString('es-AR',{weekday:'short',day:'numeric'});
+    return`<tr style="${d.esFuturo?'opacity:.4':''}">
+      <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;color:var(--brownd);font-weight:600">${fechaLabel}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right">${d.pedidos} pedido${d.pedidos!==1?'s':''}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;color:var(--brownd)">$${d.ventas.toLocaleString('es-AR')}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;color:var(--brownl)">-$${Math.round(d.costo).toLocaleString('es-AR')}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;color:var(--brownl)">-$${Math.round(d.gastos).toLocaleString('es-AR')}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;font-weight:700;color:${netoColor}">$${Math.round(d.neta).toLocaleString('es-AR')}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('fin-tabla-dias').innerHTML=filasDias?`
+    <table style="width:100%;border-collapse:collapse;font-size:.78rem">
+      <thead><tr>
+        <th style="background:var(--beige);padding:8px 10px;text-align:left;font-size:.68rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Día</th>
+        <th style="background:var(--beige);padding:8px 10px;text-align:right;font-size:.68rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Pedidos</th>
+        <th style="background:var(--beige);padding:8px 10px;text-align:right;font-size:.68rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Ventas</th>
+        <th style="background:var(--beige);padding:8px 10px;text-align:right;font-size:.68rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Costo</th>
+        <th style="background:var(--beige);padding:8px 10px;text-align:right;font-size:.68rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Gastos</th>
+        <th style="background:var(--beige);padding:8px 10px;text-align:right;font-size:.68rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Neta</th>
+      </tr></thead>
+      <tbody>${filasDias}</tbody>
+      <tfoot><tr style="background:var(--beige)">
+        <td colspan="2" style="padding:8px 10px;font-size:.78rem;font-weight:700;color:var(--brownd)">TOTAL MES</td>
+        <td style="padding:8px 10px;text-align:right;font-size:.78rem;font-weight:700;color:var(--brownd)">$${totalVentas.toLocaleString('es-AR')}</td>
+        <td style="padding:8px 10px;text-align:right;font-size:.78rem;font-weight:700;color:var(--brownl)">-$${Math.round(totalCosto).toLocaleString('es-AR')}</td>
+        <td style="padding:8px 10px;text-align:right;font-size:.78rem;font-weight:700;color:var(--brownl)">-$${Math.round(totalGastos).toLocaleString('es-AR')}</td>
+        <td style="padding:8px 10px;text-align:right;font-size:.78rem;font-weight:700;color:${totalNeto>=0?'var(--green)':'var(--red)'}">$${Math.round(totalNeto).toLocaleString('es-AR')}</td>
+      </tr></tfoot>
+    </table>`:'<div class="no-data">No hay pedidos este mes.</div>';
+}
+
+// Inicializar selector de año en Finanzas
+(function(){
+  const sel=document.getElementById('fin-anio');
+  const hoy=new Date();
+  for(let y=hoy.getFullYear();y>=hoy.getFullYear()-2;y--){
+    const o=document.createElement('option');o.value=y;o.textContent=y;
+    if(y===hoy.getFullYear())o.selected=true;
+    sel.appendChild(o);
+  }
+  document.getElementById('fin-mes').value=hoy.getMonth();
+})();
 </script>
 </body>
 </html>
