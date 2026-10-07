@@ -476,24 +476,25 @@ tr:hover td{background:rgba(237,230,214,.4)}
       <div id="gastos-fijos-list"><div class="loading-msg">Cargando...</div></div>
     </div>
 
+    <!-- Gestión de categorías -->
+    <div class="info-card" style="margin-bottom:12px">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);margin-bottom:4px">🏷️ Categorías / Líneas</h3>
+      <p style="font-size:.78rem;color:var(--brownl);margin-bottom:12px">Creá líneas como "Quilmes", "Coca-Cola", "Aguas", etc. y asigná productos a cada una.</p>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <input type="text" id="nueva-cat-nombre" placeholder="Ej: Línea Quilmes" style="flex:1;min-width:140px;padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);outline:none">
+        <button class="btn-primary" onclick="crearCategoria()">+ Crear línea</button>
+      </div>
+      <div id="fin-categorias-list"><div class="loading-msg">Cargando...</div></div>
+    </div>
+
     <!-- Tabla precios compra/venta -->
     <div class="info-card">
       <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);margin-bottom:4px">📦 Precios de compra y venta</h3>
       <p style="font-size:.78rem;color:var(--brownl);margin-bottom:12px">El precio de venta está sincronizado con la lista de productos. El precio de compra es solo visible acá.</p>
       <div id="fin-alerta-margen" style="display:none;background:#fef3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 12px;font-size:.8rem;color:#856404;margin-bottom:10px"></div>
-      <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:.8rem;min-width:500px">
-          <thead>
-            <tr>
-              <th style="background:var(--beige);padding:9px 12px;text-align:left;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Producto</th>
-              <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Precio venta</th>
-              <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Precio compra</th>
-              <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Margen</th>
-            </tr>
-          </thead>
-          <tbody id="fin-productos-body"><tr><td colspan="4" class="loading-msg">Cargando...</td></tr></tbody>
-        </table>
-      </div>
+      <!-- Buscador -->
+      <input type="text" id="fin-buscar-prod" placeholder="🔍 Buscar producto..." oninput="renderFinProductos()" style="width:100%;padding:9px 12px;border:1.5px solid var(--beige);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:var(--cream);outline:none;margin-bottom:12px">
+      <div id="fin-productos-container"></div>
     </div>
   </div>
 
@@ -2189,16 +2190,100 @@ async function eliminarGastoFijo(id){
 
 // --- PRODUCTOS (precio compra/venta) ---
 async function loadFinProductos(){
-  const{data,error}=await db.from('products').select('id,name,price,precio_compra,active,category').order('name',{ascending:true});
+  const{data,error}=await db.from('products').select('id,name,price,precio_compra,active,category,sort_order').order('sort_order',{ascending:true});
   if(error)return;
   finProductos=data||[];
+  renderFinCategoriasList();
+  renderFinProductos();
+}
+
+function getCategorias(){
+  const cats=new Set(finProductos.filter(p=>p.active).map(p=>p.category||'Sin categoría'));
+  return['Sin categoría',...[...cats].filter(c=>c!=='Sin categoría').sort()];
+}
+
+function renderFinCategoriasList(){
+  const el=document.getElementById('fin-categorias-list');
+  const cats=getCategorias().filter(c=>c!=='Sin categoría');
+  if(!cats.length){
+    el.innerHTML='<div style="font-size:.8rem;color:var(--brownl)">Todavía no creaste ninguna línea. Usá el campo de arriba para crear la primera.</div>';
+    return;
+  }
+  el.innerHTML=cats.map(cat=>{
+    const cant=finProductos.filter(p=>p.active&&p.category===cat).length;
+    return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--beige);flex-wrap:wrap">
+      <span style="flex:1;font-size:.84rem;font-weight:600;color:var(--brownd)">🏷️ ${cat}</span>
+      <span style="font-size:.75rem;color:var(--brownl)">${cant} producto${cant!==1?'s':''}</span>
+      <button onclick="renombrarCategoria('${cat.replace(/'/g,"\\'")}')" style="padding:4px 10px;border:1.5px solid var(--beige);border-radius:6px;background:transparent;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;color:var(--brownl);cursor:pointer">✏️ Renombrar</button>
+      <button onclick="eliminarCategoria('${cat.replace(/'/g,"\\'")}')" style="padding:4px 10px;border:1.5px solid #fecaca;border-radius:6px;background:transparent;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;color:var(--red);cursor:pointer">🗑️ Eliminar</button>
+    </div>`;
+  }).join('');
+}
+
+async function crearCategoria(){
+  const nombre=document.getElementById('nueva-cat-nombre').value.trim();
+  if(!nombre)return;
+  // Verificar que no exista ya
+  const cats=getCategorias();
+  if(cats.includes(nombre)){showToast('Esa línea ya existe');return;}
+  document.getElementById('nueva-cat-nombre').value='';
+  // La categoría existe cuando hay al menos un producto con ese nombre
+  // Simplemente la registramos en memoria para que aparezca disponible
+  // Se "crea" de verdad cuando se asigna un producto
+  showToast('✅ Línea "'+nombre+'" creada. Asignale productos desde la tabla de abajo.');
+  // Agregar a lista temporal para que aparezca en los selectores
+  if(!window._catsExtra)window._catsExtra=[];
+  if(!window._catsExtra.includes(nombre))window._catsExtra.push(nombre);
+  renderFinCategoriasList();
+  renderFinProductos();
+}
+
+async function renombrarCategoria(catVieja){
+  const nuevo=prompt('Nuevo nombre para "'+catVieja+'":',catVieja);
+  if(!nuevo||nuevo===catVieja)return;
+  // Actualizar todos los productos de esa categoría
+  const prods=finProductos.filter(p=>p.category===catVieja);
+  for(const p of prods){
+    await db.from('products').update({category:nuevo}).eq('id',p.id);
+    p.category=nuevo;
+    const pg=products.find(x=>x.id===p.id);if(pg)pg.category=nuevo;
+  }
+  showToast('✅ Línea renombrada a "'+nuevo+'"');
+  renderFinCategoriasList();
+  renderFinProductos();
+}
+
+async function eliminarCategoria(cat){
+  const cant=finProductos.filter(p=>p.active&&p.category===cat).length;
+  if(!confirm(`¿Eliminar la línea "${cat}"?\nLos ${cant} productos quedarán sin categoría.`))return;
+  const prods=finProductos.filter(p=>p.category===cat);
+  for(const p of prods){
+    await db.from('products').update({category:null}).eq('id',p.id);
+    p.category=null;
+    const pg=products.find(x=>x.id===p.id);if(pg)pg.category=null;
+  }
+  showToast('✅ Línea eliminada');
+  renderFinCategoriasList();
+  renderFinProductos();
+}
+
+async function cambiarCategoriaProducto(id,nuevaCat){
+  const cat=nuevaCat||null;
+  await db.from('products').update({category:cat}).eq('id',id);
+  const p=finProductos.find(x=>x.id===id);if(p)p.category=cat;
+  const pg=products.find(x=>x.id===id);if(pg)pg.category=cat;
+  renderFinCategoriasList();
   renderFinProductos();
 }
 
 function renderFinProductos(){
-  const body=document.getElementById('fin-productos-body');
+  const container=document.getElementById('fin-productos-container');
   const alertEl=document.getElementById('fin-alerta-margen');
-  const activos=finProductos.filter(p=>p.active);
+  const busqueda=(document.getElementById('fin-buscar-prod')?.value||'').toLowerCase().trim();
+
+  let activos=finProductos.filter(p=>p.active);
+  if(busqueda)activos=activos.filter(p=>p.name.toLowerCase().includes(busqueda));
+
   const negativos=activos.filter(p=>(p.precio_compra||0)>0&&(p.price||0)<=(p.precio_compra||0));
   if(negativos.length){
     alertEl.style.display='block';
@@ -2206,23 +2291,153 @@ function renderFinProductos(){
   }else{
     alertEl.style.display='none';
   }
-  body.innerHTML=activos.map(p=>{
+
+  // Opciones de categorías para el select
+  const todasCats=getCategorias();
+  if(window._catsExtra)window._catsExtra.forEach(c=>{if(!todasCats.includes(c))todasCats.push(c);});
+  const opsCat=todasCats.map(c=>`<option value="${c==='Sin categoría'?'':c}">${c}</option>`).join('');
+
+  function filaProducto(p){
     const venta=p.price||0;
     const compra=p.precio_compra||0;
     const margen=venta>0&&compra>0?Math.round((venta-compra)/venta*100):null;
     const margenColor=margen===null?'var(--brownl)':margen<=0?'var(--red)':margen<20?'#e07b00':'var(--green)';
     const margenTexto=margen===null?'—':margen+'%';
-    return`<tr>
-      <td style="padding:8px 12px;border-bottom:1px solid var(--beige);font-size:.82rem;font-weight:600;color:var(--brownd)">${p.name}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid var(--beige);text-align:right">
+    const catActual=p.category||'';
+    return`<tr draggable="true" data-id="${p.id}" class="fin-drag-row"
+      ondragstart="finDragStart(event,this)"
+      ondragover="finDragOver(event,this)"
+      ondragleave="finDragLeave(this)"
+      ondrop="finDrop(event,this)"
+      ondragend="finDragEnd()"
+      style="cursor:grab;transition:opacity .15s">
+      <td style="padding:8px 12px;border-bottom:1px solid var(--beige);font-size:.82rem;color:var(--brownd)">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+          <span style="color:var(--brownl);font-size:1rem;cursor:grab;user-select:none" title="Arrastrá para reordenar">⠿</span>
+          <span style="font-weight:600">${p.name}</span>
+        </div>
+        <select onchange="cambiarCategoriaProducto('${p.id}',this.value)" style="font-size:.72rem;padding:3px 6px;border:1px solid var(--beige);border-radius:5px;background:var(--cream);color:var(--brownl);cursor:pointer;font-family:'DM Sans',sans-serif;max-width:160px">
+          ${todasCats.map(c=>`<option value="${c==='Sin categoría'?'':c}"${(catActual===(c==='Sin categoría'?'':c))?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </td>
+      <td style="padding:8px 12px;border-bottom:1px solid var(--beige);text-align:right;vertical-align:top">
         <input type="number" value="${venta}" onchange="actualizarPrecioVentaFin('${p.id}',this.value)" style="width:90px;padding:5px 8px;border:1.5px solid var(--beige);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.82rem;background:var(--cream);outline:none;text-align:right">
       </td>
-      <td style="padding:8px 12px;border-bottom:1px solid var(--beige);text-align:right">
+      <td style="padding:8px 12px;border-bottom:1px solid var(--beige);text-align:right;vertical-align:top">
         <input type="number" value="${compra||''}" placeholder="0" onchange="actualizarPrecioCompra('${p.id}',this.value)" style="width:90px;padding:5px 8px;border:1.5px solid var(--beige);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.82rem;background:var(--cream);outline:none;text-align:right">
       </td>
-      <td style="padding:8px 12px;border-bottom:1px solid var(--beige);text-align:right;font-weight:700;color:${margenColor}">${margenTexto}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid var(--beige);text-align:right;font-weight:700;color:${margenColor};vertical-align:top">${margenTexto}</td>
     </tr>`;
-  }).join('');
+  }
+
+  const tablaHeader=`<table style="width:100%;border-collapse:collapse;font-size:.8rem;min-width:500px">
+    <thead><tr>
+      <th style="background:var(--beige);padding:9px 12px;text-align:left;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Producto / Línea</th>
+      <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Venta</th>
+      <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Compra</th>
+      <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Margen</th>
+    </tr></thead><tbody>`;
+
+  if(busqueda){
+    // Búsqueda: muestra todo plano sin agrupar
+    if(!activos.length){container.innerHTML='<div style="padding:20px;text-align:center;color:var(--brownl);font-size:.85rem">No se encontraron productos.</div>';return;}
+    container.innerHTML='<div style="overflow-x:auto">'+tablaHeader+activos.map(filaProducto).join('')+'</tbody></table></div>';
+    return;
+  }
+
+  // Agrupado por categoría
+  const grupos={};
+  activos.forEach(p=>{
+    const cat=p.category||'Sin categoría';
+    if(!grupos[cat])grupos[cat]=[];
+    grupos[cat].push(p);
+  });
+
+  // Orden: primero las con nombre, luego Sin categoría
+  const ordenCats=Object.keys(grupos).filter(c=>c!=='Sin categoría').sort();
+  if(grupos['Sin categoría'])ordenCats.push('Sin categoría');
+
+  if(!ordenCats.length){container.innerHTML='<div style="padding:20px;text-align:center;color:var(--brownl);font-size:.85rem">No hay productos activos.</div>';return;}
+
+  let html='<div style="overflow-x:auto">';
+  ordenCats.forEach(cat=>{
+    const prods=grupos[cat];
+    html+=`<div style="margin-bottom:0">
+      <div style="background:var(--beige);padding:8px 12px;font-size:.72rem;font-weight:700;color:var(--brownd);text-transform:uppercase;letter-spacing:.5px;border-radius:6px 6px 0 0;margin-top:10px;display:flex;align-items:center;gap:6px">
+        🏷️ ${cat} <span style="font-weight:400;color:var(--brownl)">(${prods.length})</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:.8rem;min-width:500px">
+        <thead><tr>
+          <th style="background:#f5f0e8;padding:7px 12px;text-align:left;font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase">Producto</th>
+          <th style="background:#f5f0e8;padding:7px 12px;text-align:right;font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase">Venta</th>
+          <th style="background:#f5f0e8;padding:7px 12px;text-align:right;font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase">Compra</th>
+          <th style="background:#f5f0e8;padding:7px 12px;text-align:right;font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase">Margen</th>
+        </tr></thead>
+        <tbody>${prods.map(filaProducto).join('')}</tbody>
+      </table>
+    </div>`;
+  });
+  html+='</div>';
+  container.innerHTML=html;
+}
+
+// --- DRAG & DROP FINANZAS ---
+let _finDragId=null;
+let _finDragSaveTimer=null;
+
+function finDragStart(e,row){
+  _finDragId=row.dataset.id;
+  e.dataTransfer.effectAllowed='move';
+  setTimeout(()=>row.style.opacity='0.4',0);
+}
+
+function finDragOver(e,row){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  if(row.dataset.id!==_finDragId){
+    row.style.borderTop='2px solid var(--brown)';
+  }
+}
+
+function finDragLeave(row){
+  row.style.borderTop='';
+}
+
+function finDrop(e,targetRow){
+  e.preventDefault();
+  targetRow.style.borderTop='';
+  if(!_finDragId||targetRow.dataset.id===_finDragId)return;
+
+  // Reordenar en finProductos
+  const fromIdx=finProductos.findIndex(p=>p.id===_finDragId);
+  const toIdx=finProductos.findIndex(p=>p.id===targetRow.dataset.id);
+  if(fromIdx<0||toIdx<0)return;
+  const [moved]=finProductos.splice(fromIdx,1);
+  finProductos.splice(toIdx,0,moved);
+
+  renderFinProductos();
+
+  // Guardar en Supabase con debounce (espera que el usuario termine de arrastrar)
+  clearTimeout(_finDragSaveTimer);
+  _finDragSaveTimer=setTimeout(()=>guardarOrdenFinProductos(),800);
+}
+
+function finDragEnd(){
+  _finDragId=null;
+  document.querySelectorAll('.fin-drag-row').forEach(r=>{r.style.opacity='';r.style.borderTop='';});
+}
+
+async function guardarOrdenFinProductos(){
+  // Asigna sort_order secuencial según el orden actual de finProductos
+  const updates=finProductos.map((p,i)=>db.from('products').update({sort_order:i+1}).eq('id',p.id));
+  await Promise.all(updates);
+  // También actualizar en el array global
+  finProductos.forEach((p,i)=>{
+    const pg=products.find(x=>x.id===p.id);
+    if(pg)pg.sort_order=i+1;
+    p.sort_order=i+1;
+  });
+  showToast('✅ Orden guardado');
 }
 
 async function actualizarPrecioVentaFin(id,valor){
