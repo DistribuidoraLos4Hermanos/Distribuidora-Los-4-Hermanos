@@ -344,7 +344,7 @@ tr:hover td{background:rgba(237,230,214,.4)}
       </div>
       <div id="b-tel-aviso" style="display:none;font-size:.72rem;color:var(--red);padding:3px 2px 0;margin-top:-4px">⚠️ Este cliente no está registrado — ingresá el teléfono para guardarlo.</div>
       <div class="boleta-search-wrap">
-        <input type="text" id="b-search" placeholder="Buscar producto para agregar..." oninput="buscarProductoBoleta()" autocomplete="off">
+        <input type="text" id="b-search" placeholder="Buscar producto para agregar..." oninput="buscarProductoBoleta()" onkeydown="if(event.key==='Enter'&&_boletaLastResults.length){agregarABoleta(_boletaLastResults[0].id);event.preventDefault();}" autocomplete="off">
         <div class="autocomplete-list" id="b-autocomplete"></div>
       </div>
       <div class="boleta-items" id="b-items">
@@ -769,31 +769,64 @@ function toggleAddForm(){const f=document.getElementById('add-form');f.className
 // ========================
 let boletaSearchTimeout=null;
 
+let _boletaLastResults=[];
+
 function buscarProductoBoleta(){
   const q=(document.getElementById('b-search').value||'').toLowerCase().trim();
   const ac=document.getElementById('b-autocomplete');
   clearTimeout(boletaSearchTimeout);
-  if(q.length<1){ac.className='autocomplete-list';return;}
+  if(q.length<1){ac.className='autocomplete-list';_boletaLastResults=[];return;}
   boletaSearchTimeout=setTimeout(()=>{
     const results=products.filter(p=>p.active&&p.name.toLowerCase().includes(q)).slice(0,8);
+    _boletaLastResults=results;
     if(!results.length){ac.className='autocomplete-list';return;}
-    ac.innerHTML=results.map(p=>`
-      <div class="autocomplete-item" onclick="agregarABoleta('${p.id}')">
-        <span class="ac-name">${p.emoji||'🛍️'} ${p.name}</span>
-        <span class="ac-price">${p.price>0?fmt(p.price):'-'}</span>
-      </div>`).join('');
+    ac.innerHTML=results.map(p=>{
+      const oferta=_getOfertaActiva(p.id);
+      const priceLabel=oferta?`<span style="text-decoration:line-through;color:#aaa;font-size:.7rem">${fmt(p.price)}</span> <span style="color:var(--red);font-weight:700">${fmt(oferta.precio_oferta)}</span>`:(p.price>0?fmt(p.price):'-');
+      return`<div class="autocomplete-item" style="display:flex;align-items:center;gap:8px" data-id="${p.id}">
+        <div style="flex:1;cursor:pointer" onclick="agregarABoleta('${p.id}')">
+          <span class="ac-name">${p.emoji||'🛍️'} ${p.name}</span>
+          <span class="ac-price">${priceLabel}</span>
+        </div>
+        <input type="number" class="b-qty-input" placeholder="Cant" min="${p.medio_pack?0.5:1}" step="${p.medio_pack?0.5:1}" style="width:54px;padding:4px 6px;border:1.5px solid var(--brown);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.82rem;text-align:center"
+          data-id="${p.id}"
+          onkeydown="if(event.key==='Enter'){const v=parseFloat(this.value);agregarABoletaCant('${p.id}',v>0?v:null);event.preventDefault();}">
+      </div>`;
+    }).join('');
     ac.className='autocomplete-list open';
   },200);
 }
 
-function agregarABoleta(id){
+// Busca oferta activa para un producto (hoy entre inicio y vencimiento)
+function _getOfertaActiva(productId){
+  if(!ofertas||!ofertas.length)return null;
+  const hoy=new Date().toISOString().split('T')[0];
+  return ofertas.find(o=>o.producto_id===productId&&o.vence_el>=hoy)||null;
+}
+
+function agregarABoletaCant(id,cantOverride){
   const p=products.find(x=>x.id===id);if(!p)return;
+  const paso=p.medio_pack?0.5:1;
+  const cant=cantOverride||paso;
+  const oferta=_getOfertaActiva(id);
+  const precioFinal=oferta?oferta.precio_oferta:p.price;
   const existing=boletaItems.find(i=>i.id===id);
-  if(existing){existing.qty+=p.medio_pack?0.5:1;}
-  else{boletaItems.push({id:p.id,name:p.name,price:p.price,emoji:p.emoji||'🛍️',medio_pack:p.medio_pack,qty:p.medio_pack?0.5:1});}
+  if(existing){
+    existing.qty+=cant;
+    // Si hay oferta y el precio difiere, actualizar
+    if(oferta)existing.price=precioFinal;
+  }else{
+    boletaItems.push({id:p.id,name:p.name,price:precioFinal,emoji:p.emoji||'🛍️',medio_pack:p.medio_pack,qty:cant,_oferta:oferta?oferta.descripcion:null});
+  }
   document.getElementById('b-search').value='';
   document.getElementById('b-autocomplete').className='autocomplete-list';
+  _boletaLastResults=[];
   renderBoleta();
+  if(oferta)showToast(`🏷️ Oferta aplicada: ${oferta.descripcion||fmt(oferta.precio_oferta)}`);
+}
+
+function agregarABoleta(id){
+  agregarABoletaCant(id,null);
 }
 
 function renderBoleta(){
@@ -1112,6 +1145,34 @@ function getFilteredOrders(){
 
 function filterOrders(){renderOrders(getFilteredOrders());}
 
+let _selectedOrderIds=new Set();
+
+function toggleOrderSelect(id){
+  if(_selectedOrderIds.has(id))_selectedOrderIds.delete(id);
+  else _selectedOrderIds.add(id);
+  _updateImprimirSelBtn();
+}
+
+function _updateImprimirSelBtn(){
+  const btn=document.getElementById('btn-imprimir-sel');
+  if(!btn)return;
+  const n=_selectedOrderIds.size;
+  btn.style.display=n>0?'inline-flex':'none';
+  btn.textContent=`🖨️ Imprimir ${n} seleccionado${n!==1?'s':''}`;
+}
+
+async function imprimirSeleccionados(){
+  if(!_selectedOrderIds.size)return;
+  const ids=[..._selectedOrderIds];
+  // Imprimir uno a uno con pequeño delay para que el browser los abra
+  for(const id of ids){
+    await imprimirPedidoExistente(id);
+    await new Promise(r=>setTimeout(r,600));
+  }
+  _selectedOrderIds.clear();
+  _updateImprimirSelBtn();
+}
+
 function renderOrders(orders){
   if(!orders.length){document.getElementById('orders-content').innerHTML='<div class="loading-msg">No hay pedidos.</div>';return;}
 
@@ -1129,7 +1190,12 @@ function renderOrders(orders){
     grupos[label].push(o);
   });
 
-  let html='';
+  // Toolbar de selección
+  let html=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+    <button id="btn-imprimir-sel" onclick="imprimirSeleccionados()" style="display:none;align-items:center;gap:6px;background:var(--brown);color:#fff;border:none;border-radius:9px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer">🖨️ Imprimir seleccionados</button>
+    <button onclick="_selectedOrderIds.clear();document.querySelectorAll('.order-chk').forEach(c=>c.checked=false);_updateImprimirSelBtn()" style="background:transparent;border:1px solid #ccc;color:#666;border-radius:7px;padding:5px 10px;font-size:.75rem;cursor:pointer">Deseleccionar todo</button>
+  </div>`;
+
   for(const [dia,pedidos] of Object.entries(grupos)){
     const totalDia=pedidos.reduce((s,o)=>s+(o.total||0),0);
     html+=`<div class="day-separator">
@@ -1147,8 +1213,12 @@ function renderOrders(orders){
       const impBtn=o.impreso
         ?`<span class="impreso-tag">✅ Impreso</span><button class="btn-reimprimir" onclick="imprimirPedidoExistente('${o.id}')">🖨️ Reimprimir</button>`
         :`<button class="btn-imprimir" onclick="imprimirPedidoExistente('${o.id}')">🖨️ Imprimir y descontar stock</button>`;
-      return`<div class="order-card${o.impreso?' impreso':''}">
-        <div class="order-top">
+      const isChecked=_selectedOrderIds.has(o.id);
+      return`<div class="order-card${o.impreso?' impreso':''}" style="position:relative">
+        <label style="position:absolute;top:10px;right:12px;display:flex;align-items:center;gap:5px;cursor:pointer;font-size:.72rem;color:var(--brownl)">
+          <input type="checkbox" class="order-chk" ${isChecked?'checked':''} onchange="toggleOrderSelect('${o.id}')" style="width:15px;height:15px;accent-color:var(--brown);cursor:pointer">
+        </label>
+        <div class="order-top" style="padding-right:28px">
           <div class="order-negocio">${o.negocio||'Sin nombre'} <span style="font-size:.68rem;color:var(--brownl);font-weight:400">${origenLabel}</span></div>
           <div class="order-total">${fmt(o.total)}</div>
         </div>
@@ -1164,6 +1234,7 @@ function renderOrders(orders){
     }).join('');
   }
   document.getElementById('orders-content').innerHTML=html;
+  _updateImprimirSelBtn();
 }
 
 // ========================
@@ -2188,34 +2259,33 @@ async function eliminarGastoFijo(id){
   renderBalanceMes();
 }
 
-// --- PRODUCTOS (precio compra/venta) ---
+// --- LÍNEAS DE FINANZAS (tabla fin_lineas, campo fin_linea_id en products) ---
+let finLineas=[];
+
 async function loadFinProductos(){
-  const{data,error}=await db.from('products').select('id,name,price,precio_compra,active,category,sort_order').order('sort_order',{ascending:true});
-  if(error)return;
-  finProductos=data||[];
-  renderFinCategoriasList();
+  const[{data:lineas},{data:prods}]=await Promise.all([
+    db.from('fin_lineas').select('*').order('sort_order',{ascending:true}),
+    db.from('products').select('id,name,price,precio_compra,active,category,sort_order,fin_linea_id').order('sort_order',{ascending:true})
+  ]);
+  finLineas=lineas||[];
+  finProductos=prods||[];
+  renderFinLineasList();
   renderFinProductos();
 }
 
-function getCategorias(){
-  const cats=new Set(finProductos.filter(p=>p.active).map(p=>p.category||'Sin categoría'));
-  return['Sin categoría',...[...cats].filter(c=>c!=='Sin categoría').sort()];
-}
-
-function renderFinCategoriasList(){
+function renderFinLineasList(){
   const el=document.getElementById('fin-categorias-list');
-  const cats=getCategorias().filter(c=>c!=='Sin categoría');
-  if(!cats.length){
+  if(!finLineas.length){
     el.innerHTML='<div style="font-size:.8rem;color:var(--brownl)">Todavía no creaste ninguna línea. Usá el campo de arriba para crear la primera.</div>';
     return;
   }
-  el.innerHTML=cats.map(cat=>{
-    const cant=finProductos.filter(p=>p.active&&p.category===cat).length;
+  el.innerHTML=finLineas.map(l=>{
+    const cant=finProductos.filter(p=>p.active&&p.fin_linea_id===l.id).length;
     return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--beige);flex-wrap:wrap">
-      <span style="flex:1;font-size:.84rem;font-weight:600;color:var(--brownd)">🏷️ ${cat}</span>
+      <span style="flex:1;font-size:.84rem;font-weight:600;color:var(--brownd)">🏷️ ${l.nombre}</span>
       <span style="font-size:.75rem;color:var(--brownl)">${cant} producto${cant!==1?'s':''}</span>
-      <button onclick="renombrarCategoria('${cat.replace(/'/g,"\\'")}')" style="padding:4px 10px;border:1.5px solid var(--beige);border-radius:6px;background:transparent;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;color:var(--brownl);cursor:pointer">✏️ Renombrar</button>
-      <button onclick="eliminarCategoria('${cat.replace(/'/g,"\\'")}')" style="padding:4px 10px;border:1.5px solid #fecaca;border-radius:6px;background:transparent;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;color:var(--red);cursor:pointer">🗑️ Eliminar</button>
+      <button onclick="renombrarLinea('${l.id}','${l.nombre.replace(/'/g,"\\'")}')" style="padding:4px 10px;border:1.5px solid var(--beige);border-radius:6px;background:transparent;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;color:var(--brownl);cursor:pointer">✏️ Renombrar</button>
+      <button onclick="eliminarLinea('${l.id}','${l.nombre.replace(/'/g,"\\'")}')" style="padding:4px 10px;border:1.5px solid #fecaca;border-radius:6px;background:transparent;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;color:var(--red);cursor:pointer">🗑️ Eliminar</button>
     </div>`;
   }).join('');
 }
@@ -2223,56 +2293,45 @@ function renderFinCategoriasList(){
 async function crearCategoria(){
   const nombre=document.getElementById('nueva-cat-nombre').value.trim();
   if(!nombre)return;
-  // Verificar que no exista ya
-  const cats=getCategorias();
-  if(cats.includes(nombre)){showToast('Esa línea ya existe');return;}
+  if(finLineas.find(l=>l.nombre===nombre)){showToast('Esa línea ya existe');return;}
+  const maxOrder=finLineas.reduce((m,l)=>Math.max(m,l.sort_order||0),0);
+  const{data,error}=await db.from('fin_lineas').insert([{nombre,sort_order:maxOrder+1}]).select().single();
+  if(error){showToast('Error: '+error.message);return;}
+  finLineas.push(data);
   document.getElementById('nueva-cat-nombre').value='';
-  // La categoría existe cuando hay al menos un producto con ese nombre
-  // Simplemente la registramos en memoria para que aparezca disponible
-  // Se "crea" de verdad cuando se asigna un producto
-  showToast('✅ Línea "'+nombre+'" creada. Asignale productos desde la tabla de abajo.');
-  // Agregar a lista temporal para que aparezca en los selectores
-  if(!window._catsExtra)window._catsExtra=[];
-  if(!window._catsExtra.includes(nombre))window._catsExtra.push(nombre);
-  renderFinCategoriasList();
+  showToast('✅ Línea "'+nombre+'" creada');
+  renderFinLineasList();
   renderFinProductos();
 }
 
-async function renombrarCategoria(catVieja){
-  const nuevo=prompt('Nuevo nombre para "'+catVieja+'":',catVieja);
-  if(!nuevo||nuevo===catVieja)return;
-  // Actualizar todos los productos de esa categoría
-  const prods=finProductos.filter(p=>p.category===catVieja);
-  for(const p of prods){
-    await db.from('products').update({category:nuevo}).eq('id',p.id);
-    p.category=nuevo;
-    const pg=products.find(x=>x.id===p.id);if(pg)pg.category=nuevo;
-  }
-  showToast('✅ Línea renombrada a "'+nuevo+'"');
-  renderFinCategoriasList();
+async function renombrarLinea(id,nombreViejo){
+  const nuevo=prompt('Nuevo nombre para "'+nombreViejo+'":',nombreViejo);
+  if(!nuevo||nuevo===nombreViejo)return;
+  const{error}=await db.from('fin_lineas').update({nombre:nuevo}).eq('id',id);
+  if(error){showToast('Error: '+error.message);return;}
+  const l=finLineas.find(x=>x.id===id);if(l)l.nombre=nuevo;
+  showToast('✅ Renombrada a "'+nuevo+'"');
+  renderFinLineasList();
   renderFinProductos();
 }
 
-async function eliminarCategoria(cat){
-  const cant=finProductos.filter(p=>p.active&&p.category===cat).length;
-  if(!confirm(`¿Eliminar la línea "${cat}"?\nLos ${cant} productos quedarán sin categoría.`))return;
-  const prods=finProductos.filter(p=>p.category===cat);
-  for(const p of prods){
-    await db.from('products').update({category:null}).eq('id',p.id);
-    p.category=null;
-    const pg=products.find(x=>x.id===p.id);if(pg)pg.category=null;
-  }
+async function eliminarLinea(id,nombre){
+  const cant=finProductos.filter(p=>p.active&&p.fin_linea_id===id).length;
+  if(!confirm(`¿Eliminar la línea "${nombre}"?\nLos ${cant} producto${cant!==1?'s':''} quedarán sin línea asignada.`))return;
+  await db.from('fin_lineas').delete().eq('id',id);
+  // fin_linea_id se pone null automáticamente por el ON DELETE SET NULL en Supabase
+  finProductos.filter(p=>p.fin_linea_id===id).forEach(p=>p.fin_linea_id=null);
+  finLineas=finLineas.filter(l=>l.id!==id);
   showToast('✅ Línea eliminada');
-  renderFinCategoriasList();
+  renderFinLineasList();
   renderFinProductos();
 }
 
-async function cambiarCategoriaProducto(id,nuevaCat){
-  const cat=nuevaCat||null;
-  await db.from('products').update({category:cat}).eq('id',id);
-  const p=finProductos.find(x=>x.id===id);if(p)p.category=cat;
-  const pg=products.find(x=>x.id===id);if(pg)pg.category=cat;
-  renderFinCategoriasList();
+async function cambiarLineaProducto(id,lineaId){
+  const val=lineaId||null;
+  await db.from('products').update({fin_linea_id:val}).eq('id',id);
+  const p=finProductos.find(x=>x.id===id);if(p)p.fin_linea_id=val;
+  renderFinLineasList();
   renderFinProductos();
 }
 
@@ -2285,17 +2344,11 @@ function renderFinProductos(){
   if(busqueda)activos=activos.filter(p=>p.name.toLowerCase().includes(busqueda));
 
   const negativos=activos.filter(p=>(p.precio_compra||0)>0&&(p.price||0)<=(p.precio_compra||0));
-  if(negativos.length){
-    alertEl.style.display='block';
-    alertEl.innerHTML='⚠️ <strong>Margen negativo o cero:</strong> '+negativos.map(p=>p.name).join(', ')+'. Revisá los precios.';
-  }else{
-    alertEl.style.display='none';
-  }
+  alertEl.style.display=negativos.length?'block':'none';
+  if(negativos.length)alertEl.innerHTML='⚠️ <strong>Margen negativo o cero:</strong> '+negativos.map(p=>p.name).join(', ')+'. Revisá los precios.';
 
-  // Opciones de categorías para el select
-  const todasCats=getCategorias();
-  if(window._catsExtra)window._catsExtra.forEach(c=>{if(!todasCats.includes(c))todasCats.push(c);});
-  const opsCat=todasCats.map(c=>`<option value="${c==='Sin categoría'?'':c}">${c}</option>`).join('');
+  // Opciones de líneas para el select de cada producto
+  const opsLinea=`<option value="">Sin línea</option>`+finLineas.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join('');
 
   function filaProducto(p){
     const venta=p.price||0;
@@ -2303,7 +2356,7 @@ function renderFinProductos(){
     const margen=venta>0&&compra>0?Math.round((venta-compra)/venta*100):null;
     const margenColor=margen===null?'var(--brownl)':margen<=0?'var(--red)':margen<20?'#e07b00':'var(--green)';
     const margenTexto=margen===null?'—':margen+'%';
-    const catActual=p.category||'';
+    const lineaId=p.fin_linea_id||'';
     return`<tr draggable="true" data-id="${p.id}" class="fin-drag-row"
       ondragstart="finDragStart(event,this)"
       ondragover="finDragOver(event,this)"
@@ -2316,8 +2369,8 @@ function renderFinProductos(){
           <span style="color:var(--brownl);font-size:1rem;cursor:grab;user-select:none" title="Arrastrá para reordenar">⠿</span>
           <span style="font-weight:600">${p.name}</span>
         </div>
-        <select onchange="cambiarCategoriaProducto('${p.id}',this.value)" style="font-size:.72rem;padding:3px 6px;border:1px solid var(--beige);border-radius:5px;background:var(--cream);color:var(--brownl);cursor:pointer;font-family:'DM Sans',sans-serif;max-width:160px">
-          ${todasCats.map(c=>`<option value="${c==='Sin categoría'?'':c}"${(catActual===(c==='Sin categoría'?'':c))?'selected':''}>${c}</option>`).join('')}
+        <select onchange="cambiarLineaProducto('${p.id}',this.value)" style="font-size:.72rem;padding:3px 6px;border:1px solid var(--beige);border-radius:5px;background:var(--cream);color:var(--brownl);cursor:pointer;font-family:'DM Sans',sans-serif;max-width:160px">
+          ${`<option value="">Sin línea</option>`+finLineas.map(l=>`<option value="${l.id}"${lineaId===l.id?'selected':''}>${l.nombre}</option>`).join('')}
         </select>
       </td>
       <td style="padding:8px 12px;border-bottom:1px solid var(--beige);text-align:right;vertical-align:top">
@@ -2330,41 +2383,28 @@ function renderFinProductos(){
     </tr>`;
   }
 
-  const tablaHeader=`<table style="width:100%;border-collapse:collapse;font-size:.8rem;min-width:500px">
-    <thead><tr>
-      <th style="background:var(--beige);padding:9px 12px;text-align:left;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Producto / Línea</th>
-      <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Venta</th>
-      <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Compra</th>
-      <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Margen</th>
-    </tr></thead><tbody>`;
-
   if(busqueda){
-    // Búsqueda: muestra todo plano sin agrupar
     if(!activos.length){container.innerHTML='<div style="padding:20px;text-align:center;color:var(--brownl);font-size:.85rem">No se encontraron productos.</div>';return;}
-    container.innerHTML='<div style="overflow-x:auto">'+tablaHeader+activos.map(filaProducto).join('')+'</tbody></table></div>';
+    container.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.8rem;min-width:500px">
+      <thead><tr>
+        <th style="background:var(--beige);padding:9px 12px;text-align:left;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Producto</th>
+        <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Venta</th>
+        <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Compra</th>
+        <th style="background:var(--beige);padding:9px 12px;text-align:right;font-size:.7rem;font-weight:700;color:var(--brownd);text-transform:uppercase">Margen</th>
+      </tr></thead><tbody>${activos.map(filaProducto).join('')}</tbody></table></div>`;
     return;
   }
 
-  // Agrupado por categoría
-  const grupos={};
-  activos.forEach(p=>{
-    const cat=p.category||'Sin categoría';
-    if(!grupos[cat])grupos[cat]=[];
-    grupos[cat].push(p);
-  });
-
-  // Orden: primero las con nombre, luego Sin categoría
-  const ordenCats=Object.keys(grupos).filter(c=>c!=='Sin categoría').sort();
-  if(grupos['Sin categoría'])ordenCats.push('Sin categoría');
-
-  if(!ordenCats.length){container.innerHTML='<div style="padding:20px;text-align:center;color:var(--brownl);font-size:.85rem">No hay productos activos.</div>';return;}
-
+  // Agrupado por línea de finanzas
   let html='<div style="overflow-x:auto">';
-  ordenCats.forEach(cat=>{
-    const prods=grupos[cat];
+
+  // Primero las líneas definidas (en orden)
+  finLineas.forEach(l=>{
+    const prods=activos.filter(p=>p.fin_linea_id===l.id);
+    if(!prods.length)return;
     html+=`<div style="margin-bottom:0">
       <div style="background:var(--beige);padding:8px 12px;font-size:.72rem;font-weight:700;color:var(--brownd);text-transform:uppercase;letter-spacing:.5px;border-radius:6px 6px 0 0;margin-top:10px;display:flex;align-items:center;gap:6px">
-        🏷️ ${cat} <span style="font-weight:400;color:var(--brownl)">(${prods.length})</span>
+        🏷️ ${l.nombre} <span style="font-weight:400;color:var(--brownl)">(${prods.length})</span>
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:.8rem;min-width:500px">
         <thead><tr>
@@ -2377,7 +2417,28 @@ function renderFinProductos(){
       </table>
     </div>`;
   });
+
+  // Al final, los sin línea asignada
+  const sinLinea=activos.filter(p=>!p.fin_linea_id);
+  if(sinLinea.length){
+    html+=`<div style="margin-bottom:0">
+      <div style="background:#f0ece4;padding:8px 12px;font-size:.72rem;font-weight:700;color:var(--brownl);text-transform:uppercase;letter-spacing:.5px;border-radius:6px 6px 0 0;margin-top:10px">
+        Sin línea asignada (${sinLinea.length})
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:.8rem;min-width:500px">
+        <thead><tr>
+          <th style="background:#f5f0e8;padding:7px 12px;text-align:left;font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase">Producto</th>
+          <th style="background:#f5f0e8;padding:7px 12px;text-align:right;font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase">Venta</th>
+          <th style="background:#f5f0e8;padding:7px 12px;text-align:right;font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase">Compra</th>
+          <th style="background:#f5f0e8;padding:7px 12px;text-align:right;font-size:.68rem;font-weight:600;color:var(--brownl);text-transform:uppercase">Margen</th>
+        </tr></thead>
+        <tbody>${sinLinea.map(filaProducto).join('')}</tbody>
+      </table>
+    </div>`;
+  }
+
   html+='</div>';
+  if(!activos.length)html='<div style="padding:20px;text-align:center;color:var(--brownl);font-size:.85rem">No hay productos activos.</div>';
   container.innerHTML=html;
 }
 
@@ -2444,8 +2505,29 @@ async function actualizarPrecioVentaFin(id,valor){
   const price=parseInt(valor)||0;
   await db.from('products').update({price}).eq('id',id);
   const p=finProductos.find(x=>x.id===id);if(p)p.price=price;
-  // también actualizar en el array global de productos si está cargado
   const pg=products.find(x=>x.id===id);if(pg)pg.price=price;
+  // Verificar si hay pedidos pendientes que contengan este producto
+  const pedidosPendientes=(allOrders||[]).filter(o=>!o.impreso&&o.items&&o.items.some(i=>i.id===id));
+  if(pedidosPendientes.length>0){
+    const nombres=pedidosPendientes.map(o=>o.negocio||'Sin nombre').join(', ');
+    const ok=confirm(`Hay ${pedidosPendientes.length} pedido${pedidosPendientes.length>1?'s':''} pendiente${pedidosPendientes.length>1?'s':''} de imprimir con este producto (${nombres}).\n\n¿Querés actualizar el precio en esos pedidos también?`);
+    if(ok){
+      for(const order of pedidosPendientes){
+        let subtotal=0;
+        const updatedItems=order.items.map(i=>{
+          if(i.id===id)i.price=price;
+          const t=i.price*i.qty;subtotal+=t;
+          i.total=t;return i;
+        });
+        const baseTotal=subtotal-(order.descuento_aplicado||0);
+        const recargoFiado=order.recargo_fiado||0;
+        const newTotal=baseTotal+recargoFiado;
+        await db.from('orders').update({items:updatedItems,total:newTotal}).eq('id',order.id);
+        order.items=updatedItems;order.total=newTotal;
+      }
+      showToast('✅ Precios actualizados en '+pedidosPendientes.length+' pedido'+(pedidosPendientes.length>1?'s':''));
+    }
+  }
   renderFinProductos();
   renderBalanceMes();
 }
