@@ -2647,55 +2647,71 @@ async function renderBalanceMes(){
     <div style="font-size:.72rem;color:var(--brownl);margin-bottom:6px">Ventas diarias — verde: ganancia neta positiva, rojo: negativa</div>
     <div style="display:flex;align-items:flex-end;gap:2px;height:90px;padding:0 2px">${barras}</div>`;
 
+  // Margen promedio real basado en precios de venta vs compra de los productos cargados
+  const prodsConMargen=finProductos.filter(p=>p.price>0&&p.precio_compra>0);
+  const margenPromedio=prodsConMargen.length>0
+    ? prodsConMargen.reduce((s,p)=>(s+(p.price-p.precio_compra)/p.price),0)/prodsConMargen.length
+    : 0.15; // fallback 15% si no hay datos
+
   // Ventas manuales guardadas en localStorage por clave "finVM_{anio}_{mes}"
-  let ventasManualKey=`finVM_${anio}_${mes}`;
+  const ventasManualKey=`finVM_${anio}_${mes}`;
   let ventasManuales={};
   try{ventasManuales=JSON.parse(localStorage.getItem(ventasManualKey)||'{}');}catch(e){}
 
-  // Recalcular totales aplicando ajustes manuales
+  // Recalcular totales aplicando ajustes manuales con margen estimado
   totalVentas=0;totalCosto=0;totalGastos=0;totalNeto=0;
   diasConVentas=0;
   diasData.forEach(d=>{
     if(d.esFuturo)return;
     const ajuste=ventasManuales[d.d];
-    d.ventasEfectivas=ajuste!=null?ajuste:d.ventas;
     d.ajustado=ajuste!=null;
-    const bruta=d.ventasEfectivas-d.costo;
-    d.netaEfectiva=bruta-d.gastos;
+    d.ventasEfectivas=ajuste!=null?ajuste:d.ventas;
+    if(d.ajustado){
+      // Costo estimado usando margen promedio de productos
+      d.costoEstimado=Math.round(d.ventasEfectivas*(1-margenPromedio));
+      d.netaEfectiva=Math.round(d.ventasEfectivas*margenPromedio)-d.gastos;
+    } else {
+      d.costoEstimado=d.costo;
+      d.netaEfectiva=d.neta;
+    }
     totalVentas+=d.ventasEfectivas;
-    totalCosto+=d.costo;
+    totalCosto+=d.ajustado?d.costoEstimado:d.costo;
     totalGastos+=d.gastos;
     totalNeto+=d.netaEfectiva;
     if(d.ventasEfectivas>0)diasConVentas++;
   });
 
+  const margenPct=Math.round(margenPromedio*100);
+
   // Tabla de días
   const filasDias=diasData.filter(d=>d.ventasEfectivas>0||(!d.esFuturo&&d.d<=hoy.getDate()&&mes===hoy.getMonth()&&anio===hoy.getFullYear())).map(d=>{
-    const neta=d.esFuturo?d.neta:(d.netaEfectiva??d.neta);
-    const ventasVal=d.esFuturo?d.ventas:(d.ventasEfectivas??d.ventas);
+    const neta=d.esFuturo?d.neta:d.netaEfectiva;
+    const ventasVal=d.esFuturo?d.ventas:d.ventasEfectivas;
+    const costoMostrar=d.esFuturo?d.costo:(d.ajustado?d.costoEstimado:d.costo);
     const netoColor=neta>=0?'var(--green)':'var(--red)';
     const fechaLabel=new Date(anio,mes,d.d).toLocaleDateString('es-AR',{weekday:'short',day:'numeric'});
     const diasKey=`${anio}_${mes}`;
-    // Celda de ventas: input editable
+    // Celda de ventas: input editable (solo días no futuros)
     const ventasCell=d.esFuturo
       ?`<td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;color:var(--brownd)">$${ventasVal.toLocaleString('es-AR')}</td>`
       :`<td style="padding:4px 10px;border-bottom:1px solid var(--beige);text-align:right">
           <div style="display:flex;align-items:center;justify-content:flex-end;gap:4px">
-            ${d.ajustado?`<span title="Valor ajustado manualmente" style="font-size:.6rem;color:var(--brown);cursor:pointer" onclick="borrarAjusteVenta(${d.d},'${diasKey}')">✏️</span>`:''}
+            ${d.ajustado?`<span title="Ingresado manualmente — costo estimado con margen ${margenPct}%. Click para borrar ajuste." style="font-size:.65rem;color:var(--brown);cursor:pointer;white-space:nowrap" onclick="borrarAjusteVenta(${d.d},'${diasKey}')">~${margenPct}% ✕</span>`:''}
             <input type="number"
               id="vm-${d.d}"
               value="${ventasVal}"
               min="0"
-              step="100"
+              step="1000"
               onchange="guardarAjusteVenta(${d.d},'${diasKey}',this.value)"
-              style="width:90px;padding:3px 6px;border:1.5px solid ${d.ajustado?'var(--brown)':'var(--beige)'};border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.78rem;text-align:right;color:var(--brownd);background:${d.ajustado?'#fff9f0':'transparent'};font-weight:${d.ajustado?700:400}">
+              style="width:96px;padding:3px 6px;border:1.5px solid ${d.ajustado?'var(--brown)':'var(--beige)'};border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.78rem;text-align:right;color:var(--brownd);background:${d.ajustado?'#fff9f0':'transparent'};font-weight:${d.ajustado?700:400}">
           </div>
         </td>`;
+    const costoLabel=d.ajustado?`<span style="font-size:.65rem;color:var(--brownl)">~</span>$${Math.round(costoMostrar).toLocaleString('es-AR')}`:`-$${Math.round(costoMostrar).toLocaleString('es-AR')}`;
     return`<tr style="${d.esFuturo?'opacity:.4':''}">
       <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;color:var(--brownd);font-weight:600">${fechaLabel}</td>
       <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right">${d.pedidos} pedido${d.pedidos!==1?'s':''}</td>
       ${ventasCell}
-      <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;color:var(--brownl)">-$${Math.round(d.costo).toLocaleString('es-AR')}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;color:var(--brownl)">${costoLabel}</td>
       <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;color:var(--brownl)">-$${Math.round(d.gastos).toLocaleString('es-AR')}</td>
       <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;font-weight:700;color:${netoColor}">$${Math.round(neta).toLocaleString('es-AR')}</td>
     </tr>`;
