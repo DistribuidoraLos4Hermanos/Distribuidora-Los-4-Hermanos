@@ -2784,16 +2784,22 @@ function _renderBoletaDiaItems(){
     const v=it.price*(it.qty||1);
     const c=(it.precio_compra||0)*(it.qty||1);
     totalV+=v;totalC+=c;
+    const paso=it.medio_pack?0.5:1;
+    const qtyDisplay=it.qty%1===0?it.qty:it.qty.toFixed(1);
+    const medioPachBadge=it.medio_pack?`<span style="font-size:.6rem;background:#fff3e0;color:var(--brown);border:1px solid #f0c070;border-radius:20px;padding:1px 5px;font-weight:600">½</span>`:'';
     return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--beige)">
       <span style="font-size:1.1rem">${it.emoji||'🛍️'}</span>
       <div style="flex:1;min-width:0">
-        <div style="font-size:.83rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${it.name}</div>
+        <div style="font-size:.83rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${it.name} ${medioPachBadge}</div>
         <div style="font-size:.72rem;color:var(--brownl)">${fmt(it.price)} c/u · costo ${fmt(it.precio_compra||0)}</div>
       </div>
       <div style="display:flex;align-items:center;gap:4px">
-        <button onclick="_bdiaQty(${i},-${it.medio_pack?0.5:1})" style="background:var(--beige);border:none;border-radius:6px;width:26px;height:26px;font-size:.9rem;cursor:pointer">−</button>
-        <span style="min-width:28px;text-align:center;font-weight:700;font-size:.88rem">${it.qty%1===0?it.qty:it.qty.toFixed(1)}</span>
-        <button onclick="_bdiaQty(${i},${it.medio_pack?0.5:1})" style="background:var(--beige);border:none;border-radius:6px;width:26px;height:26px;font-size:.9rem;cursor:pointer">+</button>
+        <button onclick="_bdiaQty(${i},-${paso})" style="background:var(--beige);border:none;border-radius:6px;width:28px;height:28px;font-size:1rem;cursor:pointer;font-weight:700">−</button>
+        <input type="number" value="${qtyDisplay}" min="${paso}" step="${paso}"
+          style="width:46px;text-align:center;font-weight:700;font-size:.88rem;border:1.5px solid var(--beige);border-radius:6px;padding:3px 4px;font-family:'DM Sans',sans-serif;background:var(--cream)"
+          onchange="_bdiaSetQty(${i},this.value)"
+          onfocus="this.select()">
+        <button onclick="_bdiaQty(${i},${paso})" style="background:var(--beige);border:none;border-radius:6px;width:28px;height:28px;font-size:1rem;cursor:pointer;font-weight:700">+</button>
       </div>
       <div style="text-align:right;min-width:60px;font-size:.82rem;font-weight:600">${fmt(v)}</div>
       <button onclick="_bdiaRemove(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:0 2px">✕</button>
@@ -2812,7 +2818,19 @@ function _renderBoletaDiaItems(){
 
 function _bdiaQty(idx,delta){
   const it=_boletaDiaItems[idx];if(!it)return;
-  it.qty=Math.max(it.medio_pack?0.5:1,it.qty+delta);
+  const min=it.medio_pack?0.5:1;
+  it.qty=Math.max(min,Math.round((it.qty+delta)*10)/10);
+  _renderBoletaDiaItems();
+}
+
+function _bdiaSetQty(idx,val){
+  const it=_boletaDiaItems[idx];if(!it)return;
+  const min=it.medio_pack?0.5:1;
+  const paso=it.medio_pack?0.5:1;
+  let v=parseFloat(val)||min;
+  // redondear al paso más cercano
+  v=Math.max(min,Math.round(v/paso)*paso);
+  it.qty=v;
   _renderBoletaDiaItems();
 }
 
