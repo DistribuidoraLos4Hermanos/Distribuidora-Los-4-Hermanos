@@ -600,6 +600,29 @@ tr:hover td{background:rgba(237,230,214,.4)}
   </div>
 </div>
 
+<!-- MODAL BOLETA DIA -->
+<div id="modal-boleta-dia" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:250;align-items:center;justify-content:center;padding:12px" onclick="if(event.target===this)cerrarBoletaDia()">
+  <div style="background:var(--white);border-radius:18px;width:100%;max-width:460px;max-height:92vh;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h3 id="bdia-titulo" style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--brownd)"></h3>
+      <button onclick="cerrarBoletaDia()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--brownl)">✕</button>
+    </div>
+    <div style="position:relative">
+      <input id="bdia-search" type="text" placeholder="Buscar producto..." autocomplete="off"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--beige);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.88rem;background:var(--cream);outline:none"
+        oninput="buscarProductoBdia()"
+        onkeydown="if(event.key==='Enter'&&_boletaDiaLastResults.length){agregarBdiaProducto(_boletaDiaLastResults[0].id);event.preventDefault();}">
+      <div id="bdia-autocomplete" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--beige);border-radius:10px;z-index:10;box-shadow:0 4px 16px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;margin-top:3px"></div>
+    </div>
+    <div id="bdia-items"></div>
+    <div id="bdia-resumen"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button onclick="limpiarBoletaDia()" style="background:none;border:1.5px solid var(--red);color:var(--red);border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer">🗑️ Limpiar</button>
+      <button onclick="guardarBoletaDia()" style="flex:1;background:var(--brown);color:white;border:none;border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer">Guardar boleta</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL EDITAR PEDIDO -->
 <div id="modal-editar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;padding:12px">
   <div style="background:var(--white);border-radius:18px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:20px">
@@ -2189,6 +2212,7 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.boleta-search-wrap'))document.getElementById('b-autocomplete').className='autocomplete-list';
   if(!e.target.closest('#edit-search')&&!e.target.closest('#edit-autocomplete'))document.getElementById('edit-autocomplete').style.display='none';
   if(!e.target.closest('#b-negocio')&&!e.target.closest('#b-negocio-autocomplete'))document.getElementById('b-negocio-autocomplete').style.display='none';
+  if(!e.target.closest('#bdia-search')&&!e.target.closest('#bdia-autocomplete'))document.getElementById('bdia-autocomplete').style.display='none';
   const modal=document.getElementById('modal-editar');
   if(e.target===modal)cerrarModalEditar();
   const modalZ=document.getElementById('modal-selector-zonas');
@@ -2647,71 +2671,60 @@ async function renderBalanceMes(){
     <div style="font-size:.72rem;color:var(--brownl);margin-bottom:6px">Ventas diarias — verde: ganancia neta positiva, rojo: negativa</div>
     <div style="display:flex;align-items:flex-end;gap:2px;height:90px;padding:0 2px">${barras}</div>`;
 
-  // Margen promedio real basado en precios de venta vs compra de los productos cargados
-  const prodsConMargen=finProductos.filter(p=>p.price>0&&p.precio_compra>0);
-  const margenPromedio=prodsConMargen.length>0
-    ? prodsConMargen.reduce((s,p)=>(s+(p.price-p.precio_compra)/p.price),0)/prodsConMargen.length
-    : 0.15; // fallback 15% si no hay datos
-
-  // Ventas manuales guardadas en localStorage por clave "finVM_{anio}_{mes}"
-  const ventasManualKey=`finVM_${anio}_${mes}`;
+  // Ventas manuales por día guardadas en localStorage: { dia: [{id,name,price,precio_compra,qty},...] }
+  const ventasManualKey=`finVM2_${anio}_${mes}`;
   let ventasManuales={};
   try{ventasManuales=JSON.parse(localStorage.getItem(ventasManualKey)||'{}');}catch(e){}
 
-  // Recalcular totales aplicando ajustes manuales con margen estimado
+  // Recalcular totales incorporando boletas manuales
   totalVentas=0;totalCosto=0;totalGastos=0;totalNeto=0;
   diasConVentas=0;
   diasData.forEach(d=>{
     if(d.esFuturo)return;
-    const ajuste=ventasManuales[d.d];
-    d.ajustado=ajuste!=null;
-    d.ventasEfectivas=ajuste!=null?ajuste:d.ventas;
-    if(d.ajustado){
-      // Costo estimado usando margen promedio de productos
-      d.costoEstimado=Math.round(d.ventasEfectivas*(1-margenPromedio));
-      d.netaEfectiva=Math.round(d.ventasEfectivas*margenPromedio)-d.gastos;
-    } else {
-      d.costoEstimado=d.costo;
-      d.netaEfectiva=d.neta;
-    }
+    const itemsManuales=ventasManuales[d.d]||[];
+    d.tieneManual=itemsManuales.length>0;
+    d.ventasManual=itemsManuales.reduce((s,i)=>s+(i.price*(i.qty||1)),0);
+    d.costoManual=itemsManuales.reduce((s,i)=>s+(i.precio_compra*(i.qty||1)),0);
+    d.ventasEfectivas=d.ventas+d.ventasManual;
+    d.costoEfectivo=d.costo+d.costoManual;
+    const bruta=d.ventasEfectivas-d.costoEfectivo;
+    d.netaEfectiva=bruta-d.gastos;
     totalVentas+=d.ventasEfectivas;
-    totalCosto+=d.ajustado?d.costoEstimado:d.costo;
+    totalCosto+=d.costoEfectivo;
     totalGastos+=d.gastos;
     totalNeto+=d.netaEfectiva;
     if(d.ventasEfectivas>0)diasConVentas++;
   });
 
-  const margenPct=Math.round(margenPromedio*100);
-
   // Tabla de días
   const filasDias=diasData.filter(d=>d.ventasEfectivas>0||(!d.esFuturo&&d.d<=hoy.getDate()&&mes===hoy.getMonth()&&anio===hoy.getFullYear())).map(d=>{
     const neta=d.esFuturo?d.neta:d.netaEfectiva;
     const ventasVal=d.esFuturo?d.ventas:d.ventasEfectivas;
-    const costoMostrar=d.esFuturo?d.costo:(d.ajustado?d.costoEstimado:d.costo);
+    const costoVal=d.esFuturo?d.costo:d.costoEfectivo;
     const netoColor=neta>=0?'var(--green)':'var(--red)';
     const fechaLabel=new Date(anio,mes,d.d).toLocaleDateString('es-AR',{weekday:'short',day:'numeric'});
-    const diasKey=`${anio}_${mes}`;
-    // Celda de ventas: input editable (solo días no futuros)
-    const ventasCell=d.esFuturo
-      ?`<td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;color:var(--brownd)">$${ventasVal.toLocaleString('es-AR')}</td>`
-      :`<td style="padding:4px 10px;border-bottom:1px solid var(--beige);text-align:right">
-          <div style="display:flex;align-items:center;justify-content:flex-end;gap:4px">
-            ${d.ajustado?`<span title="Ingresado manualmente — costo estimado con margen ${margenPct}%. Click para borrar ajuste." style="font-size:.65rem;color:var(--brown);cursor:pointer;white-space:nowrap" onclick="borrarAjusteVenta(${d.d},'${diasKey}')">~${margenPct}% ✕</span>`:''}
-            <input type="number"
-              id="vm-${d.d}"
-              value="${ventasVal}"
-              min="0"
-              step="1000"
-              onchange="guardarAjusteVenta(${d.d},'${diasKey}',this.value)"
-              style="width:96px;padding:3px 6px;border:1.5px solid ${d.ajustado?'var(--brown)':'var(--beige)'};border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.78rem;text-align:right;color:var(--brownd);background:${d.ajustado?'#fff9f0':'transparent'};font-weight:${d.ajustado?700:400}">
-          </div>
-        </td>`;
-    const costoLabel=d.ajustado?`<span style="font-size:.65rem;color:var(--brownl)">~</span>$${Math.round(costoMostrar).toLocaleString('es-AR')}`:`-$${Math.round(costoMostrar).toLocaleString('es-AR')}`;
+    // Columna ventas: si tiene manual muestra badge, siempre botón para abrir boleta
+    const manualBadge=d.tieneManual
+      ?`<span style="font-size:.6rem;background:#fff3e0;color:var(--brown);border:1px solid #f0c070;border-radius:20px;padding:1px 6px;font-weight:600;white-space:nowrap">+boleta</span>`
+      :'';
+    const btnCargar=d.esFuturo?''
+      :`<button onclick="abrirBoletaDia(${d.d},${mes},${anio})" title="${d.tieneManual?'Editar boleta del día':'Cargar ventas del día'}"
+          style="background:${d.tieneManual?'var(--brown)':'transparent'};color:${d.tieneManual?'#fff':'var(--brown)'};border:1.5px solid var(--brown);border-radius:7px;padding:2px 7px;font-size:.68rem;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap">
+          ${d.tieneManual?'✏️ Editar':'+ Cargar'}
+        </button>`;
+    const ventasCell=`<td style="padding:5px 10px;border-bottom:1px solid var(--beige);text-align:right">
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap">
+        ${d.esFuturo?'':`<span style="font-size:.78rem;color:var(--brownd)">$${ventasVal.toLocaleString('es-AR')}</span>`}
+        ${d.esFuturo?`<span style="font-size:.78rem;color:var(--brownd)">$${ventasVal.toLocaleString('es-AR')}</span>`:''}
+        ${manualBadge}
+        ${btnCargar}
+      </div>
+    </td>`;
     return`<tr style="${d.esFuturo?'opacity:.4':''}">
       <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;color:var(--brownd);font-weight:600">${fechaLabel}</td>
       <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right">${d.pedidos} pedido${d.pedidos!==1?'s':''}</td>
       ${ventasCell}
-      <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;color:var(--brownl)">${costoLabel}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;color:var(--brownl)">-$${Math.round(costoVal).toLocaleString('es-AR')}</td>
       <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;color:var(--brownl)">-$${Math.round(d.gastos).toLocaleString('es-AR')}</td>
       <td style="padding:7px 10px;border-bottom:1px solid var(--beige);font-size:.78rem;text-align:right;font-weight:700;color:${netoColor}">$${Math.round(neta).toLocaleString('es-AR')}</td>
     </tr>`;
@@ -2738,25 +2751,119 @@ async function renderBalanceMes(){
     </table>`:'<div class="no-data">No hay pedidos este mes.</div>';
 }
 
-// Ajustes manuales de ventas por día
-function guardarAjusteVenta(dia,mesKey,valor){
-  const v=parseInt(valor)||0;
-  const storageKey=`finVM_${mesKey}`;
-  let vm={};try{vm=JSON.parse(localStorage.getItem(storageKey)||'{}');}catch(e){}
-  vm[dia]=v;
-  try{localStorage.setItem(storageKey,JSON.stringify(vm));}catch(e){}
-  showToast('✅ Venta del día '+dia+' guardada');
-  renderBalanceMes();
+// Boleta del día — Finanzas
+let _boletaDiaItems=[];
+let _boletaDiaDia=null,_boletaDiaMes=null,_boletaDiaAnio=null;
+let _boletaDiaLastResults=[];
+
+function abrirBoletaDia(dia,mes,anio){
+  _boletaDiaDia=dia;_boletaDiaMes=mes;_boletaDiaAnio=anio;
+  const ventasManualKey=`finVM2_${anio}_${mes}`;
+  let vm={};try{vm=JSON.parse(localStorage.getItem(ventasManualKey)||'{}');}catch(e){}
+  _boletaDiaItems=(vm[dia]||[]).map(i=>({...i}));
+  const dias=['dom','lun','mar','mié','jue','vie','sáb'];
+  const fecha=new Date(anio,mes,dia);
+  const nombreDia=dias[fecha.getDay()];
+  document.getElementById('bdia-titulo').textContent=`📋 Boleta del ${nombreDia} ${dia}`;
+  document.getElementById('bdia-search').value='';
+  document.getElementById('bdia-autocomplete').style.display='none';
+  _renderBoletaDiaItems();
+  document.getElementById('modal-boleta-dia').style.display='flex';
+  document.getElementById('bdia-search').focus();
 }
 
-function borrarAjusteVenta(dia,mesKey){
-  if(!confirm('¿Borrar el ajuste manual de este día y volver al valor calculado por el sistema?'))return;
-  const storageKey=`finVM_${mesKey}`;
-  let vm={};try{vm=JSON.parse(localStorage.getItem(storageKey)||'{}');}catch(e){}
-  delete vm[dia];
-  try{localStorage.setItem(storageKey,JSON.stringify(vm));}catch(e){}
-  showToast('Ajuste borrado — se muestra el valor del sistema');
+function cerrarBoletaDia(){
+  document.getElementById('modal-boleta-dia').style.display='none';
+  _boletaDiaItems=[];_boletaDiaDia=null;
+}
+
+function _renderBoletaDiaItems(){
+  const fmt=v=>'$'+Math.round(v).toLocaleString('es-AR');
+  let totalV=0,totalC=0;
+  const rows=_boletaDiaItems.map((it,i)=>{
+    const v=it.price*(it.qty||1);
+    const c=(it.precio_compra||0)*(it.qty||1);
+    totalV+=v;totalC+=c;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--beige)">
+      <span style="font-size:1.1rem">${it.emoji||'🛍️'}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.83rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${it.name}</div>
+        <div style="font-size:.72rem;color:var(--brownl)">${fmt(it.price)} c/u · costo ${fmt(it.precio_compra||0)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <button onclick="_bdiaQty(${i},-${it.medio_pack?0.5:1})" style="background:var(--beige);border:none;border-radius:6px;width:26px;height:26px;font-size:.9rem;cursor:pointer">−</button>
+        <span style="min-width:28px;text-align:center;font-weight:700;font-size:.88rem">${it.qty%1===0?it.qty:it.qty.toFixed(1)}</span>
+        <button onclick="_bdiaQty(${i},${it.medio_pack?0.5:1})" style="background:var(--beige);border:none;border-radius:6px;width:26px;height:26px;font-size:.9rem;cursor:pointer">+</button>
+      </div>
+      <div style="text-align:right;min-width:60px;font-size:.82rem;font-weight:600">${fmt(v)}</div>
+      <button onclick="_bdiaRemove(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:0 2px">✕</button>
+    </div>`;
+  }).join('');
+  const ganancia=totalV-totalC;
+  const resumen=_boletaDiaItems.length>0
+    ?`<div style="background:var(--cream);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:.8rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center">
+        <div><div style="color:var(--brownl)">Ventas</div><strong>${fmt(totalV)}</strong></div>
+        <div><div style="color:var(--brownl)">Costo</div><strong>${fmt(totalC)}</strong></div>
+        <div><div style="color:var(--green)">Ganancia</div><strong style="color:var(--green)">${fmt(ganancia)}</strong></div>
+      </div>`:'';
+  document.getElementById('bdia-items').innerHTML=rows||'<div style="text-align:center;color:var(--brownl);padding:20px;font-size:.82rem">Todavía no hay productos — buscá arriba para agregar</div>';
+  document.getElementById('bdia-resumen').innerHTML=resumen;
+}
+
+function _bdiaQty(idx,delta){
+  const it=_boletaDiaItems[idx];if(!it)return;
+  it.qty=Math.max(it.medio_pack?0.5:1,it.qty+delta);
+  _renderBoletaDiaItems();
+}
+
+function _bdiaRemove(idx){
+  _boletaDiaItems.splice(idx,1);
+  _renderBoletaDiaItems();
+}
+
+function buscarProductoBdia(){
+  const q=document.getElementById('bdia-search').value.trim().toLowerCase();
+  const ac=document.getElementById('bdia-autocomplete');
+  if(!q){ac.style.display='none';_boletaDiaLastResults=[];return;}
+  const res=(finProductos||[]).filter(p=>p.name&&p.name.toLowerCase().includes(q)).slice(0,8);
+  _boletaDiaLastResults=res;
+  if(!res.length){ac.style.display='none';return;}
+  const fmt=v=>'$'+Math.round(v).toLocaleString('es-AR');
+  ac.innerHTML=res.map(p=>`<div onclick="agregarBdiaProducto('${p.id}')" style="padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--beige);display:flex;align-items:center;gap:8px;font-size:.83rem" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background=''">
+    <span>${p.emoji||'🛍️'}</span>
+    <div style="flex:1"><div style="font-weight:600">${p.name}</div><div style="color:var(--brownl);font-size:.72rem">${fmt(p.price)} · costo ${fmt(p.precio_compra||0)}</div></div>
+  </div>`).join('');
+  ac.style.display='block';
+}
+
+function agregarBdiaProducto(id){
+  const p=(finProductos||[]).find(x=>x.id===id);if(!p)return;
+  const paso=p.medio_pack?0.5:1;
+  const existing=_boletaDiaItems.find(i=>i.id===id);
+  if(existing){existing.qty+=paso;}
+  else{_boletaDiaItems.push({id:p.id,name:p.name,emoji:p.emoji||'🛍️',price:p.price,precio_compra:p.precio_compra||0,medio_pack:p.medio_pack||false,qty:paso});}
+  document.getElementById('bdia-search').value='';
+  document.getElementById('bdia-autocomplete').style.display='none';
+  _boletaDiaLastResults=[];
+  _renderBoletaDiaItems();
+  document.getElementById('bdia-search').focus();
+}
+
+function guardarBoletaDia(){
+  const ventasManualKey=`finVM2_${_boletaDiaAnio}_${_boletaDiaMes}`;
+  let vm={};try{vm=JSON.parse(localStorage.getItem(ventasManualKey)||'{}');}catch(e){}
+  if(_boletaDiaItems.length>0){vm[_boletaDiaDia]=_boletaDiaItems;}
+  else{delete vm[_boletaDiaDia];}
+  try{localStorage.setItem(ventasManualKey,JSON.stringify(vm));}catch(e){}
+  cerrarBoletaDia();
   renderBalanceMes();
+  showToast(_boletaDiaItems.length>0?`✅ Boleta del día ${_boletaDiaDia} guardada`:'🗑️ Boleta del día eliminada');
+}
+
+function limpiarBoletaDia(){
+  if(!confirm('¿Borrar todos los productos de este día?'))return;
+  _boletaDiaItems=[];
+  _renderBoletaDiaItems();
 }
 
 // Inicializar selector de año en Finanzas
