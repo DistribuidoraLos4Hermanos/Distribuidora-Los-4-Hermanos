@@ -2795,7 +2795,7 @@ function _renderBoletaDiaItems(){
       </div>
       <div style="display:flex;align-items:center;gap:4px">
         <button onclick="_bdiaQty(${i},-${paso})" style="background:var(--beige);border:none;border-radius:6px;width:28px;height:28px;font-size:1rem;cursor:pointer;font-weight:700">−</button>
-        <input type="number" value="${qtyDisplay}" min="${paso}" step="${paso}"
+        <input type="number" value="${qtyDisplay}" min="0.5" step="0.5"
           style="width:46px;text-align:center;font-weight:700;font-size:.88rem;border:1.5px solid var(--beige);border-radius:6px;padding:3px 4px;font-family:'DM Sans',sans-serif;background:var(--cream)"
           onchange="_bdiaSetQty(${i},this.value)"
           onfocus="this.select()">
@@ -2826,10 +2826,11 @@ function _bdiaQty(idx,delta){
 function _bdiaSetQty(idx,val){
   const it=_boletaDiaItems[idx];if(!it)return;
   const min=it.medio_pack?0.5:1;
-  const paso=it.medio_pack?0.5:1;
-  let v=parseFloat(val)||min;
-  // redondear al paso más cercano
-  v=Math.max(min,Math.round(v/paso)*paso);
+  let v=parseFloat(val);
+  if(isNaN(v)||v<min)v=min;
+  // permitir medios (0.5) siempre, redondear a 1 decimal
+  v=Math.round(v*2)/2;
+  if(v<min)v=min;
   it.qty=v;
   _renderBoletaDiaItems();
 }
