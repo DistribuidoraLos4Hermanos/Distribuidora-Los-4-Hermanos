@@ -649,14 +649,19 @@ tr:hover td{background:rgba(237,230,214,.4)}
     <div id="edit-total-row" style="background:var(--beige);border-radius:8px;padding:10px 14px;font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--brownd);margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:.82rem;font-weight:400;font-family:'DM Sans',sans-serif;color:var(--brownl)">Subtotal</span><span id="edit-subtotal-val" style="font-size:.85rem;font-weight:600;font-family:'DM Sans',sans-serif">$0</span></div>
       <div id="edit-fiado-row" style="display:none;justify-content:space-between;margin-bottom:4px"><span style="font-size:.8rem;font-weight:400;font-family:'DM Sans',sans-serif;color:var(--red)" id="edit-fiado-label">Recargo fiado (10%)</span><span id="edit-recargo-val" style="font-size:.82rem;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--red)">$0</span></div>
+      <div id="edit-desc-row" style="display:none;justify-content:space-between;margin-bottom:4px"><span style="font-size:.8rem;font-weight:400;font-family:'DM Sans',sans-serif;color:var(--green)" id="edit-desc-label">Descuento</span><span id="edit-desc-val" style="font-size:.82rem;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--green)">-$0</span></div>
       <div style="display:flex;justify-content:space-between"><span>TOTAL</span><span id="edit-total-val">$0</span></div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;padding:6px 2px;margin-bottom:12px;background:rgba(192,57,43,.06);border-radius:8px;padding:8px 12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;background:rgba(192,57,43,.06);border-radius:8px;padding:8px 12px">
       <input type="checkbox" id="edit-fiado" style="width:18px;height:18px;accent-color:#c0392b;cursor:pointer" onchange="renderEditItems()">
       <label for="edit-fiado" style="font-size:.83rem;font-weight:600;color:var(--red);cursor:pointer">Es fiado</label>
       <span style="font-size:.78rem;color:var(--brownl)">+ recargo</span>
       <input type="number" id="edit-fiado-pct" value="10" min="1" max="100" style="width:52px;padding:5px 8px;border:1.5px solid var(--beige);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.8rem;background:var(--cream);outline:none" oninput="renderEditItems()">
       <span style="font-size:.78rem;color:var(--brownl)">%</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;background:rgba(26,122,60,.06);border-radius:8px;padding:8px 12px">
+      <span style="font-size:.83rem;font-weight:600;color:var(--green)">Descuento $</span>
+      <input type="number" id="edit-descuento" value="0" min="0" style="width:90px;padding:5px 8px;border:1.5px solid var(--beige);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.9rem;background:var(--cream);outline:none" oninput="renderEditItems()">
     </div>
     <div style="display:flex;gap:8px">
       <button class="btn-primary" onclick="guardarEdicionPedido()" style="flex:1">💾 Guardar cambios</button>
@@ -1401,6 +1406,8 @@ function abrirModalEditar(orderId){
   const pctInput=document.getElementById('edit-fiado-pct');
   if(cb){cb.checked=!!(o.recargo_fiado&&o.recargo_fiado>0);}
   if(pctInput){pctInput.value=10;}
+  const descInput=document.getElementById('edit-descuento');
+  if(descInput){descInput.value=o.descuento_aplicado&&o.descuento_aplicado>0?o.descuento_aplicado:0;}
   renderEditItems();
   const modal=document.getElementById('modal-editar');
   modal.style.display='flex';
@@ -1429,13 +1436,17 @@ function renderEditItems(){
   const esFiado=document.getElementById('edit-fiado')?.checked;
   const fiadoPct=parseFloat(document.getElementById('edit-fiado-pct')?.value)||10;
   const recargoFiado=esFiado?Math.round(subtotal*fiadoPct/100):0;
-  const total=subtotal+recargoFiado;
+  const descuento=Math.max(0,parseFloat(document.getElementById('edit-descuento')?.value)||0);
+  const total=Math.max(0,subtotal+recargoFiado-descuento);
   document.getElementById('edit-subtotal-val').textContent=fmt(subtotal);
   const fiadoRow=document.getElementById('edit-fiado-row');
   if(fiadoRow){fiadoRow.style.display=esFiado?'flex':'none';}
   const fiadoLabel=document.getElementById('edit-fiado-label');
   if(fiadoLabel)fiadoLabel.textContent=`Recargo fiado (${fiadoPct}%)`;
   document.getElementById('edit-recargo-val').textContent='+'+fmt(recargoFiado);
+  const descRow=document.getElementById('edit-desc-row');
+  if(descRow){descRow.style.display=descuento>0?'flex':'none';}
+  document.getElementById('edit-desc-val').textContent='-$'+Number(descuento).toLocaleString('es-AR');
   document.getElementById('edit-total-val').textContent=fmt(total);
 }
 
@@ -1480,19 +1491,20 @@ function getEditTotals(){
   const esFiado=document.getElementById('edit-fiado')?.checked;
   const fiadoPct=parseFloat(document.getElementById('edit-fiado-pct')?.value)||10;
   const recargoFiado=esFiado?Math.round(subtotal*fiadoPct/100):0;
-  const total=subtotal+recargoFiado;
-  return{items,subtotal,esFiado,fiadoPct,recargoFiado,total};
+  const descuento=Math.max(0,parseFloat(document.getElementById('edit-descuento')?.value)||0);
+  const total=Math.max(0,subtotal+recargoFiado-descuento);
+  return{items,subtotal,esFiado,fiadoPct,recargoFiado,descuento,total};
 }
 
 async function guardarEdicionPedido(){
   if(!editOrderId)return;
-  const{items,subtotal,esFiado,fiadoPct,recargoFiado,total}=getEditTotals();
+  const{items,subtotal,esFiado,fiadoPct,recargoFiado,descuento,total}=getEditTotals();
   const negocio=document.getElementById('edit-negocio').value.trim()||'Sin nombre';
   const telefono=document.getElementById('edit-telefono').value.trim();
-  const{error}=await db.from('orders').update({negocio,telefono,items,total,recargo_fiado:recargoFiado}).eq('id',editOrderId);
+  const{error}=await db.from('orders').update({negocio,telefono,items,total,recargo_fiado:recargoFiado,descuento_aplicado:descuento}).eq('id',editOrderId);
   if(error){showToast('Error al guardar: '+error.message);return;}
   const o=allOrders.find(x=>x.id===editOrderId);
-  if(o){Object.assign(o,{negocio,telefono,items,total,recargo_fiado:recargoFiado});}
+  if(o){Object.assign(o,{negocio,telefono,items,total,recargo_fiado:recargoFiado,descuento_aplicado:descuento});}
   cerrarModalEditar();
   renderOrders(getFilteredOrders());
   showToast('✅ Pedido actualizado');
@@ -1500,12 +1512,11 @@ async function guardarEdicionPedido(){
 
 async function imprimirDesdeModal(){
   if(!editOrderId)return;
-  const{items,subtotal,esFiado,fiadoPct,recargoFiado,total}=getEditTotals();
+  const{items,subtotal,esFiado,fiadoPct,recargoFiado,descuento,total}=getEditTotals();
   const negocio=document.getElementById('edit-negocio').value.trim()||'Sin nombre';
   const telefono=document.getElementById('edit-telefono').value.trim();
   const o=allOrders.find(x=>x.id===editOrderId);
   const fecha=o?new Date(o.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});
-  const descuento=o?o.descuento_aplicado||0:0;
   // Guardar antes de imprimir
   await db.from('orders').update({negocio,telefono,items,total,recargo_fiado:recargoFiado,impreso:true}).eq('id',editOrderId);
   if(o){Object.assign(o,{negocio,telefono,items,total,recargo_fiado:recargoFiado,impreso:true});}
