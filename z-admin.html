@@ -334,7 +334,7 @@ tr:hover td{background:rgba(237,230,214,.4)}
       <h3>🧾 Nueva boleta</h3>
       <div class="boleta-cliente-row">
         <div style="position:relative">
-          <input type="text" id="b-negocio" placeholder="Nombre del negocio / cliente" oninput="onNegocioBoleta()" autocomplete="off" style="width:100%">
+          <input type="text" id="b-negocio" placeholder="Dirección o nombre del cliente" oninput="onNegocioBoleta()" autocomplete="off" style="width:100%">
           <div id="b-negocio-autocomplete" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--beige);border-radius:0 0 10px 10px;max-height:160px;overflow-y:auto;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.1)"></div>
         </div>
         <div style="position:relative">
@@ -1661,7 +1661,7 @@ function imprimirClientesSeleccionados(){
     <div class="sub">Distribuidora Los 4 Hermanos &nbsp;·&nbsp; ${fecha} &nbsp;·&nbsp; ${seleccionados.length} cliente${seleccionados.length!==1?'s':''}</div>
     <table>
       <thead><tr>
-        <th>#</th><th>Negocio / Nombre</th><th>Teléfono</th><th>Zona</th>
+        <th>#</th><th>Dirección / Cliente</th><th>Teléfono</th><th>Zona</th>
       </tr></thead>
       <tbody>${filas}</tbody>
     </table>
