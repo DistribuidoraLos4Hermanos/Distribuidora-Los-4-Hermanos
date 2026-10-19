@@ -230,7 +230,7 @@ footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opaci
     </div>
     <div class="client-form">
       <h4>Tus datos</h4>
-      <div class="form-field"><label>Nombre del negocio</label><input type="text" id="negocio" placeholder="Kiosco / Almacen..." oninput="checkLoyalty()"></div>
+      <div class="form-field"><label>Dirección <span style="font-weight:400;opacity:.7">(calle y número)</span></label><input type="text" id="negocio" placeholder="Ej: San Martín 1234" oninput="checkLoyalty()"></div>
       <div class="form-field"><label>Telefono de contacto <span style="color:var(--red)">*</span></label><input type="tel" id="telefono" placeholder="351 000-0000" oninput="checkLoyalty()" required></div>
     </div>
     <button class="send-btn" onclick="sendOrder()">Enviar pedido por WhatsApp</button>
@@ -466,7 +466,7 @@ async function sendOrder(){
   const telefono=document.getElementById('telefono').value.trim();
   const items=Object.entries(cart);
   if(!items.length){showToast('Tu carrito esta vacio');return;}
-  if(!negocio){showToast('Ingresa el nombre de tu negocio');return;}
+  if(!negocio){showToast('Ingresá tu dirección (calle y número)');return;}
   if(!telefono){showToast('Ingresa tu telefono');return;}
 
   let subtotal=0;
@@ -502,7 +502,7 @@ async function sendOrder(){
   if(hasDiscount)descLines+=`\n🏆 Descuento fidelidad (${loyaltyConfig.descuento_pct}%): -${fmt(descLoyalty)}`;
   if(cuponAplicado)descLines+=`\n🎟️ Cupon "${cuponAplicado.codigo}" (${cuponAplicado.descuento_pct}%): -${fmt(descCupon)}`;
   const wsp=storeConfig.telefono_wsp||'5493516211515';
-  const msg=`PEDIDO - LOS 4 HERMANOS\n\nNegocio: ${negocio}\nTel: ${telefono}\nTurno: ${turnoLabel}\n\nDetalle:\n${lines}\n\nSubtotal: ${fmt(subtotal)}${descLines}\nTOTAL: ${fmt(totalFinal)}\n\n💳 Alias de pago: verso.iran.menta (Ramallo Angel Guillermo)\nPor favor enviá el comprobante de pago por este mismo chat.`;
+  const msg=`PEDIDO - LOS 4 HERMANOS\n\nDirección: ${negocio}\nTel: ${telefono}\nTurno: ${turnoLabel}\n\nDetalle:\n${lines}\n\nSubtotal: ${fmt(subtotal)}${descLines}\nTOTAL: ${fmt(totalFinal)}\n\n💳 Alias de pago: Bebidas.2L (Luciana Ramallo Loss)\nPor favor enviá el comprobante de pago por este mismo chat.`;
 
   window.open('https://wa.me/'+wsp+'?text='+encodeURIComponent(msg),'_blank');
   cart={};hasDiscount=false;clientLoyalty=null;cuponAplicado=null;
