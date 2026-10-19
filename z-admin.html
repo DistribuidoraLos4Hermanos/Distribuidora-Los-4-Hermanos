@@ -1582,7 +1582,9 @@ async function loadClientes(filtro=''){
     let url=`${SURL}/rest/v1/clientes?select=*,zonas(nombre)&order=negocio.asc`;
     if(filtro)url+=`&telefono=ilike.*${filtro}*`;
     const r=await fetch(url,{headers:{apikey:SKEY,Authorization:'Bearer '+SKEY}});
-    allClientes=await r.json();
+    const data=await r.json();
+    if(!r.ok||!Array.isArray(data)){throw new Error(data?.message||'Error');}
+    allClientes=data;
     renderClientesList();
   }catch(e){document.getElementById('clientes-list').innerHTML='<div class="no-data">Error al cargar clientes</div>';}
 }
