@@ -164,12 +164,28 @@ tr:hover td{background:rgba(237,230,214,.4)}
   body>*:not(#print-area){display:none!important}
   #print-area{display:block!important}
   @page{size:A4 portrait;margin:5mm 8mm}
-  /* 3 por hoja A4 (~94mm mínimo). Crece si el contenido necesita más */
+  /* Exactamente media hoja A4: siempre 2 por hoja */
   .boleta-print{
     width:195mm;
-    min-height:94mm;
+    height:138mm;
+    max-height:138mm;
+    overflow:hidden;
     box-sizing:border-box;
+    page-break-inside:avoid;
+    break-inside:avoid;
+    page-break-after:always;
+    break-after:page;
   }
+  /* Compactar tabla para que quepan más items en el espacio fijo */
+  .boleta-print .bp-header{padding-bottom:4px;margin-bottom:4px}
+  .boleta-print .bp-info{margin-bottom:3px;font-size:.62rem}
+  .boleta-print .bp-cliente{margin-bottom:4px;padding:3px 8px;font-size:.76rem}
+  .boleta-print .bp-table th{padding:3px 6px;font-size:.62rem}
+  .boleta-print .bp-table td{padding:2px 6px;font-size:.68rem}
+  .boleta-print .bp-totales{width:170px}
+  .boleta-print .bp-tot-row{font-size:.68rem;padding:2px 0}
+  .boleta-print .bp-tot-row.main{font-size:.8rem;padding:4px 6px}
+  .boleta-print .bp-footer{margin-top:4px;padding-top:3px;font-size:.58rem}
   .bp-corte{display:block!important}
 }
 #print-area{display:none}
