@@ -70,6 +70,13 @@ header{background:var(--brownd);padding:14px 16px;position:sticky;top:0;z-index:
 .qs-section-icon{font-size:1.8rem;margin-bottom:8px;display:block}
 .qs-section h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--brownd);font-weight:700;margin-bottom:8px}
 .qs-section p{font-size:.84rem;color:var(--brownl);line-height:1.6;white-space:pre-wrap}
+/* GALERIA FOTOS EQUIPO */
+.qs-fotos{padding:0 16px 6px}
+.qs-fotos-titulo{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--brownd);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.qs-fotos-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qs-fotos-grid.single{grid-template-columns:1fr}
+.qs-foto-item{border-radius:14px;overflow:hidden;aspect-ratio:4/3;border:2px solid var(--beige)}
+.qs-foto-item img{width:100%;height:100%;object-fit:cover;display:block}
 
 /* CART */
 .overlay{position:fixed;inset:0;background:rgba(26,16,8,.55);z-index:200;display:none;align-items:flex-end}
@@ -176,6 +183,10 @@ footer{text-align:center;padding:20px;font-size:.68rem;color:var(--brownl);opaci
   <div class="qs-hero">
     <h1 id="qs-nombre">Los 4 Hermanos</h1>
     <p id="qs-subtitulo">Distribuidora · Cba Sur</p>
+  </div>
+  <div id="qs-fotos-sec" style="display:none;padding:16px 16px 0">
+    <div class="qs-fotos-titulo">📸 Nuestro equipo</div>
+    <div class="qs-fotos-grid" id="qs-fotos-grid"></div>
   </div>
   <div class="qs-content">
     <div class="qs-section" id="qs-historia-sec" style="display:none">
@@ -285,6 +296,14 @@ async function loadStoreConfig(){
       if(data.quienes_somos_vision){document.getElementById('qs-vision').textContent=data.quienes_somos_vision;document.getElementById('qs-vision-sec').style.display='block';hayContenido=true;}
       if(data.quienes_somos_extra){document.getElementById('qs-extra').textContent=data.quienes_somos_extra;document.getElementById('qs-extra-sec').style.display='block';hayContenido=true;}
       if(!hayContenido)document.getElementById('qs-empty').style.display='block';
+      // Fotos del equipo
+      const fotos=Array.isArray(data.fotos_equipo)?data.fotos_equipo:[];
+      if(fotos.length){
+        const grid=document.getElementById('qs-fotos-grid');
+        grid.className='qs-fotos-grid'+(fotos.length===1?' single':'');
+        grid.innerHTML=fotos.map(url=>`<div class="qs-foto-item"><img src="${url}" loading="lazy" alt="Foto del equipo"></div>`).join('');
+        document.getElementById('qs-fotos-sec').style.display='block';
+      }
     }
   }catch(e){}
 }
