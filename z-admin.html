@@ -547,6 +547,17 @@ tr:hover td{background:rgba(237,230,214,.4)}
       <button class="save-settings-btn" onclick="saveQuienesSomos()">💾 Guardar contenido</button>
     </div>
     <div class="info-card">
+      <h3>📸 Fotos del equipo</h3>
+      <p style="font-size:.8rem;color:var(--brownl);margin-bottom:14px">Las fotos aparecen en la página "Quienes somos". Podés subir varias.</p>
+      <div id="fotos-equipo-list" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px"></div>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--cream);border:2px dashed var(--beige);border-radius:10px;padding:14px;font-size:.84rem;color:var(--brownl)">
+        <span style="font-size:1.4rem">📷</span>
+        <span id="foto-upload-label">Elegir foto...</span>
+        <input type="file" id="foto-file-input" accept="image/*" style="display:none" onchange="subirFotoEquipo(this)">
+      </label>
+      <div id="foto-upload-progress" style="display:none;margin-top:10px;font-size:.8rem;color:var(--brownl)">Subiendo...</div>
+    </div>
+    <div class="info-card">
       <h3>🎟️ Cupones de descuento</h3>
       <p>Crea codigos que tus clientes pueden usar al hacer un pedido.</p>
       <div class="form-grid" style="margin-bottom:10px">
@@ -1301,6 +1312,7 @@ async function loadStoreConfigForm(){
       document.getElementById('s-mision').value=data.quienes_somos_mision||'';
       document.getElementById('s-vision').value=data.quienes_somos_vision||'';
       document.getElementById('s-extra').value=data.quienes_somos_extra||'';
+      renderFotosEquipo(data.fotos_equipo||[]);
       turnoMananaActivo=data.turno_manana_activo!==false;
       const btn=document.getElementById('turno-manana-toggle');
       btn.className='big-toggle'+(turnoMananaActivo?'':' off');
@@ -1322,6 +1334,56 @@ async function saveStoreConfig(){
   const{error}=await db.from('store_config').update(payload).eq('id',1);
   if(error){showToast('Error al guardar');return;}
   Object.assign(storeInfo,payload);showToast('✅ Informacion guardada');
+}
+
+function renderFotosEquipo(urls){
+  const c=document.getElementById('fotos-equipo-list');
+  if(!c)return;
+  if(!urls||!urls.length){c.innerHTML='<div style="font-size:.78rem;color:var(--brownl)">Todavia no hay fotos.</div>';return;}
+  c.innerHTML=urls.map((url,i)=>`
+    <div style="position:relative;width:110px;height:100px;border-radius:10px;overflow:hidden;border:2px solid var(--beige)">
+      <img src="${url}" style="width:100%;height:100%;object-fit:cover">
+      <button onclick="eliminarFotoEquipo(${i})" style="position:absolute;top:4px;right:4px;background:rgba(192,57,43,.85);color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:.75rem;cursor:pointer;line-height:1">✕</button>
+    </div>`).join('');
+}
+
+async function subirFotoEquipo(input){
+  const file=input.files[0];if(!file)return;
+  const prog=document.getElementById('foto-upload-progress');
+  const lbl=document.getElementById('foto-upload-label');
+  prog.style.display='block';prog.textContent='Subiendo...';
+  lbl.textContent=file.name;
+  try{
+    const ext=file.name.split('.').pop();
+    const nombre=`equipo_${Date.now()}.${ext}`;
+    const res=await fetch(`${SURL}/storage/v1/object/fotos-equipo/${nombre}`,{
+      method:'POST',
+      headers:{apikey:SKEY,Authorization:'Bearer '+SKEY,'Content-Type':file.type,'x-upsert':'true'},
+      body:file
+    });
+    if(!res.ok){const e=await res.text();throw new Error(e);}
+    const publicUrl=`${SURL}/storage/v1/object/public/fotos-equipo/${nombre}`;
+    // Leer fotos actuales y agregar la nueva
+    const{data}=await db.from('store_config').select('fotos_equipo').eq('id',1).single();
+    const fotos=Array.isArray(data?.fotos_equipo)?data.fotos_equipo:[];
+    fotos.push(publicUrl);
+    await db.from('store_config').update({fotos_equipo:fotos}).eq('id',1);
+    storeInfo.fotos_equipo=fotos;
+    renderFotosEquipo(fotos);
+    prog.textContent='✅ Foto subida';
+    input.value='';lbl.textContent='Elegir foto...';
+    setTimeout(()=>{prog.style.display='none';},2000);
+  }catch(e){prog.textContent='❌ Error: '+e.message;}
+}
+
+async function eliminarFotoEquipo(idx){
+  if(!confirm('¿Eliminar esta foto?'))return;
+  const fotos=Array.isArray(storeInfo.fotos_equipo)?[...storeInfo.fotos_equipo]:[];
+  fotos.splice(idx,1);
+  await db.from('store_config').update({fotos_equipo:fotos}).eq('id',1);
+  storeInfo.fotos_equipo=fotos;
+  renderFotosEquipo(fotos);
+  showToast('✅ Foto eliminada');
 }
 
 async function saveQuienesSomos(){
