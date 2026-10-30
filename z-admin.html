@@ -164,17 +164,24 @@ tr:hover td{background:rgba(237,230,214,.4)}
   body>*:not(#print-area){display:none!important}
   #print-area{display:block!important}
   @page{size:A4 portrait;margin:5mm 8mm}
-  /* Exactamente media hoja A4: siempre 2 por hoja */
-  .boleta-print{
+  /* Hoja entera = 287mm (A4 297 - 10mm márgenes). Cada boleta = exactamente la mitad */
+  .boleta-par{
     width:195mm;
-    height:138mm;
-    max-height:138mm;
-    overflow:hidden;
-    box-sizing:border-box;
-    page-break-inside:avoid;
-    break-inside:avoid;
+    height:287mm;
     page-break-after:always;
     break-after:page;
+    page-break-inside:avoid;
+    break-inside:avoid;
+    display:flex;
+    flex-direction:column;
+  }
+  .boleta-print{
+    width:195mm;
+    height:143mm;
+    max-height:143mm;
+    overflow:hidden;
+    box-sizing:border-box;
+    flex-shrink:0;
   }
   /* Compactar tabla para que quepan más items en el espacio fijo */
   .boleta-print .bp-header{padding-bottom:4px;margin-bottom:4px}
@@ -970,13 +977,30 @@ async function imprimirBoleta(){
 }
 
 function generarVistaBoleta(negocio,telefono,items,subtotal,descuento,total,fecha,esFiado,fiadoPct,recargoFiado){
-  // El title de la página determina el nombre del PDF al guardar
+  // Construye un objeto order sintético para reutilizar boletaHTML
+  const orderSintetico={created_at:new Date().toISOString(),negocio,telefono,items,descuento_aplicado:descuento,recargo_fiado:recargoFiado,total};
+  // Sobreescribir fecha formateada (boletaHTML usa created_at, aquí ya viene formateada)
+  const html=boletaHTML(orderSintetico);
+  // Dos copias en media hoja cada una
+  document.getElementById('print-area').innerHTML=`<div class="boleta-par">${html}${html}</div>`;
   const titleOriginal=document.title;
   const fechaCorta=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});
   document.title=`Pedido ${negocio||telefono||'cliente'} — ${fechaCorta}`;
   window.addEventListener('afterprint',function restoreTitle(){document.title=titleOriginal;window.removeEventListener('afterprint',restoreTitle);});
-  document.getElementById('print-area').innerHTML=`
-  <div class="boleta-print">
+}
+
+// Genera el HTML de una boleta sin tocar el DOM ni imprimir
+function boletaHTML(order){
+  const fecha=new Date(order.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+  const items=order.items||[];
+  let subtotal=items.reduce((s,i)=>s+(i.total||0),0);
+  const descuento=order.descuento_aplicado||0;
+  const recargoFiado=order.recargo_fiado||0;
+  const total=order.total||0;
+  const esFiado=recargoFiado>0;
+  const negocio=order.negocio||'';
+  const telefono=order.telefono||'';
+  return `<div class="boleta-print">
     <div class="bp-header">
       <div class="bp-logo">DISTRI<br>LOS 4<br>HERMANOS</div>
       <div class="bp-title">
@@ -989,19 +1013,17 @@ function generarVistaBoleta(negocio,telefono,items,subtotal,descuento,total,fech
       <span>📅 ${storeInfo.dias||'Lun, Mar, Jue, Vie y Sab'} · ${storeInfo.horario||'8:00 a 14:30'}</span>
       <span>Fecha: ${fecha}</span>
     </div>
-    ${esFiado?`<div style="background:#c0392b;color:white;text-align:center;padding:6px;font-weight:700;font-size:.85rem;letter-spacing:1px;border-radius:6px;margin-bottom:4px">⚠️ VENTA EN FIADO (${fiadoPct}% recargo)</div>`:''}
+    ${esFiado?`<div style="background:#c0392b;color:white;text-align:center;padding:4px;font-weight:700;font-size:.8rem;border-radius:5px;margin-bottom:3px">⚠️ FIADO (${recargoFiado>0?Math.round(recargoFiado/subtotal*100):10}% recargo)</div>`:''}
     <div class="bp-cliente">CLIENTE: ${negocio}${telefono?' — Tel: '+telefono:''}</div>
     <table class="bp-table">
       <thead><tr><th>CANT</th><th>PRODUCTO</th><th>PRECIO C/U</th><th>TOTAL</th></tr></thead>
-      <tbody>
-        ${items.map(i=>`<tr><td>${fmtQty(i.qty)}</td><td>${i.name}</td><td>${i.price>0?fmt(i.price):'$ -'}</td><td>${i.total>0?fmt(i.total):'$ -'}</td></tr>`).join('')}
-      </tbody>
+      <tbody>${items.map(i=>`<tr><td>${fmtQty(i.qty)}</td><td>${i.name}</td><td>${i.price>0?fmt(i.price):'$ -'}</td><td>${i.total>0?fmt(i.total):'$ -'}</td></tr>`).join('')}</tbody>
     </table>
     <div style="display:flex;justify-content:flex-end">
       <div class="bp-totales">
         <div class="bp-tot-row"><span>SUB TOTAL</span><span>${fmt(subtotal)}</span></div>
         ${descuento>0?`<div class="bp-tot-row"><span>DESCUENTO</span><span>-${fmt(descuento)}</span></div>`:''}
-        ${esFiado&&recargoFiado?`<div class="bp-tot-row" style="color:#c0392b"><span>RECARGO FIADO (${fiadoPct}%)</span><span>+${fmt(recargoFiado)}</span></div>`:''}
+        ${esFiado&&recargoFiado?`<div class="bp-tot-row" style="color:#c0392b"><span>RECARGO FIADO</span><span>+${fmt(recargoFiado)}</span></div>`:''}
         <div class="bp-tot-row main"><span>TOTAL${esFiado?' (FIADO)':''}</span><span>${fmt(total)}</span></div>
       </div>
     </div>
@@ -1011,18 +1033,10 @@ function generarVistaBoleta(negocio,telefono,items,subtotal,descuento,total,fech
 }
 
 async function imprimirPedidoExistente(orderId){
-  // El fiado se configura desde el modal de Editar → botón Imprimir
-  // Este botón imprime directo sin fiado (reimprimir rápido)
   const order=allOrders.find(o=>o.id===orderId);if(!order)return;
-  const fecha=new Date(order.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
-  const items=order.items||[];
-  let subtotal=items.reduce((s,i)=>s+(i.total||0),0);
-  const descuento=order.descuento_aplicado||0;
-  const recargoFiado=order.recargo_fiado||0;
-  const total=order.total||0;
   if(!order.stock_descontado){
     await db.from('orders').update({impreso:true,stock_descontado:true}).eq('id',orderId);
-    await descontarStock(items);
+    await descontarStock(order.items||[]);
     order.impreso=true;order.stock_descontado=true;
   }else{
     await db.from('orders').update({impreso:true}).eq('id',orderId);
@@ -1030,8 +1044,12 @@ async function imprimirPedidoExistente(orderId){
   }
   syncCliente(order.telefono||'',order.negocio||'');
   renderOrders(getFilteredOrders());
-  const esFiado=recargoFiado>0;
-  generarVistaBoleta(order.negocio||'',order.telefono||'',items,subtotal,descuento,total,fecha,esFiado,null,recargoFiado);
+  // Una sola boleta: la ponemos en un par con una copia igual (para llenar la hoja)
+  document.getElementById('print-area').innerHTML=`<div class="boleta-par">${boletaHTML(order)}${boletaHTML(order)}</div>`;
+  const titleOriginal=document.title;
+  const fechaCorta=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+  document.title=`Pedido ${order.negocio||order.telefono||'cliente'} — ${fechaCorta}`;
+  window.addEventListener('afterprint',function restoreTitle(){document.title=titleOriginal;window.removeEventListener('afterprint',restoreTitle);});
   window.print();
 }
 
@@ -1219,11 +1237,31 @@ function _updateImprimirSelBtn(){
 async function imprimirSeleccionados(){
   if(!_selectedOrderIds.size)return;
   const ids=[..._selectedOrderIds];
-  // Imprimir uno a uno con pequeño delay para que el browser los abra
+  // Marcar todos como impresos y descontar stock
   for(const id of ids){
-    await imprimirPedidoExistente(id);
-    await new Promise(r=>setTimeout(r,600));
+    const order=allOrders.find(o=>o.id===id);if(!order)continue;
+    if(!order.stock_descontado){
+      await db.from('orders').update({impreso:true,stock_descontado:true}).eq('id',id);
+      await descontarStock(order.items||[]);
+      order.impreso=true;order.stock_descontado=true;
+    }else{
+      await db.from('orders').update({impreso:true}).eq('id',id);
+      order.impreso=true;
+    }
+    syncCliente(order.telefono||'',order.negocio||'');
   }
+  renderOrders(getFilteredOrders());
+  // Agrupar de a 2 boletas por página
+  const orders=ids.map(id=>allOrders.find(o=>o.id===id)).filter(Boolean);
+  let html='';
+  for(let i=0;i<orders.length;i+=2){
+    const b1=boletaHTML(orders[i]);
+    // Si hay par, segunda boleta real; si es impar, repetimos la primera para llenar la hoja
+    const b2=orders[i+1]?boletaHTML(orders[i+1]):boletaHTML(orders[i]);
+    html+=`<div class="boleta-par">${b1}${b2}</div>`;
+  }
+  document.getElementById('print-area').innerHTML=html;
+  window.print();
   _selectedOrderIds.clear();
   _updateImprimirSelBtn();
 }
@@ -1351,26 +1389,33 @@ async function subirFotoEquipo(input){
   const file=input.files[0];if(!file)return;
   const prog=document.getElementById('foto-upload-progress');
   const lbl=document.getElementById('foto-upload-label');
-  prog.style.display='block';prog.textContent='Subiendo...';
+  prog.style.display='block';prog.textContent='Procesando...';
   lbl.textContent=file.name;
   try{
-    const ext=file.name.split('.').pop();
-    const nombre=`equipo_${Date.now()}.${ext}`;
-    const res=await fetch(`${SURL}/storage/v1/object/fotos-equipo/${nombre}`,{
-      method:'POST',
-      headers:{apikey:SKEY,Authorization:'Bearer '+SKEY,'Content-Type':file.type,'x-upsert':'true'},
-      body:file
+    // Redimensionar y convertir a base64 para guardar directo en DB
+    const base64=await new Promise((resolve,reject)=>{
+      const img=new Image();
+      const url=URL.createObjectURL(file);
+      img.onload=()=>{
+        const MAX=800;
+        let w=img.width,h=img.height;
+        if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+        const canvas=document.createElement('canvas');
+        canvas.width=w;canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL('image/jpeg',0.82));
+      };
+      img.onerror=reject;
+      img.src=url;
     });
-    if(!res.ok){const e=await res.text();throw new Error(e);}
-    const publicUrl=`${SURL}/storage/v1/object/public/fotos-equipo/${nombre}`;
-    // Leer fotos actuales y agregar la nueva
     const{data}=await db.from('store_config').select('fotos_equipo').eq('id',1).single();
     const fotos=Array.isArray(data?.fotos_equipo)?data.fotos_equipo:[];
-    fotos.push(publicUrl);
+    fotos.push(base64);
     await db.from('store_config').update({fotos_equipo:fotos}).eq('id',1);
     storeInfo.fotos_equipo=fotos;
     renderFotosEquipo(fotos);
-    prog.textContent='✅ Foto subida';
+    prog.textContent='✅ Foto guardada';
     input.value='';lbl.textContent='Elegir foto...';
     setTimeout(()=>{prog.style.display='none';},2000);
   }catch(e){prog.textContent='❌ Error: '+e.message;}
