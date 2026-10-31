@@ -1228,10 +1228,10 @@ function toggleOrderSelect(id){
 
 function _updateImprimirSelBtn(){
   const btn=document.getElementById('btn-imprimir-sel');
-  if(!btn)return;
+  const btn2=document.getElementById('btn-lista-sel');
   const n=_selectedOrderIds.size;
-  btn.style.display=n>0?'inline-flex':'none';
-  btn.textContent=`🖨️ Imprimir ${n} seleccionado${n!==1?'s':''}`;
+  if(btn){btn.style.display=n>0?'inline-flex':'none';btn.textContent=`🖨️ Imprimir ${n} seleccionado${n!==1?'s':''}`;}
+  if(btn2){btn2.style.display=n>0?'inline-flex':'none';btn2.textContent=`🚛 Lista camión (${n})`;}
 }
 
 async function imprimirSeleccionados(){
@@ -1286,6 +1286,7 @@ function renderOrders(orders){
   // Toolbar de selección
   let html=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
     <button id="btn-imprimir-sel" onclick="imprimirSeleccionados()" style="display:none;align-items:center;gap:6px;background:var(--brown);color:#fff;border:none;border-radius:9px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer">🖨️ Imprimir seleccionados</button>
+    <button id="btn-lista-sel" onclick="listaSeleccionados()" style="display:none;align-items:center;gap:6px;background:#2563a8;color:#fff;border:none;border-radius:9px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer">🚛 Lista camión</button>
     <button onclick="_selectedOrderIds.clear();document.querySelectorAll('.order-chk').forEach(c=>c.checked=false);_updateImprimirSelBtn()" style="background:transparent;border:1px solid #ccc;color:#666;border-radius:7px;padding:5px 10px;font-size:.75rem;cursor:pointer">Deseleccionar todo</button>
   </div>`;
 
@@ -2030,14 +2031,50 @@ function buildListaTable(lista,label){
     </table>`;
 }
 
+async function listaSeleccionados(){
+  if(!_selectedOrderIds.size)return;
+  const ids=[..._selectedOrderIds];
+  const orders=ids.map(id=>allOrders.find(o=>o.id===id)).filter(Boolean);
+  if(!orders.length)return;
+  // Marcar como en_lista para que no aparezcan en la próxima lista del camión
+  await Promise.all(ids.map(id=>db.from('orders').update({en_lista:true}).eq('id',id)));
+  orders.forEach(o=>{o.en_lista=true;});
+  // Construir lista
+  const mapa={};
+  orders.forEach(o=>{
+    (o.items||[]).forEach(item=>{
+      if(!mapa[item.name])mapa[item.name]={name:item.name,qty:0};
+      mapa[item.name].qty+=Number(item.qty)||0;
+    });
+  });
+  const lista=ordenarCamion(Object.values(mapa));
+  const fechaStr=new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const body=buildListaTable(lista,'');
+  const negociosList=orders.map(o=>o.negocio||'Sin nombre').join(', ');
+  document.getElementById('print-area').innerHTML=`
+    <div style="font-family:'DM Sans',sans-serif;padding:10px 14px;max-width:210mm">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;border-bottom:2px solid #333;padding-bottom:8px">
+        <div><div style="font-size:1.1rem;font-weight:800;text-transform:uppercase">🚛 Lista del Camión</div><div style="font-size:.75rem;color:#555;text-transform:capitalize">${fechaStr}</div></div>
+        <div style="text-align:right;font-size:.72rem;color:#555">${orders.length} pedido${orders.length!==1?'s':''}<br><span style="font-size:.65rem">${negociosList}</span></div>
+      </div>
+      ${body}
+    </div>`;
+  window.print();
+  _selectedOrderIds.clear();
+  document.querySelectorAll('.order-chk').forEach(c=>c.checked=false);
+  _updateImprimirSelBtn();
+  renderOrders(getFilteredOrders());
+}
+
 async function imprimirListaCamion(modo='completa', zonasElegidas=null){
   const hoy=new Date();
   const pedidosHoy=allOrders.filter(o=>{
     if(!o.impreso)return false;
+    if(o.en_lista)return false;// ya fue incluido en una lista anterior
     const fecha=new Date(o.created_at);
     return fecha.toDateString()===hoy.toDateString();
   });
-  if(!pedidosHoy.length){showToast('No hay pedidos impresos de hoy');return;}
+  if(!pedidosHoy.length){showToast('No hay pedidos nuevos para listar hoy');return;}
 
   const fechaStr=hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
@@ -2150,6 +2187,9 @@ async function imprimirListaCamion(modo='completa', zonasElegidas=null){
   </div>`;
 
   document.getElementById('print-area').innerHTML=header+body+footer;
+  // Marcar los pedidos de esta lista para que no aparezcan en la próxima
+  await Promise.all(pedidosEnLista.map(o=>db.from('orders').update({en_lista:true}).eq('id',o.id)));
+  pedidosEnLista.forEach(o=>{o.en_lista=true;});
   window.print();
 }
 
