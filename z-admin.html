@@ -2070,11 +2070,10 @@ async function imprimirListaCamion(modo='completa', zonasElegidas=null){
   const hoy=new Date();
   const pedidosHoy=allOrders.filter(o=>{
     if(!o.impreso)return false;
-    if(o.en_lista)return false;// ya fue incluido en una lista anterior
     const fecha=new Date(o.created_at);
     return fecha.toDateString()===hoy.toDateString();
   });
-  if(!pedidosHoy.length){showToast('No hay pedidos nuevos para listar hoy');return;}
+  if(!pedidosHoy.length){showToast('No hay pedidos de hoy para listar');return;}
 
   const fechaStr=hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
@@ -2206,52 +2205,48 @@ async function imprimirNoImpresosDelDia(){
   if(!noImpresos.length){showToast('✅ Todos los pedidos de hoy ya fueron impresos');return;}
   if(!confirm(`Hay ${noImpresos.length} pedido${noImpresos.length>1?'s':''} sin imprimir hoy.\n¿Querés imprimirlos todos y marcarlos como impresos?`))return;
 
-  const fechaStr=hoy.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  const filas=noImpresos.map((o,i)=>{
-    const productos=(o.items||[]).map(i=>`${fmtQty(i.qty)} ${i.name}`).join(', ');
-    const recargoFiado=o.recargo_fiado||0;
-    const esFiado=recargoFiado>0;
-    const fiadoLinea=esFiado?`<tr><td colspan="2" style="padding:3px 0;font-size:.72rem;color:#c0392b;font-weight:600">⚠️ FIADO — Recargo: +$${recargoFiado.toLocaleString('es-AR')}</td></tr>`:'';
-    return `
-    <div style="page-break-inside:avoid;border:1px solid #ddd;border-radius:8px;padding:14px;margin-bottom:16px;background:#fff">
-      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #3A2418;padding-bottom:8px;margin-bottom:10px">
-        <div>
-          <div style="font-family:Georgia,serif;font-size:1rem;font-weight:700;color:#3A2418">Distribuidora Los 4 Hermanos</div>
-          <div style="font-size:.7rem;color:#8B6248">Tel: ${storeInfo.telefono_display||'351 621-1515'}</div>
-        </div>
-        <div style="text-align:right;font-size:.72rem;color:#555">
-          <div>${fechaStr}</div>
-          <div style="font-size:.68rem">Pedido #${i+1}</div>
-        </div>
-      </div>
-      ${esFiado?`<div style="background:#c0392b;color:white;text-align:center;padding:5px;font-weight:700;font-size:.78rem;border-radius:5px;margin-bottom:8px">⚠️ VENTA EN FIADO</div>`:''}
-      <table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:10px">
-        <tr><td style="padding:2px 0;color:#555;width:90px">Cliente:</td><td style="font-weight:700;color:#1A1008">${o.negocio||'Sin nombre'}</td></tr>
-        <tr><td style="padding:2px 0;color:#555">Teléfono:</td><td style="color:#1A1008">${o.telefono||'—'}</td></tr>
-        <tr><td style="padding:2px 0;color:#555">Turno:</td><td style="color:#1A1008">${o.turno==='manana'?'Mañana (8-12)':'Tarde (14-18)'}</td></tr>
-      </table>
-      <div style="background:#f5f0e8;border-radius:6px;padding:8px 10px;font-size:.78rem;margin-bottom:10px">
-        <div style="font-weight:700;color:#3A2418;margin-bottom:4px">Detalle del pedido:</div>
-        ${(o.items||[]).map(it=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #ede6d6"><span>${fmtQty(it.qty)} ${it.name}</span><span style="font-weight:600">$${(it.total||0).toLocaleString('es-AR')}</span></div>`).join('')}
-      </div>
-      <table style="width:100%;font-size:.82rem">
-        ${o.descuento_aplicado>0?`<tr><td style="color:#555">Descuento:</td><td style="text-align:right;color:#c0392b">-$${(o.descuento_aplicado||0).toLocaleString('es-AR')}</td></tr>`:''}
-        ${fiadoLinea}
-        <tr><td style="font-weight:700;font-size:.9rem;padding-top:4px">TOTAL${esFiado?' (FIADO)':''}:</td><td style="text-align:right;font-weight:700;font-size:.9rem;padding-top:4px">$${(o.total||0).toLocaleString('es-AR')}</td></tr>
-      </table>
-    </div>`;
-  }).join('');
+  // Agrupar de a pares para imprimir 2 boletas por hoja
+  const pares=[];
+  for(let i=0;i<noImpresos.length;i+=2){
+    const a=boletaHTML(noImpresos[i]);
+    const b=i+1<noImpresos.length?boletaHTML(noImpresos[i+1]):'<div class="boleta-print" style="visibility:hidden"></div>';
+    pares.push(`<div class="boleta-par">${a}${b}</div>`);
+  }
 
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Pedidos no impresos — ${hoy.toLocaleDateString('es-AR')}</title>
+  // Obtener los estilos de boleta del documento actual
+  const boletaStyles=Array.from(document.styleSheets)
+    .flatMap(s=>{try{return Array.from(s.cssRules||[]);}catch(e){return[];}})
+    .filter(r=>r.cssText&&(r.cssText.includes('boleta')||r.cssText.includes('@media print')))
+    .map(r=>r.cssText).join('\n');
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Pedidos no impresos — ${hoy.toLocaleDateString('es-AR')}</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body{font-family:'DM Sans',Arial,sans-serif;padding:16px;background:#fff;color:#1A1008}
-    @media print{body{padding:4px}.no-print{display:none}}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',Arial,sans-serif;background:#fff;color:#1A1008}
+    .boleta-par{width:210mm;height:287mm;display:flex;flex-direction:column;page-break-after:always;overflow:hidden}
+    .boleta-print{width:210mm;height:143mm;padding:8mm 10mm;overflow:hidden;box-sizing:border-box}
+    .boleta-sep{border:none;border-top:1px dashed #aaa;margin:0}
+    .boleta-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #3A2418;padding-bottom:5px;margin-bottom:6px}
+    .boleta-logo{font-family:Georgia,serif;font-size:.95rem;font-weight:700;color:#3A2418}
+    .boleta-sub{font-size:.65rem;color:#8B6248}
+    .boleta-meta{text-align:right;font-size:.65rem;color:#555}
+    .boleta-cliente{font-size:.75rem;margin-bottom:6px}
+    .boleta-cliente td{padding:1px 0}
+    .boleta-fiado-banner{background:#c0392b;color:#fff;text-align:center;padding:3px;font-weight:700;font-size:.72rem;border-radius:4px;margin-bottom:5px}
+    .boleta-items{width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:6px}
+    .boleta-items th{background:#3A2418;color:#fff;padding:3px 5px;text-align:left;font-weight:600;font-size:.7rem}
+    .boleta-items th:last-child,.boleta-items td:last-child{text-align:right}
+    .boleta-items th:nth-child(3),.boleta-items td:nth-child(3){text-align:right}
+    .boleta-items td{padding:2px 5px;border-bottom:1px solid #ede6d6}
+    .boleta-totales{width:100%;font-size:.75rem;border-collapse:collapse}
+    .boleta-totales td{padding:2px 5px}
+    .boleta-totales tr:last-child td{font-weight:700;font-size:.82rem;border-top:1px solid #3A2418;padding-top:4px}
+    @media print{body{margin:0;padding:0}.boleta-par{page-break-after:always}}
   </style></head>
   <body>
-    <div class="no-print" style="margin-bottom:12px;padding:10px;background:#f5f0e8;border-radius:8px;font-size:.82rem;color:#5C3D2E">
-      <strong>${noImpresos.length} pedido${noImpresos.length>1?'s':''}  sin imprimir de hoy.</strong> Al cerrar esta ventana, quedarán marcados como impresos.
-    </div>
-    ${filas}
+    ${pares.join('')}
     <script>window.onload=function(){window.print();}<\/script>
   </body></html>`;
 
