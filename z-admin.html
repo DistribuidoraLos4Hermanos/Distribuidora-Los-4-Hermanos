@@ -1017,7 +1017,7 @@ function boletaHTML(order){
     <div class="bp-cliente">CLIENTE: ${negocio}${telefono?' — Tel: '+telefono:''}</div>
     <table class="bp-table">
       <thead><tr><th>CANT</th><th>PRODUCTO</th><th>PRECIO C/U</th><th>TOTAL</th></tr></thead>
-      <tbody>${items.map(i=>{const totalItem=i.total||((i.price||0)*(i.qty||0));return`<tr><td>${fmtQty(i.qty)}</td><td>${i.name}</td><td>${i.price>0?fmt(i.price):'$ -'}</td><td>${totalItem>0?fmt(totalItem):'$ -'}</td></tr>`;}).join('')}</tbody>
+      <tbody>${items.map(i=>{const p=Number(i.price)||0;const q=Number(i.qty)||0;const totalItem=Number(i.total)||p*q;return`<tr><td>${fmtQty(q)}</td><td>${i.name}</td><td>${p>0?fmt(p):'$ -'}</td><td>${totalItem>0?fmt(totalItem):'$ -'}</td></tr>`;}).join('')}</tbody>
     </table>
     <div style="display:flex;justify-content:flex-end">
       <div class="bp-totales">
