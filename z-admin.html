@@ -2036,9 +2036,6 @@ async function listaSeleccionados(){
   const ids=[..._selectedOrderIds];
   const orders=ids.map(id=>allOrders.find(o=>o.id===id)).filter(Boolean);
   if(!orders.length)return;
-  // Marcar como en_lista para que no aparezcan en la próxima lista del camión
-  await Promise.all(ids.map(id=>db.from('orders').update({en_lista:true}).eq('id',id)));
-  orders.forEach(o=>{o.en_lista=true;});
   // Construir lista
   const mapa={};
   orders.forEach(o=>{
@@ -2070,10 +2067,14 @@ async function imprimirListaCamion(modo='completa', zonasElegidas=null){
   const hoy=new Date();
   const pedidosHoy=allOrders.filter(o=>{
     if(!o.impreso)return false;
+    if(modo==='zonas'&&o.en_lista)return false;// Por zona: excluir ya listados
     const fecha=new Date(o.created_at);
     return fecha.toDateString()===hoy.toDateString();
   });
-  if(!pedidosHoy.length){showToast('No hay pedidos de hoy para listar');return;}
+  if(!pedidosHoy.length){
+    showToast(modo==='zonas'?'No hay pedidos nuevos para listar por zona hoy':'No hay pedidos de hoy para listar');
+    return;
+  }
 
   const fechaStr=hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
