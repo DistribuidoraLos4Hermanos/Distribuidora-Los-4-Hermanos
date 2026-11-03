@@ -993,7 +993,7 @@ function generarVistaBoleta(negocio,telefono,items,subtotal,descuento,total,fech
 function boletaHTML(order){
   const fecha=new Date(order.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
   const items=order.items||[];
-  let subtotal=items.reduce((s,i)=>s+(i.total||0),0);
+  let subtotal=items.reduce((s,i)=>s+(i.total||((i.price||0)*(i.qty||0))),0);
   const descuento=order.descuento_aplicado||0;
   const recargoFiado=order.recargo_fiado||0;
   const total=order.total||0;
