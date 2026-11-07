@@ -180,6 +180,7 @@ tr:hover td{background:rgba(237,230,214,.4)}
     height:143mm;
     max-height:143mm;
     overflow:hidden;
+    overflow-x:visible;
     box-sizing:border-box;
     flex-shrink:0;
   }
@@ -187,8 +188,12 @@ tr:hover td{background:rgba(237,230,214,.4)}
   .boleta-print .bp-header{padding-bottom:4px;margin-bottom:4px}
   .boleta-print .bp-info{margin-bottom:3px;font-size:.62rem}
   .boleta-print .bp-cliente{margin-bottom:4px;padding:3px 8px;font-size:.76rem}
-  .boleta-print .bp-table th{padding:3px 6px;font-size:.62rem}
-  .boleta-print .bp-table td{padding:2px 6px;font-size:.68rem}
+  .boleta-print .bp-table{table-layout:fixed;width:100%}
+  .boleta-print .bp-table th:first-child,.boleta-print .bp-table td:first-child{width:36px}
+  .boleta-print .bp-table th:nth-child(3),.boleta-print .bp-table td:nth-child(3){width:65px;text-align:right}
+  .boleta-print .bp-table th:nth-child(4),.boleta-print .bp-table td:nth-child(4){width:65px;text-align:right}
+  .boleta-print .bp-table th{padding:3px 4px;font-size:.60rem;overflow:hidden}
+  .boleta-print .bp-table td{padding:2px 4px;font-size:.66rem;overflow:hidden}
   .boleta-print .bp-totales{width:170px}
   .boleta-print .bp-tot-row{font-size:.68rem;padding:2px 0}
   .boleta-print .bp-tot-row.main{font-size:.8rem;padding:4px 6px}
@@ -208,7 +213,7 @@ tr:hover td{background:rgba(237,230,214,.4)}
 .bp-title p{font-size:.68rem;color:#555;text-align:center}
 .bp-info{display:flex;justify-content:space-between;font-size:.7rem;color:#333;margin-bottom:6px;flex-wrap:wrap;gap:4px}
 .bp-cliente{font-size:.82rem;font-weight:700;margin-bottom:7px;border:1.5px solid #ccc;padding:4px 9px;border-radius:5px}
-.bp-table{width:100%;border-collapse:collapse;margin-bottom:7px}
+.bp-table{width:100%;border-collapse:collapse;margin-bottom:7px;table-layout:fixed}
 .bp-table th{background:#2d7a27;color:white;padding:5px 8px;text-align:left;font-size:.7rem;text-transform:uppercase}
 .bp-table th:last-child,.bp-table td:last-child{text-align:right}
 .bp-table th:first-child,.bp-table td:first-child{text-align:center;width:46px}
@@ -1046,7 +1051,7 @@ function boletaHTML(order){
     ${esFiado?`<div style="background:#c0392b;color:white;text-align:center;padding:4px;font-weight:700;font-size:.8rem;border-radius:5px;margin-bottom:3px">⚠️ FIADO (${recargoFiado>0?Math.round(recargoFiado/subtotal*100):10}% recargo)</div>`:''}
     <div class="bp-cliente">CLIENTE: ${negocio}${telefono?' — Tel: '+telefono:''}</div>
     <table class="bp-table">
-      <thead><tr><th style="width:36px">CANT</th><th>PRODUCTO</th><th style="width:72px;text-align:right">P.UNIT</th><th style="width:72px;text-align:right">TOTAL</th></tr></thead>
+      <thead><tr><th style="width:36px">CANT</th><th style="width:auto">PRODUCTO</th><th style="width:65px;text-align:right">P.UNIT</th><th style="width:65px;text-align:right">TOTAL</th></tr></thead>
       <tbody>${items.map(i=>{const p=Number(i.price)||0;const q=Number(i.qty)||0;const totalItem=Number(i.total)||p*q;return`<tr><td>${fmtQty(q)}</td><td>${i.name}</td><td style="text-align:right">${p>0?fmt(p):'$ -'}</td><td style="text-align:right">${totalItem>0?fmt(totalItem):'$ -'}</td></tr>`;}).join('')}</tbody>
     </table>
     <div style="display:flex;justify-content:flex-end">
@@ -2244,13 +2249,13 @@ async function imprimirNoImpresosDelDia(){
     .bp-title h1{font-size:.95rem;font-weight:800;color:#1a5c15}.bp-title p{font-size:.65rem;color:#888}
     .bp-info{display:flex;justify-content:space-between;font-size:.62rem;color:#555;margin-bottom:3px;flex-wrap:wrap;gap:4px}
     .bp-cliente{background:#f0f7ee;border-left:3px solid #2d7a27;padding:3px 8px;font-size:.76rem;font-weight:700;color:#1a5c15;margin-bottom:4px}
-    .bp-table{width:100%;border-collapse:collapse;margin-bottom:7px}
-    .bp-table th{background:#2d7a27;color:white;padding:3px 6px;text-align:left;font-size:.62rem;text-transform:uppercase}
+    .bp-table{width:100%;border-collapse:collapse;margin-bottom:7px;table-layout:fixed}
+    .bp-table th{background:#2d7a27;color:white;padding:3px 4px;text-align:left;font-size:.62rem;text-transform:uppercase;overflow:hidden}
     .bp-table th:last-child,.bp-table td:last-child{text-align:right}
     .bp-table th:first-child,.bp-table td:first-child{text-align:center;width:36px}
-    .bp-table th:nth-child(3),.bp-table td:nth-child(3){text-align:right;width:72px}
-    .bp-table th:nth-child(4),.bp-table td:nth-child(4){text-align:right;width:72px}
-    .bp-table td{padding:2px 6px;border-bottom:1px solid #eee;font-size:.68rem}
+    .bp-table th:nth-child(3),.bp-table td:nth-child(3){text-align:right;width:65px}
+    .bp-table th:nth-child(4),.bp-table td:nth-child(4){text-align:right;width:65px}
+    .bp-table td{padding:2px 4px;border-bottom:1px solid #eee;font-size:.68rem;overflow:hidden}
     .bp-table tr:nth-child(even) td{background:#f9f9f9}
     .bp-totales{width:170px;margin-left:auto}
     .bp-tot-row{display:flex;justify-content:space-between;font-size:.68rem;padding:2px 0;border-bottom:1px solid #eee}
