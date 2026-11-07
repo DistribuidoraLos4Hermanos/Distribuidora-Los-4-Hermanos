@@ -2154,29 +2154,26 @@ async function imprimirListaCamion(modo='completa', zonasElegidas=null){
       showToast('No hay pedidos en las zonas seleccionadas');return;
     }
 
-    // Recolectar pedidos filtrados para el encabezado
+    // Recolectar pedidos filtrados
     pedidosEnLista=Object.values(porZona).flatMap(z=>z.pedidos);
 
-    // Ordenar: zonas con nombre primero, "Sin zona" al final
-    const zonasOrdenadas=Object.keys(porZona).sort((a,b)=>{
-      if(a==='Sin zona')return 1;if(b==='Sin zona')return -1;
-      return a.localeCompare(b,'es');
+    // Sumar TODOS los productos de todas las zonas seleccionadas en un solo mapa
+    const mapaTotal={};
+    pedidosEnLista.forEach(o=>{
+      if(!o.items||!Array.isArray(o.items))return;
+      o.items.forEach(item=>{
+        if(!mapaTotal[item.name])mapaTotal[item.name]={name:item.name,qty:0};
+        mapaTotal[item.name].qty+=Number(item.qty)||0;
+      });
     });
 
     const titulosZonas=zonasElegidas?zonasElegidas.filter(z=>z.id!=='sin-zona').map(z=>z.nombre).join(', ')+(incluyeSinZona?' + Sin zona':''):'Todas';
+    const negociosTodos=pedidosEnLista.map(o=>o.negocio||'Sin nombre').join(', ');
+    const lista=ordenarCamion(Object.values(mapaTotal));
 
-    body=zonasOrdenadas.map(zona=>{
-      const lista=ordenarCamion(Object.values(porZona[zona].mapa));
-      const negociosZona=porZona[zona].pedidos.map(o=>o.negocio||'Sin nombre').join(', ');
-      return `<div style="margin-bottom:24px;page-break-inside:avoid">
-        <div style="background:#2563a8;color:white;padding:10px 14px;border-radius:8px 8px 0 0;font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center">
-          <span>📍 ${zona}</span>
-          <span style="font-size:.72rem;font-weight:400;opacity:.85">${porZona[zona].pedidos.length} pedido${porZona[zona].pedidos.length>1?'s':''}</span>
-        </div>
-        <div style="font-size:.7rem;color:#666;padding:4px 10px 6px;border:1px solid #ddd;border-top:none;background:#f5f5f5">Clientes: ${negociosZona}</div>
-        ${buildListaTable(lista,zona)}
-      </div>`;
-    }).join('');
+    body=`<div style="margin-bottom:8px;padding:6px 10px;background:#e8f0fe;border-radius:6px;font-size:.72rem;color:#444">
+      <strong>Zonas:</strong> ${titulosZonas} &nbsp;|&nbsp; <strong>Clientes:</strong> ${negociosTodos}
+    </div>${buildListaTable(lista,'')}`;
   }
 
   const negocios=pedidosEnLista.map(o=>o.negocio||'Sin nombre').join(', ');
