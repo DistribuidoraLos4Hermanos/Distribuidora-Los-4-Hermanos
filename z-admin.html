@@ -175,6 +175,10 @@ tr:hover td{background:rgba(237,230,214,.4)}
     display:flex;
     flex-direction:column;
   }
+  .boleta-par:last-child,.boleta-sola:last-child{
+    page-break-after:avoid;
+    break-after:avoid;
+  }
   .boleta-print{
     width:195mm;
     height:143mm;
@@ -202,6 +206,8 @@ tr:hover td{background:rgba(237,230,214,.4)}
   /* Boleta larga: ocupa hoja entera */
   .boleta-sola{width:195mm;height:287mm;page-break-after:always;break-after:page;display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden}
   .boleta-sola .boleta-print{height:287mm;max-height:287mm;overflow:visible;}
+  /* Nunca agregar página vacía después del último elemento */
+  .boleta-sola:last-child{page-break-after:avoid;break-after:avoid;}
 }
 #print-area{display:none}
 .boleta-print{font-family:Arial,sans-serif;width:100%;max-width:195mm;margin:0 auto;padding:6px 0}
@@ -2241,6 +2247,7 @@ async function imprimirNoImpresosDelDia(){
     @page{size:A4 portrait;margin:5mm 8mm}
     .boleta-par{width:195mm;height:287mm;display:flex;flex-direction:column;page-break-after:always;break-after:page;overflow:hidden}
     .boleta-sola{width:195mm;height:287mm;display:flex;flex-direction:column;page-break-after:always;break-after:page}
+    .boleta-par:last-child,.boleta-sola:last-child{page-break-after:avoid;break-after:avoid;}
     .boleta-print{font-family:'DM Sans',Arial,sans-serif;width:100%;max-width:195mm;margin:0 auto;padding:6px 0;height:143mm;max-height:143mm;overflow:hidden;box-sizing:border-box;flex-shrink:0}
     .boleta-sola .boleta-print{height:287mm;max-height:287mm}
     .bp-corte{text-align:center;font-size:.65rem;color:#aaa;letter-spacing:2px;border-top:1.5px dashed #bbb;padding-top:5px;margin-top:4px}
